@@ -21,7 +21,7 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         this.gl.CylinderBasePrefab(true);
 
         ///PLAYER
-        this.player = this.gl.Player(new Vector3(-1,0,0), true, true);
+        this.player = this.gl.Player(new Vector3(-1, 0, 0), true, true);
 
         this.mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
@@ -35,19 +35,29 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
     {
         var nextLevel = this.gl.GenerateEntity(
             EntityType.NonTarget,
-            new Vector3(0,0,0),PrimitiveType.Sphere,
-            Color.red, 
-            null, 
+            new Vector3(0, 0, 0), PrimitiveType.Sphere,
+            Color.red,
+            null,
             "NextLevelSphere",
-            new Type[] { typeof(NextLevelSphere)});
+            new Type[] { typeof(NextLevelSphere) });
 
         var targetSphere = this.gl.GenerateEntity(
             EntityType.Target,
             new Vector3(0, 2, 0),
             PrimitiveType.Sphere,
             Color.blue,
-            new Vector3(3,3,3),
+            new Vector3(3, 3, 3),
             "TargetSphere",
+            new Type[0]
+        );
+
+        var targetSphere2 = this.gl.GenerateEntity(
+            EntityType.Target,
+            new Vector3(0, 5, 0),
+            PrimitiveType.Sphere,
+            Color.blue,
+            new Vector3(3, 3, 3),
+            "TargetSphere2",
             new Type[0]
         );
     }
@@ -57,7 +67,7 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         if (Input.GetKey(KeyCode.W))
         {
             var direction = this.GenerateNormalisedForward();
-            this.player.transform.position +=direction* speed / Time.deltaTime;
+            this.player.transform.position += direction * speed / Time.deltaTime;
             this.player.transform.rotation = Quaternion.LookRotation(-direction);
         }
 

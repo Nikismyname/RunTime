@@ -27,11 +27,14 @@ public static class Compilation
         var param = new CompilerParameters()
         {
             GenerateExecutable = false,
-            GenerateInMemory = true
+            GenerateInMemory = true,
         };
+
+        ///Manualy Provide available assemblies
         //param.ReferencedAssemblies.Add("System.dll"); // and any other assemblies you'll need
         //param.ReferencedAssemblies.Add("UnityEngine.dll");
 
+        ///Add all assemblies form Current Domain?
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             param.ReferencedAssemblies.Add(assembly.Location);
@@ -45,16 +48,14 @@ public static class Compilation
             Debug.Log("Compilation Error " + error);
         }
 
+        ///I beleve it returns null if compilation had Error (not Warning)
         var result = compilerResult.CompiledAssembly;
         return result;
     }
 
-    public static CompFunctionsInAssemblyType GenerateAllFunctions(Assembly ass)
+    public static CompMethodsInAssemblyType GenerateAllFunctionsFromAssembpy(Assembly ass)
     {
-        var result = new CompFunctionsInAssemblyType();
-
         var types = ass.GetTypes();
-        //var allAtaches = new List<Func<GameObject, MonoBehaviour>>();
 
         if (types.Length == 0)
         {
@@ -62,6 +63,7 @@ public static class Compilation
             return null;
         }
 
+        ///Will be posible to extract more that one in the future
         if (types.Length > 1)
         {
             Debug.Log("More than one type found in assembly!");
@@ -69,11 +71,30 @@ public static class Compilation
         }
 
         var type = types[0];
-        var method = type.GetMethod("Attach");
-        var attachFunk = (Func<GameObject, MonoBehaviour>)
-        Delegate.CreateDelegate(typeof(Func<GameObject, MonoBehaviour>), method);
-        result.Attach = attachFunk;
 
+        return GenerateAllMethodsFromType(type);
+    }
+
+    public static CompMethodsInAssemblyType GenerateAllMethodsFromType(Type type)
+    {
+        var result = new CompMethodsInAssemblyType();
+
+        ///Getting the attach method and converting it to Funk that attaches to GameObject and returns the MonoBehaviour
+        var method = type.GetMethod("Attach");
+
+        Func<GameObject, MonoBehaviour> attachFunk = null;
+        if (method == null)
+        {
+            Debug.Log("There is not attach method on Type: " + type.Name);
+        }
+        else
+        {
+            attachFunk = (Func<GameObject, MonoBehaviour>)
+                Delegate.CreateDelegate(typeof(Func<GameObject, MonoBehaviour>), method);
+                result.Attach = attachFunk;
+        }
+
+        /// Setting the flags for method extraction
         var flags =
             BindingFlags.DeclaredOnly |
             BindingFlags.Public |
@@ -88,10 +109,13 @@ public static class Compilation
         {
             flags = flags | BindingFlags.Static;
         }
+        ///...
 
+        ///Non Attach methods are gathered here
         var otherMethods = type.GetMethods(flags)
             .Where(x => x.Name != "Attach");
 
+        ///Gathering the information for method parameters
         var methodInfos = new Dictionary<string, CompMethodInfoWIthParams>();
         foreach (var item in otherMethods)
         {
@@ -113,6 +137,7 @@ public static class Compilation
                 Parameters = parameters.ToArray(),
             };
         }
+        ///...
 
         result.MethodInfos = methodInfos;
         result.TypeName = type.Name;

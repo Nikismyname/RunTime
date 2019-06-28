@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
-public class ParameterNameWithAllStringValues
+public class ParameterNameWithAllObjectValues
 {
     public string ParameterName { get; set; }
 
-    public List<string> ParamaterValues { get; set; }
+    public List<object> ParamaterValues { get; set; }
 }
 

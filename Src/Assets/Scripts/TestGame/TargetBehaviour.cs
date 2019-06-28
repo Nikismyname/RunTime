@@ -7,6 +7,7 @@ public class TargetBehaviour : MonoBehaviour
     private bool selected;
     Renderer myRenderer; 
     Color originalColor;
+    Color selectionColor = Color.green;
 
     private void Start()
     {
@@ -42,11 +43,17 @@ public class TargetBehaviour : MonoBehaviour
 
     private void PaintSelected()
     {
-        this.myRenderer.material.color = Color.green;
+        this.originalColor = myRenderer.material.color;  
+        this.myRenderer.material.color = this.selectionColor;
     }
 
     private void PaintNotSelected()
     {
+        if(this.myRenderer.material.color != this.selectionColor)
+        {
+            this.originalColor = this.myRenderer.material.color; 
+        }
+
         this.myRenderer.material.color = originalColor;
     }
 }

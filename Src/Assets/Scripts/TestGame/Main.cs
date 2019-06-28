@@ -77,34 +77,55 @@ public class Main : MonoBehaviour
     #endregion
 
     #region ATTACH
-    public MonoBehaviour AttachMono(CompFunctionsInAssemblyType funcs)
+    public MonoBehaviour AttachMono(
+        CompMethodsInAssemblyType funcs,
+        bool toTarget = true,
+        GameObject actTarget = null,
+        bool attach = true,
+        MonoBehaviour incMono = null)
     {
-        if (this.target == null)
+        //Debug.Log(actTarget?.name);
+
+        GameObject internalTarget = null;
+
+        if (toTarget == false)
         {
-            Debug.Log("You Have To Select Target!");
-            return null;
+            if (actTarget == null)
+            {
+                Debug.Log("You chose to privade custom target but sent null as its value!");
+                Debug.Break();
+            }
+
+            internalTarget = actTarget;
+        }
+        else
+        {
+            internalTarget = this.target;
         }
 
-        var mono = this.AttachAndAddToDict(funcs);
+        var mono = this.AttachAndAddToDict(funcs, internalTarget, attach, incMono);
 
         if (mono.changesInMethodSignature)
         {
-            this.mangeButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(mono));
-            mono.changesInMethodSignature = false; 
+            this.mangeButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(mono, internalTarget));
+            mono.changesInMethodSignature = false;
         }
-
 
         return mono.Mono;
     }
 
-    private MainMonoWithName AttachAndAddToDict(CompFunctionsInAssemblyType funcs)
+    private MainMonoWithName AttachAndAddToDict(
+        CompMethodsInAssemblyType funcs,
+        GameObject intTarget,
+        bool attach,
+        MonoBehaviour incMono)
     {
-        if (!attachedMonos.ContainsKey(this.target))
+        if (!attachedMonos.ContainsKey(intTarget))
         {
-            this.attachedMonos[this.target] = new List<MainMonoWithName>();
+            this.attachedMonos[intTarget] = new List<MainMonoWithName>();
         }
 
-        var monoList = this.attachedMonos[this.target];
+        var monoList = this.attachedMonos[intTarget];
 
         var existingMonos = monoList.Where(x => x.Name == funcs.TypeName).ToArray();
 
@@ -115,67 +136,82 @@ public class Main : MonoBehaviour
             return null;
         }
 
-
         var newVersion = 0;
         List<MainMethodInfoWithName> previousMethods = null;
-        var preExistionMono = false; 
+        var preExistionMono = false;
 
         if (existingMonos.Length == 1) // If a mono with the same name attched we raplace it with the new!
         {
             preExistionMono = true;
             var preexistingMonoMithName = existingMonos[0];
             newVersion = preexistingMonoMithName.Version + 1;
-            previousMethods = preexistingMonoMithName.MyMethods; 
+            previousMethods = preexistingMonoMithName.MyMethods;
 
-            var monoToDestroy = this.target.GetComponent(preexistingMonoMithName.Mono.GetType());
+            var monoToDestroy = intTarget.GetComponent(preexistingMonoMithName.Mono.GetType());
             Destroy(monoToDestroy);
             monoList.Remove(monoList.SingleOrDefault(x => x.Name == funcs.TypeName));
             Debug.Log("Old Script is overriden");
         }
 
-        var script = funcs.Attach(this.target);
-        var newMono = new MainMonoWithName(funcs.TypeName, script);
-        newMono.MyMethods = funcs.MethodInfos.Select(x => new MainMethodInfoWithName
+        ///Mnaging the mono, if we provide one that is already attached we do not need to attach but still register
+        MonoBehaviour script = null;
+
+        if (attach == false)
+        {
+            if (incMono == null)
+            {
+                Debug.Log("No Attach but the sent script is null!");
+            }
+
+            script = incMono;
+        }
+        else
+        {
+            script = funcs.Attach(intTarget);
+        }
+
+        var newMonoData = new MainMonoWithName(funcs.TypeName, script);
+        newMonoData.MyMethods = funcs.MethodInfos.Select(x => new MainMethodInfoWithName
         {
             MethodInfo = x.Value.MethodInfo,
             Parameters = x.Value.Parameters,
             Name = x.Value.MethodInfo.Name,
         }).ToList();
 
-        newMono.Version = newVersion;
-        if(preExistionMono == false)
+        newMonoData.Version = newVersion;
+        if (preExistionMono == false)
         {
-            newMono.changesInMethodSignature = true; // since it is just created, we do not have the signiture
+            newMonoData.changesInMethodSignature = true; // since it is just created, we do not have the signiture
         }
         else
         {
-            if(previousMethods == null)
+            if (previousMethods == null)
             {
                 Debug.Log("Failed at collecting the previous signature");
                 Debug.Break();
-                return null; 
+                return null;
             }
 
-            if (this.TwoMehtodCollHaveSameSignatures(previousMethods, newMono.MyMethods))
+            if (this.TwoMehtodCollHaveSameSignatures(previousMethods, newMonoData.MyMethods))
             {
-                newMono.changesInMethodSignature = false;
+                newMonoData.changesInMethodSignature = false;
             }
             else
             {
-                newMono.changesInMethodSignature = true;
+                newMonoData.changesInMethodSignature = true;
             }
         }
 
-        monoList.Add(newMono); // adding it to the collection
+        monoList.Add(newMonoData); // adding it to the collection
 
-        return newMono;
+        return newMonoData;
     }
 
     public bool TwoMehtodCollHaveSameSignatures(List<MainMethodInfoWithName> lOne, List<MainMethodInfoWithName> lTwo)
     {
-        if(lOne.Count!= lTwo.Count)
+        if (lOne.Count != lTwo.Count)
         {
-            return false; 
+            return false;
         }
 
         for (int i = 0; i < lOne.Count; i++)
@@ -183,14 +219,14 @@ public class Main : MonoBehaviour
             var one = lOne[i];
             var two = lTwo[i];
 
-            if(one.Name != two.Name)
+            if (one.Name != two.Name)
             {
-                return false; 
+                return false;
             }
 
-            if(one.Parameters.Length != two.Parameters.Length)
+            if (one.Parameters.Length != two.Parameters.Length)
             {
-                return false; 
+                return false;
             }
 
             for (int j = 0; j < one.Parameters.Length; j++)
@@ -198,9 +234,9 @@ public class Main : MonoBehaviour
                 var pOne = one.Parameters[j];
                 var pTwo = two.Parameters[j];
 
-                if(pOne.Name != pTwo.Name || pOne.Type != pTwo.Type)
+                if (pOne.Name != pTwo.Name || pOne.Type != pTwo.Type)
                 {
-                    return false; 
+                    return false;
                 }
             }
         }
@@ -211,7 +247,7 @@ public class Main : MonoBehaviour
     #endregion
 
     #region CALL_FUNCTION
-    public void CallFunction(string monoName, string methodName, ParameterNameWithSingleStringValue[] parameters)
+    public void CallFunction(string monoName, string methodName, ParameterNameWithSingleObjectValues[] parameters)
     {
         if (this.target == null)
         {
@@ -260,23 +296,23 @@ public class Main : MonoBehaviour
     }
 
     private object[] GenerateParamaterObjects(
-        ParameterNameWithSingleStringValue[] data,
+        ParameterNameWithSingleObjectValues[] data,
         UiParameterWithType[] parameters)
     {
-        // Consolidating all input values that belong to single Parameter type 
-        // vecotr3 has all theree inputs for example
-        // vector2 has 2; int has 1; 
-        var parametersWithInputs = new List<ParameterNameWithAllStringValues>();
+        /// Consolidating all input values that belong to single Parameter type 
+        /// vecotr3 has all theree inputs for example
+        /// vector2 has 2; int has 1; 
+        var parametersWithInputs = new List<ParameterNameWithAllObjectValues>();
 
         foreach (var item in data)
         {
             var existingParamater = parametersWithInputs.Where(x => x.ParameterName == item.ParameterName).SingleOrDefault();
             if (existingParamater == null)
             {
-                var newItem = new ParameterNameWithAllStringValues
+                var newItem = new ParameterNameWithAllObjectValues
                 {
                     ParameterName = item.ParameterName,
-                    ParamaterValues = new List<string>(),
+                    ParamaterValues = new List<object>()
                 };
 
                 parametersWithInputs.Add(newItem);
@@ -285,7 +321,7 @@ public class Main : MonoBehaviour
 
             existingParamater.ParamaterValues.Add(item.ParameterValue);
         }
-        //.......................................................................................
+        ///.......................................................................................
 
         var result = new List<object>();
 
@@ -304,7 +340,7 @@ public class Main : MonoBehaviour
             var values = item.ParamaterValues;
             for (int i = 0; i < values.Count; i++)
             {
-                if(values[i] == "")
+                if (values[i] == "")
                 {
                     values[i] = "0";
                     Debug.Log("You left input empty, there is 0 there now!");
@@ -322,11 +358,13 @@ public class Main : MonoBehaviour
 
                 float x, y, z; x = y = z = 0f;
 
-                if (
-                    !float.TryParse(values[0], out x) ||
-                    !float.TryParse(values[1], out y) ||
-                    !float.TryParse(values[2], out z)
-                )
+                try
+                {
+                    x = (float)ConvertToAny(values[0], typeof(float), false);
+                    y = (float)ConvertToAny(values[1], typeof(float), false);
+                    z = (float)ConvertToAny(values[2], typeof(float), false);
+                }
+                catch
                 {
                     Debug.Log("Failed at parsing vector3 floats!");
                     return null;
@@ -345,10 +383,12 @@ public class Main : MonoBehaviour
                 }
                 float x, y; x = y = 0f;
 
-                if (
-                    !float.TryParse(values[0], out x) ||
-                    !float.TryParse(values[1], out y)
-                )
+                try
+                {
+                    x = (float)ConvertToAny(values[0], typeof(float), false);
+                    y = (float)ConvertToAny(values[1], typeof(float), false);
+                }
+                catch
                 {
                     Debug.Log("Failed at parsing vector2 floats!");
                     return null;
@@ -368,50 +408,74 @@ public class Main : MonoBehaviour
 
                 var value = values[0]; // for single input parameters
 
-                var convertedValue = this.ConvertToAny(value, currentParamType);
-
-                if (convertedValue == null)
+                if (currentParamType == typeof(Color))
                 {
-                    return null;
+                    result.Add(value);
                 }
+                else
+                {
+                    var convertedValue = this.ConvertToAny(value, currentParamType);
 
-                result.Add(convertedValue);
+                    if (convertedValue == null)
+                    {
+                        return null;
+                    }
+
+                    result.Add(convertedValue);
+                }
             }
         }
 
         return result.ToArray();
     }
 
-    private object ConvertToAny(string value, Type to)
+    private object ConvertToAny(object value, Type to, bool catchError = true)
     {
-        try
+        if (catchError)
+        {
+            try
+            {
+                return Convert.ChangeType(value, to);
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"Failed at conterting {value} to {to.Name}");
+                Debug.Log($"Exception: {e.Message}");
+                return null;
+            }
+        }
+        else
         {
             return Convert.ChangeType(value, to);
-        }
-        catch (Exception e)
-        {
-            Debug.Log($"Failed at conterting {value} to {to.Name}");
-            Debug.Log($"Exception: {e.Message}");
-            return null;
         }
     }
 
     #endregion
 
     #region UI_BUTTONS_DATA
-    public UiMonoWithMethods GenerateButtonInformation(MainMonoWithName mono)
+    public UiMonoWithMethods GenerateButtonInformation(MainMonoWithName mono, GameObject incTarget = null)
     {
-        if (this.target == null)
+        GameObject target = null;
+
+        if (incTarget != null)
+        {
+            target = incTarget;
+        }
+        else
+        {
+            target = this.target;
+        }
+
+        if (target == null)
         {
             Debug.Log("GenButtons No Target!");
             return null;
         }
 
-
         var result = new UiMonoWithMethods
         {
             MonoName = mono.Name,
-            Object = this.target,
+            Object = target,
             Methods = mono.MyMethods.Select(y => new UiMethodNameWithParameters
             {
                 Name = y.Name,
@@ -459,7 +523,7 @@ public class Main : MonoBehaviour
                 {
                     if (!gameObjectsPruned.ContainsKey(item.Key))
                     {
-                        gameObjectsPruned[item.Key] = new List<string>(); 
+                        gameObjectsPruned[item.Key] = new List<string>();
                     }
 
                     gameObjectsPruned[item.Key].Add(monoList[i].Name);
@@ -492,53 +556,53 @@ public class Main : MonoBehaviour
 #region NOT_IN_USE
 //private void ManualCheckingForSingleInputValues()
 //{
-    ////INT
-    //if(currentParamType == typeof(int))
-    //{
-    //    var success = int.TryParse(value, out int val);
-    //    if (!success)
-    //    {
-    //        Debug.Log("failed at converting int!");
-    //        return null;
-    //    }
-    //    result.Add(val);
-    //}
+////INT
+//if(currentParamType == typeof(int))
+//{
+//    var success = int.TryParse(value, out int val);
+//    if (!success)
+//    {
+//        Debug.Log("failed at converting int!");
+//        return null;
+//    }
+//    result.Add(val);
+//}
 
-    ////FLOAT
-    //if (currentParamType == typeof(float))
-    //{
-    //    var success = float.TryParse(value, out float val);
-    //    if (!success)
-    //    {
-    //        Debug.Log("failed at converting float!");
-    //        return null;
-    //    }
-    //    result.Add(val);
-    //}
+////FLOAT
+//if (currentParamType == typeof(float))
+//{
+//    var success = float.TryParse(value, out float val);
+//    if (!success)
+//    {
+//        Debug.Log("failed at converting float!");
+//        return null;
+//    }
+//    result.Add(val);
+//}
 
-    ////SHORT
-    //if (currentParamType == typeof(long))
-    //{
-    //    var success = short.TryParse(value, out short val);
-    //    if (!success)
-    //    {
-    //        Debug.Log("failed at converting Short!");
-    //        return null;
-    //    }
-    //    result.Add(val);
-    //}
+////SHORT
+//if (currentParamType == typeof(long))
+//{
+//    var success = short.TryParse(value, out short val);
+//    if (!success)
+//    {
+//        Debug.Log("failed at converting Short!");
+//        return null;
+//    }
+//    result.Add(val);
+//}
 
-    ////LONG
-    //if (currentParamType == typeof(long))
-    //{
-    //    var success = long.TryParse(value, out long val);
-    //    if (!success)
-    //    {
-    //        Debug.Log("failed at converting long!");
-    //        return null;
-    //    }
-    //    result.Add(val);
-    //}
+////LONG
+//if (currentParamType == typeof(long))
+//{
+//    var success = long.TryParse(value, out long val);
+//    if (!success)
+//    {
+//        Debug.Log("failed at converting long!");
+//        return null;
+//    }
+//    result.Add(val);
+//}
 //}
 #endregion
 

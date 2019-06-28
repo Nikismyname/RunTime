@@ -3,10 +3,20 @@ using UnityEngine.UI;
 
 public class ReferenceBuffer : MonoBehaviour
 {
-    public InputField textEditorInputField;  
+    public InputField TextEditorInputField { get; set; }
+    public ShowActionsBehaviour ShowActions { get; set; }
+    public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
+    public GameObject ColorPicker { get; set; }
 
     private void Awake()
     {
-        this.textEditorInputField = GameObject.Find("TextEditor").GetComponent<InputField>();
+        this.TextEditorInputField = GameObject.Find("TextEditor").GetComponent<InputField>();
+
+        this.ColorPicker = GameObject.Find("ColorPicker");
+        this.ColorPicker.SetActive(false);
+
+        this.ShowActions = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
+
+        this.ShowAvailableCSFiles = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>(); 
     }
 }

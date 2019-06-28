@@ -351,7 +351,7 @@ PrefabInstance:
     - target: {fileID: 8988003089260943128, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8988003089260943128, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
@@ -715,6 +715,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SuccessCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5357766704726963934, guid: 588b2226ef0b10347bcb001a1954944a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6138394533263670780, guid: 588b2226ef0b10347bcb001a1954944a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -753,7 +758,7 @@ PrefabInstance:
     - target: {fileID: 6138394533263670780, guid: 588b2226ef0b10347bcb001a1954944a,
         type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6138394533263670780, guid: 588b2226ef0b10347bcb001a1954944a,
         type: 3}

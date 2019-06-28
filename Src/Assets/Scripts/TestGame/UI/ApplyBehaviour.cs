@@ -31,14 +31,14 @@ public class ApplyBehaviour : MonoBehaviour
         {
             var text = textEditorInputField.text;
             var ass = Compilation.GenerateAssambly(text, false);
-            var functions = Compilation.GenerateAllFunctions(ass);
+            var functions = Compilation.GenerateAllFunctionsFromAssembpy(ass);
             return functions;
         });
 
         this.Finish(funcs);
     }
 
-    private void Finish(CompFunctionsInAssemblyType functions)
+    private void Finish(CompMethodsInAssemblyType functions)
     {
         var script = this.ms.AttachMono(functions);
         Camera.main.backgroundColor = Color.black;

@@ -5,7 +5,7 @@ using UnityEngine;
 
 ///Compilation Data Structures
 
-public class CompFunctionsInAssemblyType
+public class CompMethodsInAssemblyType
 {
     public string TypeName { get; set; }
 

@@ -10,7 +10,7 @@ public class FileSelectionButton: MonoBehaviour
     private void Start()
     {
         var rb = GameObject.Find("Main").GetComponent<ReferenceBuffer>();
-        this.inputField = rb.textEditorInputField;
+        this.inputField = rb.TextEditorInputField;
         
         var btn = gameObject.GetComponent<Button>();
         btn.onClick.AddListener(this.OnClick);

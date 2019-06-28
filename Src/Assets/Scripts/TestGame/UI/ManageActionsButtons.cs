@@ -27,7 +27,9 @@ public class ManageActionsButtons : MonoBehaviour
     private float inputX;
     private float inputY;
 
-    private Dictionary<GameObject, List<UiMonoGroupInformation>> monosPerObjectData;
+    private Dictionary<GameObject, List<UiMonoGroupInformation>> monosPerObjectData = new Dictionary<GameObject, List<UiMonoGroupInformation>>();
+
+    private List<ColorSelectionButton> collorPickerButtons = new List<ColorSelectionButton>();
 
     private float startYHeight;
 
@@ -54,8 +56,6 @@ public class ManageActionsButtons : MonoBehaviour
         this.labelX = this.buttonX * 2 + marginX;
         this.inputX = buttonX;
         this.inputY = this.buttonY;
-
-        this.monosPerObjectData = new Dictionary<GameObject, List<UiMonoGroupInformation>>();
 
         this.startYHeight = -this.marginY;
 
@@ -160,7 +160,7 @@ public class ManageActionsButtons : MonoBehaviour
             return;
         }
 
-        var listToClear  = this.monosPerObjectData[objToClear];
+        var listToClear = this.monosPerObjectData[objToClear];
 
         foreach (var item in listToClear)
         {
@@ -246,7 +246,7 @@ public class ManageActionsButtons : MonoBehaviour
         var localHeight = 0f;
 
         //assigning the label to the grandparent not the parent
-        var labelInfo = this.SpawnOneLable(new Vector2(this.marginX, localHeight), monoName, localGrandParent.transform, true, out GameObject intButtonLabel);
+        var labelInfo = this.SpawnOneLable(new Vector2(this.marginX, localHeight), monoName, localGrandParent.transform, true, out GameObject intButtonLabel, true);
 
         localHeight -= labelInfo.Height;
 
@@ -305,24 +305,50 @@ public class ManageActionsButtons : MonoBehaviour
         button.GetComponent<RectTransform>().anchoredPosition = position;
         button.GetComponentInChildren<Text>().text = method;
 
+        button.GetComponent<Image>().color = new Color32(229, 200, 25, 255);
+        //button.GetComponent<Button>().image.color = new Color(229, 200, 25);
+        //var thing = button.GetComponent<Button>().colors;
+        //thing.normalColor = new Color(229, 200, 25);
+        //button.GetComponent<Button>().colors = thing;
+
         var script = button.AddComponent<MethodButtonBehaviour>();
         script.SetUp(mono, method);
 
         return script;
     }
 
-    private ActionUiLabelButtonWithHeight SpawnOneLable(Vector2 pos, string text, Transform parent, bool button, out GameObject buttonLabel)
+    private ActionUiLabelButtonWithHeight SpawnOneLable(
+        Vector2 pos, 
+        string text, 
+        Transform parent, 
+        bool button, 
+        out GameObject buttonLabel,
+        bool monoName)
     {
         var result = new ActionUiLabelButtonWithHeight();
 
-
         var label = Instantiate(this.labelPreFab, parent);
+        var labelRT = label.GetComponent<RectTransform>();
+        var labelText = label.GetComponent<Text>();
+        labelText.text = text;
 
-        label.GetComponent<RectTransform>().sizeDelta = new Vector2(labelX, this.labelY);
+        if (monoName)
+        {
+            labelRT.sizeDelta = new Vector2(this.labelX, this.labelY);
+            labelText.fontSize = 20;
+            labelText.alignment = TextAnchor.MiddleCenter;
+        }
+        else
+        {
+            labelRT.sizeDelta = new Vector2(this.buttonX, this.labelY);
+        }
 
-        var position = new Vector2(pos.x + this.labelX / 2, pos.y - this.labelY / 2);
-        label.GetComponent<Text>().text = text;
+        var localX = labelRT.sizeDelta.x;
+        var localY = labelRT.sizeDelta.y;
+
+        var position = new Vector2(pos.x + localX / 2, pos.y - localY / 2);
         label.GetComponent<RectTransform>().anchoredPosition = position;
+
 
         if (button)
         {
@@ -352,6 +378,20 @@ public class ManageActionsButtons : MonoBehaviour
         return input.GetComponent<InputField>();
     }
 
+    private ColorSelectionButton SpawnOneColorButton(Vector2 pos, Transform parent)
+    {
+        var button = Instantiate(this.buttonPreFab, parent);
+        button.GetComponent<RectTransform>().sizeDelta = new Vector2(this.buttonX, this.buttonY);
+        var position = new Vector2(pos.x + this.buttonX / 2, pos.y - this.buttonY / 2);
+        button.GetComponent<RectTransform>().anchoredPosition = position;
+        button.GetComponentInChildren<Text>().text = "";
+        button.GetComponent<Image>().color = Color.white;
+        var script = button.AddComponent<ColorSelectionButton>();
+        this.collorPickerButtons.Add(script);
+        script.SetUp(this.collorPickerButtons,this.collorPickerButtons.Count);
+        return script; // returning so it can be registered in the Method Button Script
+    }
+
     private float SpawnAllInputs(Vector2 pos, MethodButtonBehaviour parentBehaviour, UiMethodNameWithParameters method, Transform parent)
     {
         var overallHeight = 0f;
@@ -371,12 +411,11 @@ public class ManageActionsButtons : MonoBehaviour
         float overallHeight = 0;
         var height = this.SpawnOneLable(
             pos,
-            parameter.Name + " " + parameter.Type.Name,
+            parameter.Name + " " + this.ShorterPropTypes(parameter.Type.Name),
             parent,
             false,
-            out GameObject _notused
-            )
-            .Height;
+            out GameObject _notused,
+            false).Height;
 
         pos.y -= height; overallHeight += height;
 
@@ -388,9 +427,9 @@ public class ManageActionsButtons : MonoBehaviour
             pos.y -= this.inputY;
             var inputField3 = this.SpawnOneInput(pos, parameter.Name, parent);
 
-            parentBehaviour.RegisterParamater(parameter.Name, inputField1);
-            parentBehaviour.RegisterParamater(parameter.Name, inputField2);
-            parentBehaviour.RegisterParamater(parameter.Name, inputField3);
+            parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField1);
+            parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField2);
+            parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField3);
 
             overallHeight += 3 * this.inputY;
         }
@@ -406,13 +445,62 @@ public class ManageActionsButtons : MonoBehaviour
         )
         {
             var inputField = this.SpawnOneInput(pos, parameter.Name, parent);
-            parentBehaviour.RegisterParamater(parameter.Name, inputField);
+            parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField);
             overallHeight += this.inputY;
+        }
+
+        if (parameter.Type == typeof(Color))
+        {
+            var colorSelectionScript = this.SpawnOneColorButton(pos, parent);
+            parentBehaviour.RegisterColorParam(parameter.Name, colorSelectionScript);
+
+            overallHeight += this.inputY; 
         }
 
         return overallHeight;
     }
     #endregion
+
+    public string ShorterPropTypes(string propType)
+    {
+        const int maxLenght = 10;
+
+        if (propType.Length <= maxLenght)
+        {
+            return propType;
+        } 
+
+        var indecies = new List<int>();
+        for (int i = 0; i < propType.Length; i++)
+        {
+            var letter = propType[i];
+
+            if (char.IsUpper(letter))
+            {
+                indecies.Add(i); 
+            }
+        }
+
+        var charArr = new List<char>();
+        foreach (var ind  in indecies)
+        {
+            charArr.Add(propType[ind]);
+        }
+
+        var remainingLength = maxLenght - indecies.Count;
+
+        var substring = propType.Substring(indecies.Last() +1);
+
+        for (int i = 0; i < substring.Length; i++)
+        {
+            var letter = substring[i];
+            charArr.Add(letter);
+        }
+
+        var result = new string(charArr.ToArray());
+
+        return result;
+    }
 
     #region END_BRACKET
 }
