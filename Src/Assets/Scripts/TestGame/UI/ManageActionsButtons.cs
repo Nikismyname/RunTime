@@ -10,6 +10,8 @@ public class ManageActionsButtons : MonoBehaviour
     public GameObject labelPreFab;
     public GameObject inputPrefab;
 
+    private GameObject colorPicker;
+
     private Transform parentTransform;
 
     private GameObject currentTarget;
@@ -59,12 +61,15 @@ public class ManageActionsButtons : MonoBehaviour
 
         this.startYHeight = -this.marginY;
 
-        this.ms = GameObject.Find("Main").GetComponent<Main>();
+        var mainGO = GameObject.Find("Main");
+        this.ms = mainGO.GetComponent<Main>();
+        this.colorPicker = mainGO.GetComponent<ReferenceBuffer>().ColorPicker;
 
         this.parentRT = gameObject.GetComponent<RectTransform>();
 
         this.currentTarget = null;
         this.previousTarget = null;
+
     }
     #endregion
 
@@ -77,6 +82,8 @@ public class ManageActionsButtons : MonoBehaviour
 
         this.previousTarget = this.currentTarget;
         this.currentTarget = newTarget;
+
+        this.colorPicker.SetActive(false);
 
         //setting the data structire for this targets mono so we do not have to check later
         if (!this.monosPerObjectData.ContainsKey(currentTarget))
@@ -245,12 +252,17 @@ public class ManageActionsButtons : MonoBehaviour
 
         var localHeight = 0f;
 
-        //assigning the label to the grandparent not the parent
+        ///assigning the label to the grandparent not the parent
         var labelInfo = this.SpawnOneLable(new Vector2(this.marginX, localHeight), monoName, localGrandParent.transform, true, out GameObject intButtonLabel, true);
+        var lableButtonScript = labelInfo.labelButtonScript;
 
         localHeight -= labelInfo.Height;
 
-        //all others are assigned to the parent so we can deactivate them seperately
+        ///Collectiong All The method button behaviurs so that we can extract all colorButton scripts 
+        ///from them
+        List<MethodButtonBehaviour> methodButtonBehs = new List<MethodButtonBehaviour>();
+
+        ///all others are assigned to the parent so we can deactivate them seperately
         for (int i = 0; i < methods.Length; i += 2)
         {
             if (i + 1 == methods.Length)
@@ -261,6 +273,8 @@ public class ManageActionsButtons : MonoBehaviour
                 pos.y -= this.buttonY;
                 var height = this.SpawnAllInputs(pos, beh, method, localTransform);
                 localHeight -= (height + buttonY + marginY);
+
+                methodButtonBehs.Add(beh);
             }
             else
             {
@@ -277,6 +291,18 @@ public class ManageActionsButtons : MonoBehaviour
                 pos2.y -= this.buttonY;
                 var height2 = this.SpawnAllInputs(pos2, beh2, method2, localTransform);
                 localHeight -= (Mathf.Max(height1, height2) + buttonY + marginY);
+
+                methodButtonBehs.Add(beh1);
+                methodButtonBehs.Add(beh2);
+            }
+        }
+
+        ///Collecting all the color scripts so we can close Color Picker on colapse
+        foreach (var methodScript in methodButtonBehs)
+        {
+            foreach (var colorButtonScript in methodScript.ColorParamaters)
+            {
+                lableButtonScript.ColorSelectionButtons.Add(colorButtonScript.colorScript);
             }
         }
 
@@ -318,10 +344,10 @@ public class ManageActionsButtons : MonoBehaviour
     }
 
     private ActionUiLabelButtonWithHeight SpawnOneLable(
-        Vector2 pos, 
-        string text, 
-        Transform parent, 
-        bool button, 
+        Vector2 pos,
+        string text,
+        Transform parent,
+        bool button,
         out GameObject buttonLabel,
         bool monoName)
     {
@@ -368,14 +394,19 @@ public class ManageActionsButtons : MonoBehaviour
         return result;
     }
 
-    private InputField SpawnOneInput(Vector2 pos, string parameterName, Transform parent)
+    private InputField SpawnOneInput(Vector2 pos, string parameterName, Transform parent, string placeHolderText = null)
     {
         var input = Instantiate(this.inputPrefab, parent);
         input.GetComponent<RectTransform>().sizeDelta = new Vector2(this.inputX, this.inputY);
         var position = new Vector2(pos.x + this.inputX / 2, pos.y - this.inputY / 2);
         input.GetComponent<RectTransform>().anchoredPosition = position;
-
-        return input.GetComponent<InputField>();
+        var inputField = input.GetComponent<InputField>();
+        if (placeHolderText != null)
+        {
+            var phText = input.transform.Find("Placeholder").GetComponent<Text>();
+            phText.text = placeHolderText;
+        }
+        return inputField;
     }
 
     private ColorSelectionButton SpawnOneColorButton(Vector2 pos, Transform parent)
@@ -388,7 +419,7 @@ public class ManageActionsButtons : MonoBehaviour
         button.GetComponent<Image>().color = Color.white;
         var script = button.AddComponent<ColorSelectionButton>();
         this.collorPickerButtons.Add(script);
-        script.SetUp(this.collorPickerButtons,this.collorPickerButtons.Count);
+        script.SetUp(this.collorPickerButtons, this.collorPickerButtons.Count);
         return script; // returning so it can be registered in the Method Button Script
     }
 
@@ -421,17 +452,29 @@ public class ManageActionsButtons : MonoBehaviour
 
         if (parameter.Type == typeof(Vector3))
         {
-            var inputField1 = this.SpawnOneInput(pos, parameter.Name, parent);
+            var inputField1 = this.SpawnOneInput(pos, parameter.Name, parent, "x: float");
             pos.y -= this.inputY;
-            var inputField2 = this.SpawnOneInput(pos, parameter.Name, parent);
+            var inputField2 = this.SpawnOneInput(pos, parameter.Name, parent, "y: float");
             pos.y -= this.inputY;
-            var inputField3 = this.SpawnOneInput(pos, parameter.Name, parent);
+            var inputField3 = this.SpawnOneInput(pos, parameter.Name, parent, "z: float");
 
             parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField1);
             parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField2);
             parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField3);
 
             overallHeight += 3 * this.inputY;
+        }
+
+        if (parameter.Type == typeof(Vector2))
+        {
+            var inputField1 = this.SpawnOneInput(pos, parameter.Name, parent, "x: float");
+            pos.y -= this.inputY;
+            var inputField2 = this.SpawnOneInput(pos, parameter.Name, parent, "y: float");
+
+            parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField1);
+            parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField2);
+
+            overallHeight += 2 * this.inputY;
         }
 
         if (
@@ -444,7 +487,7 @@ public class ManageActionsButtons : MonoBehaviour
             parameter.Type == typeof(char)
         )
         {
-            var inputField = this.SpawnOneInput(pos, parameter.Name, parent);
+            var inputField = this.SpawnOneInput(pos, parameter.Name, parent, parameter.Type.Name);
             parentBehaviour.RegisterNonColorParamater(parameter.Name, inputField);
             overallHeight += this.inputY;
         }
@@ -453,8 +496,7 @@ public class ManageActionsButtons : MonoBehaviour
         {
             var colorSelectionScript = this.SpawnOneColorButton(pos, parent);
             parentBehaviour.RegisterColorParam(parameter.Name, colorSelectionScript);
-
-            overallHeight += this.inputY; 
+            overallHeight += this.inputY;
         }
 
         return overallHeight;
@@ -468,7 +510,7 @@ public class ManageActionsButtons : MonoBehaviour
         if (propType.Length <= maxLenght)
         {
             return propType;
-        } 
+        }
 
         var indecies = new List<int>();
         for (int i = 0; i < propType.Length; i++)
@@ -477,19 +519,19 @@ public class ManageActionsButtons : MonoBehaviour
 
             if (char.IsUpper(letter))
             {
-                indecies.Add(i); 
+                indecies.Add(i);
             }
         }
 
         var charArr = new List<char>();
-        foreach (var ind  in indecies)
+        foreach (var ind in indecies)
         {
             charArr.Add(propType[ind]);
         }
 
         var remainingLength = maxLenght - indecies.Count;
 
-        var substring = propType.Substring(indecies.Last() +1);
+        var substring = propType.Substring(indecies.Last() + 1);
 
         for (int i = 0; i < substring.Length; i++)
         {

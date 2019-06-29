@@ -10,7 +10,7 @@ public class MethodButtonBehaviour : MonoBehaviour
     private bool isColor = false;
 
     private List<ParameterNameWithInputField> parameters = new List<ParameterNameWithInputField>();
-    private List<ParameterNameWithColorButtonScript> colorParamaters = new List<ParameterNameWithColorButtonScript>();
+    public List<ParameterNameWithColorButtonScript> ColorParamaters { get; set; } = new List<ParameterNameWithColorButtonScript>();
 
     private ColorSelectionButton colorSelectionButtonScript = null;
     private string colorSelectionParamater = null;
@@ -42,7 +42,7 @@ public class MethodButtonBehaviour : MonoBehaviour
 
     public void RegisterColorParam(string paramater, ColorSelectionButton colorSelectionScript)
     {
-        this.colorParamaters.Add(new ParameterNameWithColorButtonScript
+        this.ColorParamaters.Add(new ParameterNameWithColorButtonScript
         {
             ParamaterName = paramater,
             colorScript = colorSelectionScript,
@@ -63,9 +63,9 @@ public class MethodButtonBehaviour : MonoBehaviour
             });
         }
 
-        for (int i = 0; i < this.colorParamaters.Count; i++)
+        for (int i = 0; i < this.ColorParamaters.Count; i++)
         {
-            var p = this.colorParamaters[i];
+            var p = this.ColorParamaters[i];
             para.Add(new ParameterNameWithSingleObjectValues
             {
                 ParameterName = p.ParamaterName,

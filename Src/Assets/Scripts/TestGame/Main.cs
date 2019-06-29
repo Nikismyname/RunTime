@@ -11,17 +11,17 @@ public class Main : MonoBehaviour
     [SerializeField] public GameObject cylinderPrefab;
     [SerializeField] public float playerSpeed = 0.0005f;
 
-    private GameObject target;
+    public GameObject Target { get; set; }
+    //private GameObject previousTarget; 
+
     private List<GameObject> targets;
-    private Dictionary<GameObject, List<MainMonoWithName>> attachedMonos;
+    private Dictionary<GameObject, List<MainMonoWithName>> attachedMonos = new Dictionary<GameObject, List<MainMonoWithName>>();
 
     private ManageActionsButtons mangeButtons;
 
     void Awake()
     {
         this.mangeButtons = GameObject.Find("ActionsContent").GetComponent<ManageActionsButtons>();
-
-        this.attachedMonos = new Dictionary<GameObject, List<MainMonoWithName>>();
         this.targets = new List<GameObject>();
 
         if (this.testMode)
@@ -51,7 +51,7 @@ public class Main : MonoBehaviour
 
     public void RegisterSelection(int id)
     {
-        this.target = this.targets.SingleOrDefault(x => x.GetComponent<TargetBehaviour>().id == id);
+        this.Target = this.targets.SingleOrDefault(x => x.GetComponent<TargetBehaviour>().id == id);
 
         //this.mangeButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation());
 
@@ -60,7 +60,17 @@ public class Main : MonoBehaviour
             target.GetComponent<TargetBehaviour>().VisualiseSelection(id);
         }
 
-        this.mangeButtons.SetTarget(this.target);
+        this.mangeButtons.SetTarget(this.Target);
+    }
+
+    public void RegisterDeselection(int id)
+    {
+        if (this.Target.GetComponent<TargetBehaviour>().id != id)
+        {
+            Debug.Log("Deselection Error!");
+        }
+
+        this.Target = null;
     }
 
     public void UnregeisterTarget(GameObject obj)
@@ -100,7 +110,7 @@ public class Main : MonoBehaviour
         }
         else
         {
-            internalTarget = this.target;
+            internalTarget = this.Target;
         }
 
         var mono = this.AttachAndAddToDict(funcs, internalTarget, attach, incMono);
@@ -249,19 +259,19 @@ public class Main : MonoBehaviour
     #region CALL_FUNCTION
     public void CallFunction(string monoName, string methodName, ParameterNameWithSingleObjectValues[] parameters)
     {
-        if (this.target == null)
+        if (this.Target == null)
         {
             Debug.Log("Select a target before calling function!");
             return;
         }
 
-        if (!this.attachedMonos.ContainsKey(this.target))
+        if (!this.attachedMonos.ContainsKey(this.Target))
         {
             Debug.Log("The target has no behaviours attached!");
             return;
         }
 
-        var monos = this.attachedMonos[this.target];
+        var monos = this.attachedMonos[this.Target];
 
         var wantedMonos = monos.Where(x => x.Name == monoName).ToArray();
         if (wantedMonos.Length != 1)
@@ -463,7 +473,7 @@ public class Main : MonoBehaviour
         }
         else
         {
-            target = this.target;
+            target = this.Target;
         }
 
         if (target == null)

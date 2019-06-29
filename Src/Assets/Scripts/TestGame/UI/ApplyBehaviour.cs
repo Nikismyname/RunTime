@@ -27,6 +27,12 @@ public class ApplyBehaviour : MonoBehaviour
 
     private async void CompileText()
     {
+        if(ms.Target == null)
+        {
+            Debug.Log("You should select a target before compiling script to attach to target!");
+            return;
+        }
+
         var funcs = await Task.Run(() =>
         {
             var text = textEditorInputField.text;

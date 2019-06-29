@@ -10,7 +10,7 @@ public class ColorSelectionButton : MonoBehaviour
     private Image myImage;
     private int id;
 
-    private bool active = false;
+    public bool Active { get; set; } = false;
     private List<ColorSelectionButton> others; 
 
     private void Start()
@@ -24,7 +24,7 @@ public class ColorSelectionButton : MonoBehaviour
         this.myImage = gameObject.GetComponent<Image>(); 
 
         script.onValueChanged.AddListener(color => {
-            if(this.active == false)
+            if(this.Active == false)
             {
                 return; 
             } 
@@ -44,7 +44,7 @@ public class ColorSelectionButton : MonoBehaviour
     {
         if (this.id != id)
         {
-            this.active = false;
+            this.Active = false;
         }
     }
 
@@ -53,10 +53,10 @@ public class ColorSelectionButton : MonoBehaviour
         // if the color picker was closed externaly, click here should still activate colorPicker 
         if(colorPicker.activeSelf == false)
         {
-            this.active = false;
+            this.Active = false;
         } 
 
-        if (this.active == false)
+        if (this.Active == false)
         {
             //stoping all other collor picker buttons from interacting with the ColorPicker
             foreach (var item in others)
@@ -68,12 +68,12 @@ public class ColorSelectionButton : MonoBehaviour
             this.colorPickerScript.CurrentColor = this.color;
 
             this.colorPicker.SetActive(true);
-            this.active = true;
+            this.Active = true;
         }
         else
         {
             this.colorPicker.SetActive(false);
-            this.active = false;
+            this.Active = false;
         }
     }
 }
