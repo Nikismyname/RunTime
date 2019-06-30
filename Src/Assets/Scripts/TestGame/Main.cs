@@ -10,6 +10,7 @@ public class Main : MonoBehaviour
     [SerializeField] public GameObject playerPrefab;
     [SerializeField] public GameObject cylinderPrefab;
     [SerializeField] public float playerSpeed = 0.0005f;
+    [SerializeField] public float NSSAllSpeedMultipyer = 0.5f;
 
     public GameObject Target { get; set; }
     //private GameObject previousTarget; 
@@ -87,6 +88,7 @@ public class Main : MonoBehaviour
     #endregion
 
     #region ATTACH
+    ///TODO: make attach mono and register mono separate function to recduse confusion.
     public MonoBehaviour AttachMono(
         CompMethodsInAssemblyType funcs,
         bool toTarget = true,
@@ -302,7 +304,7 @@ public class Main : MonoBehaviour
 
         wantedMethod.MethodInfo.Invoke(wantedMono.Mono, parameterObjects); //Invocation Here
 
-        Debug.Log($"Method {methodName} successfully invoked on mono {monoName}");
+        //Debug.Log($"Method {methodName} successfully invoked on mono {monoName}");
     }
 
     private object[] GenerateParamaterObjects(

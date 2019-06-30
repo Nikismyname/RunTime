@@ -152,6 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc4517b39b577624e9ffe6bf9c25ed62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shipPrefab: {fileID: 2383099895054674443, guid: f45c00eff9853a548989fb478507143f,
+    type: 3}
 --- !u!4 &248794162
 Transform:
   m_ObjectHideFlags: 0
@@ -1207,30 +1209,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8585496229122928803, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 380
-      objectReference: {fileID: 0}
-    - target: {fileID: 8585496229122928803, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -122
-      objectReference: {fileID: 0}
-    - target: {fileID: 8585496229101117321, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_Name
-      value: ColorPicker
-      objectReference: {fileID: 0}
     - target: {fileID: 8988003089260943124, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
       propertyPath: m_Name
       value: UI
-      objectReference: {fileID: 0}
-    - target: {fileID: 8988003089260943124, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8988003089260943128, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
@@ -1367,43 +1349,7 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8988003088280065164, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_Text
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8988003088715483500, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8988003088740085467, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8988003088740085467, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8988003088740085467, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2542631956550328217, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.000061035156
-      objectReference: {fileID: 0}
-    - target: {fileID: 6450957298202357698, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.000061035156
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 677053510384692289, guid: 6e7c0d16799cc2e40a5739c42d804c39, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6e7c0d16799cc2e40a5739c42d804c39, type: 3}
 --- !u!1 &1688670876
 GameObject:
@@ -1788,23 +1734,3 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 588b2226ef0b10347bcb001a1954944a, type: 3}
---- !u!1 &2122664571 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6530218954105142902, guid: 6e7c0d16799cc2e40a5739c42d804c39,
-    type: 3}
-  m_PrefabInstance: {fileID: 700661551}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2122664575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2122664571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ff17bdaf2b5d5a46a5bbdeb4431d07b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buttonPreFab: {fileID: 2118669218282056122, guid: 457656d5293b07a4d871971bfa7f0d6e,
-    type: 3}

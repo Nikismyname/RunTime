@@ -7,6 +7,7 @@ public class ReferenceBuffer : MonoBehaviour
     public ShowActionsBehaviour ShowActions { get; set; }
     public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
     public GameObject ColorPicker { get; set; }
+    public PlayerHandling PlayerHandling { get; set; }
 
     private void Awake()
     {
@@ -18,5 +19,10 @@ public class ReferenceBuffer : MonoBehaviour
         this.ShowActions = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
 
         this.ShowAvailableCSFiles = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>(); 
+    }
+
+    public void RegisterPlayerHandling (PlayerHandling playerHandling)
+    {
+        this.PlayerHandling = playerHandling; 
     }
 }

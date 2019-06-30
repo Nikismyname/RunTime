@@ -9,11 +9,8 @@ public class ManageActionsButtons : MonoBehaviour
     public GameObject buttonPreFab;
     public GameObject labelPreFab;
     public GameObject inputPrefab;
-
     private GameObject colorPicker;
-
     private Transform parentTransform;
-
     private GameObject currentTarget;
     private GameObject previousTarget;
 
@@ -30,18 +27,15 @@ public class ManageActionsButtons : MonoBehaviour
     private float inputY;
 
     private Dictionary<GameObject, List<UiMonoGroupInformation>> monosPerObjectData = new Dictionary<GameObject, List<UiMonoGroupInformation>>();
-
     private List<ColorSelectionButton> collorPickerButtons = new List<ColorSelectionButton>();
 
-    private float startYHeight;
-
+    private RectTransform parentRT;
     private Main ms;
 
-    private RectTransform parentRT;
+    private float startY;
 
     void Start()
     {
-        //Debug.Log("Manager on start!");
         var globalParent = new GameObject("TestParent");
         globalParent.transform.SetParent(gameObject.transform, false);
         globalParent.transform.position = gameObject.transform.position;
@@ -59,7 +53,7 @@ public class ManageActionsButtons : MonoBehaviour
         this.inputX = buttonX;
         this.inputY = this.buttonY;
 
-        this.startYHeight = -this.marginY;
+        this.startY = -this.marginY;
 
         var mainGO = GameObject.Find("Main");
         this.ms = mainGO.GetComponent<Main>();
@@ -75,6 +69,7 @@ public class ManageActionsButtons : MonoBehaviour
 
     public void SetTarget(GameObject newTarget)
     {
+        //Debug.Log("SetTarget: " + newTarget.name);
         if (newTarget == this.currentTarget)
         {
             return;
@@ -111,7 +106,7 @@ public class ManageActionsButtons : MonoBehaviour
             this.RemoveDestroyedMono(target, monoData.MonoName, false);
         }
 
-        var createResult = this.CreateScriptVisualisation(monoData.MonoName, monoData.Methods);
+        var createResult = this.CreateScriptUI(monoData.MonoName, monoData.Methods);
 
         var monoGroup = new UiMonoGroupInformation
         {
@@ -130,7 +125,9 @@ public class ManageActionsButtons : MonoBehaviour
 
         list.Add(monoGroup);
 
-        this.DisplayInterfaceForTarger(target);
+        if (this.currentTarget!= null && this.currentTarget == target) {
+            this.DisplayInterfaceForTarger(target);
+        }
     }
 
     //Removes it from the dict as well as destroys the object visualisation
@@ -179,12 +176,13 @@ public class ManageActionsButtons : MonoBehaviour
     //Check again when this gets called it seems like way too often.
     public void DisplayInterfaceForTarger(GameObject displayTarget, bool useCurrentTarget = false)
     {
+        //Debug.Log("Display Interface: " + displayTarget.name);
         if (useCurrentTarget)
         {
             displayTarget = this.currentTarget;
         }
 
-        //aranging the current interface
+        /// aranging the current interface
         var toReorder = this.monosPerObjectData[displayTarget];
         var initialY = this.marginY;
         for (int i = 0; i < toReorder.Count; i++)
@@ -207,7 +205,7 @@ public class ManageActionsButtons : MonoBehaviour
             initialY += height;
         }
 
-        //showing the current interface
+        /// showing the current interface
         foreach (var item in toReorder)
         {
             if (item.Collapsed)
@@ -224,7 +222,7 @@ public class ManageActionsButtons : MonoBehaviour
 
         var totalHeight = initialY;
 
-        //expanding the box if need be
+        /// expanding the box if need be
         var y = parentRT.sizeDelta.y;
         var x = parentRT.sizeDelta.x;
 
@@ -232,14 +230,11 @@ public class ManageActionsButtons : MonoBehaviour
         {
             parentRT.sizeDelta = new Vector2(x, totalHeight);
         }
-
-        //assign new previous target; 
-        //this.previousTarget = displayTarget;
     }
     #endregion
 
-    #region REGISTER_SCRIPT
-    private CreateMonUIResult CreateScriptVisualisation(string monoName, UiMethodNameWithParameters[] methods)
+    #region CREATE_SCRIPT_UI
+    private CreateMonUIResult CreateScriptUI(string monoName, UiMethodNameWithParameters[] methods)
     {
         var localGrandParent = new GameObject(monoName + "GrandParent");
         localGrandParent.transform.SetParent(this.parentTransform, false);
@@ -305,6 +300,10 @@ public class ManageActionsButtons : MonoBehaviour
                 lableButtonScript.ColorSelectionButtons.Add(colorButtonScript.colorScript);
             }
         }
+
+        /// newly created item whould be activated later;
+        localParent.SetActive(false);
+        intButtonLabel.SetActive(false);
 
         var result = new CreateMonUIResult
         {
@@ -442,7 +441,7 @@ public class ManageActionsButtons : MonoBehaviour
         float overallHeight = 0;
         var height = this.SpawnOneLable(
             pos,
-            parameter.Name + " " + this.ShorterPropTypes(parameter.Type.Name),
+            parameter.Name + " " + this.ShortenPropTypes(parameter.Type.Name),
             parent,
             false,
             out GameObject _notused,
@@ -503,7 +502,8 @@ public class ManageActionsButtons : MonoBehaviour
     }
     #endregion
 
-    public string ShorterPropTypes(string propType)
+    #region HELPERS
+    public string ShortenPropTypes(string propType)
     {
         const int maxLenght = 10;
 
@@ -543,6 +543,7 @@ public class ManageActionsButtons : MonoBehaviour
 
         return result;
     }
+    #endregion
 
     #region END_BRACKET
 }

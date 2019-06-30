@@ -3,19 +3,18 @@ using UnityEngine;
 
 public class LevelPCTMain : MonoBehaviour, ILevelMain
 {
-    private float speed;
+    public GameObject shipPrefab;
     private GameObject player;
     private GameObject mainCamera;
-    private Camera cameraComponent;
     private Main ms;
     private GenerateLevel gl;
 
     private void Start()
     {
-        this.ms = GameObject.Find("Main").GetComponent<Main>();
-        this.gl = new GenerateLevel(this.ms);
-
-        this.speed = ms.playerSpeed;
+        var main = GameObject.Find("Main"); 
+        this.ms = main.GetComponent<Main>();
+        var rb = main.GetComponent<ReferenceBuffer>(); 
+        this.gl = new GenerateLevel(this.ms, rb);
 
         ///Generate the environment
         this.gl.CylinderBasePrefab(true);
@@ -26,7 +25,6 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         this.mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
-        this.cameraComponent = this.mainCamera.GetComponent<Camera>();
 
         this.GenerateInGameInterface();
     }
@@ -60,53 +58,16 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
             "TargetSphere2",
             new Type[0]
         );
-    }
 
-    private void Update()
-    {
-        if (Input.GetKey(KeyCode.W))
-        {
-            var direction = this.GenerateNormalisedForward();
-            this.player.transform.position += direction * speed / Time.deltaTime;
-            this.player.transform.rotation = Quaternion.LookRotation(-direction);
-        }
-
-        if (Input.GetKey(KeyCode.S))
-        {
-            var direction = this.GenerateNormalisedForward();
-            this.player.transform.position -= direction * speed / Time.deltaTime;
-            this.player.transform.rotation = Quaternion.LookRotation(direction);
-        }
-
-
-        if (Input.GetKey(KeyCode.D))
-        {
-            var direction = this.GenerateNormalisedForward(true);
-            this.player.transform.position -= direction * speed / Time.deltaTime;
-            this.player.transform.rotation = Quaternion.LookRotation(direction);
-        }
-
-        if (Input.GetKey(KeyCode.A))
-        {
-            var direction = this.GenerateNormalisedForward(true);
-            this.player.transform.position += direction * speed / Time.deltaTime;
-            this.player.transform.rotation = Quaternion.LookRotation(-direction);
-        }
-    }
-
-    private Vector3 GenerateNormalisedForward(bool side = false)
-    {
-        var forward = this.cameraComponent.transform.forward.normalized;
-        var vectorTwo = new Vector2(forward.x, forward.z);
-        vectorTwo.Normalize();
-        forward.Set(vectorTwo.x, 0, vectorTwo.y);
-
-        if (side)
-        {
-            forward = Quaternion.AngleAxis(-90, Vector3.up) * forward;
-        }
-        //Debug.Log("M " + forward.magnitude);
-        return forward;
+        var ship = this.gl.GenerateSpaceShip(
+            EntityType.Target,
+            shipPrefab,
+            new Vector3(20, 0, 20),
+            "Body",
+            null,
+            "space ship",
+            new Type[] { typeof(NewtonianSpaceShipInterface) }
+        );
     }
 
     public void ResetLevel()

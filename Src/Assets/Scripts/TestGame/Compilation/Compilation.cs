@@ -85,7 +85,7 @@ public static class Compilation
         Func<GameObject, MonoBehaviour> attachFunk = null;
         if (method == null)
         {
-            Debug.Log("There is not attach method on Type: " + type.Name);
+            //Debug.Log("There is not attach method on Type: " + type.Name);
         }
         else
         {

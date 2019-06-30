@@ -4,10 +4,12 @@ using UnityEngine;
 public class GenerateLevel
 {
     private Main ms;
+    private ReferenceBuffer rb;
 
-    public GenerateLevel(Main ms)
+    public GenerateLevel(Main ms, ReferenceBuffer rb)
     {
         this.ms = ms;
+        this.rb = rb;
     }
 
     public GameObject CylinderBasePrefab(bool collider = false)
@@ -76,12 +78,113 @@ public class GenerateLevel
         return entity;
     }
 
+    public GameObject GenerateEntityFromPrefab(
+    EntityType enType,
+    GameObject prefab,
+    Vector3 postions,
+    string bodyToWorkWith = null,
+    Vector3? scale = null,
+    string name = "prefab entity",
+    Type[] scriptsToRegister = null)
+    {
+        var entity = GameObject.Instantiate(prefab);
+
+        if (bodyToWorkWith != null)
+        {
+            entity = entity.transform.Find(bodyToWorkWith).gameObject;
+        }
+
+        if (enType == EntityType.Target)
+        {
+            entity.AddComponent<TargetBehaviour>();
+            this.ms.RegisterTarget(entity);
+
+            if(scriptsToRegister != null)
+            {
+                foreach (var scriptType in scriptsToRegister)
+                {
+                    var script = (MonoBehaviour)entity.GetComponent(scriptType);
+                    var funcs = Compilation.GenerateAllMethodsFromType(scriptType);
+                    this.ms.AttachMono(funcs, false, entity,false,script);
+                }
+            }
+        }
+
+        if (scale != null)
+        {
+            entity.transform.localScale = scale.Value;
+        }
+
+        var y = entity.GetComponent<MeshRenderer>().bounds.size.y;
+        entity.transform.position = postions;
+
+        entity.name = name;
+
+        return entity;
+    }
+
+    public GameObject GenerateSpaceShip(
+        EntityType enType,
+        GameObject prefab,
+        Vector3 postions,
+        string scriptsObjectName = null,
+        Vector3? scale = null,
+        string name = "prefab entity",
+        Type[] scriptsToRegister = null)
+    {
+        var prefabParent = GameObject.Instantiate(prefab);
+
+        GameObject scriptsObject = null;
+
+        if (scriptsObjectName != null)
+        {
+            scriptsObject = prefabParent.transform.Find(scriptsObjectName).gameObject;
+            //Debug.Log("SCRIPT OBJECT PASSED");
+        }
+        else
+        {
+            scriptsObject = prefabParent;
+            //Debug.Log("NO SCRIPT OBJECT PASSED");
+        }
+
+        if (enType == EntityType.Target)
+        {
+            scriptsObject.AddComponent<TargetBehaviour>();
+            this.ms.RegisterTarget(scriptsObject);
+
+            if (scriptsToRegister != null)
+            {
+                foreach (var scriptType in scriptsToRegister)
+                {
+                    var script = (MonoBehaviour)scriptsObject.GetComponent(scriptType);
+                    var funcs = Compilation.GenerateAllMethodsFromType(scriptType);
+                    this.ms.AttachMono(funcs, false, scriptsObject, false, script);
+                }
+            }
+        }
+
+        if (scale != null)
+        {
+            prefabParent.transform.localScale = scale.Value;
+        }
+
+        var y = scriptsObject.GetComponent<MeshRenderer>().bounds.size.y;
+        prefabParent.transform.position = postions;
+
+        prefabParent.name = name;
+
+        return scriptsObject;
+    }
+
     public GameObject Player(Vector3 position, bool rigidBody,bool isTarget, params Type[] scripts)
     {
         var player = GameObject.Instantiate(this.ms.playerPrefab);
         player.name = "Player";
 
-        player.AddComponent<PlayerScript>();
+        player.AddComponent<PlayerFailure>();
+
+        var ph = player.AddComponent<PlayerHandling>();
+        this.rb.RegisterPlayerHandling(ph);
 
         if (isTarget)
         {

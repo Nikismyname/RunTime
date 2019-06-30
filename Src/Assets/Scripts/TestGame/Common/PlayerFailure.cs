@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerScript: MonoBehaviour
+public class PlayerFailure: MonoBehaviour
 {
     private LevelManager lm; 
 

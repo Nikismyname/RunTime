@@ -15,7 +15,8 @@ public class Level1Main: MonoBehaviour, ILevelMain
         var main = GameObject.Find("Main");
         this.lm = main.GetComponent<LevelManager>(); 
         this.ms = main.GetComponent<Main>();
-        this.gl = new GenerateLevel(ms);
+        var rb = main.GetComponent<ReferenceBuffer>();
+        this.gl = new GenerateLevel(ms, rb);
 
         this.t = gl.GenerateEntity(EntityType.Target, new Vector3(0, -5, 0), PrimitiveType.Cube, Color.gray,null,"Target");
         this.goal = gl.GenerateEntity(EntityType.NonTarget, new Vector3(0, 5, 0), PrimitiveType.Cube, Color.blue,null, "Goal");

@@ -15,13 +15,15 @@ public class Level3Main : MonoBehaviour, ILevelMain
 
     void Start()
     {
-        this.lm = GameObject.Find("Main").GetComponent<LevelManager>();
+        var main = GameObject.Find("Main"); 
+        this.lm = main.GetComponent<LevelManager>();
+        var rb = main.GetComponent<ReferenceBuffer>(); 
 
         this.gatheredTheSphere = false;
         this.placedTHeSphere = false;
 
         this.ms = gameObject.GetComponent<Main>();
-        var gl = new GenerateLevel(this.ms);
+        var gl = new GenerateLevel(this.ms, rb);
 
         gl.CylinderBasePrefab();
 
