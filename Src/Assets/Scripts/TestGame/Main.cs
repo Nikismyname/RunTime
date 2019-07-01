@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 public class Main : MonoBehaviour
@@ -35,7 +36,7 @@ public class Main : MonoBehaviour
     #endregion
 
     #region TARGET_MANAGMENT
-    public void RegisterTarget(GameObject newTarget)
+    public void RegisterTarget(GameObject newTarget, Func<object, MethodInfo, bool> testFunc = null)
     {
         var tb = newTarget.GetComponent<TargetBehaviour>();
         if (tb == null)
@@ -46,7 +47,14 @@ public class Main : MonoBehaviour
         }
 
         var newId = this.targets.Count;
-        tb.SetUp(newId);
+        if (testFunc == null)
+        {
+            tb.SetUp(newId);
+        }
+        else
+        {
+            tb.SetUp(newId, TargetType.Test, testFunc);
+        }
         this.targets.Add(newTarget);
     }
 

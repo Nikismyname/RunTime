@@ -10,6 +10,7 @@ using UnityEngine;
 public static class Compilation
 {
     public const string path = "C:/Users/ASUS G751JY/Unity/ScriptDonor/ScriptDonor/Assets/TestScripts";
+    public const string testPath = "C:/Users/ASUS G751JY/Unity/ScriptDonor/ScriptDonor/Assets/Tests/Solutions";
 
     public static Assembly GenerateAssambly(string str, bool isPath)
     {
@@ -53,7 +54,7 @@ public static class Compilation
         return result;
     }
 
-    public static CompMethodsInAssemblyType GenerateAllFunctionsFromAssembpy(Assembly ass)
+    public static Type GetSingleTypeFromAssembly(Assembly ass)
     {
         var types = ass.GetTypes();
 
@@ -72,6 +73,31 @@ public static class Compilation
 
         var type = types[0];
 
+        return type;
+    }
+
+    public static CompTypeWithSolveMehtodInfo GenerateTypeWithSolveMethod(Assembly ass)
+    {
+        var type = GetSingleTypeFromAssembly(ass);
+        var solveMehtod = type.GetMethod("Solve");
+        if (solveMehtod == null)
+        {
+            Debug.Log("Solve Method Not Found!");
+            return null;
+        }
+
+        var result = new CompTypeWithSolveMehtodInfo
+        {
+            ClassType = type,
+            SolveMethodInfo = solveMehtod,
+        };
+
+        return result;
+    }
+
+    public static CompMethodsInAssemblyType GenerateAllMethodsFromAssembly(Assembly ass)
+    {
+        var type = GetSingleTypeFromAssembly(ass);
         return GenerateAllMethodsFromType(type);
     }
 
@@ -91,7 +117,7 @@ public static class Compilation
         {
             attachFunk = (Func<GameObject, MonoBehaviour>)
                 Delegate.CreateDelegate(typeof(Func<GameObject, MonoBehaviour>), method);
-                result.Attach = attachFunk;
+            result.Attach = attachFunk;
         }
 
         /// Setting the flags for method extraction

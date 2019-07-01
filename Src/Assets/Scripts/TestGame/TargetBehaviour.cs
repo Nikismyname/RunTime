@@ -1,5 +1,7 @@
 ﻿#region INIT
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -20,6 +22,10 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     private bool vehicleIsActive = false;
     private NewtonianSpaceShipInterface vehicleMono = null;
 
+    public TargetType type;
+    private Func<object, MethodInfo, bool> testFunction;
+    private bool passed = false;
+
     private int counter;
 
     private void Start()
@@ -37,11 +43,30 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
         this.originalColor = myRenderer.material.color;
     }
 
-    public void SetUp(int id)
+    public void SetUp(
+        int id,
+        TargetType type = TargetType.Standard,
+        Func<object, MethodInfo, bool> testFunction = null
+    )
     {
         this.id = id;
+        this.type = type;
+        this.testFunction = testFunction;
     }
     #endregion
+
+    public bool Test(object classInstance, MethodInfo methodInfo)
+    {
+        var result = false;
+        if(this.testFunction(classInstance, methodInfo) == true)
+        {
+            this.passed = true;
+            myRenderer.material.color = Color.red;
+            result = true;
+        }
+
+        return result;
+    }
 
     #region MAUSE_INPUT
     public void OnPointerDown(PointerEventData eventData)
@@ -59,6 +84,7 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     }
     #endregion
 
+    #region VISUALISE_SELECTION
     ///This method gets called from Main on the whole array of targets with the id of the selected target
     public void VisualiseSelection(int id)
     {
@@ -94,7 +120,9 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
         this.myRenderer.material.color = originalColor;
     }
+    #endregion
 
+    #region MONITOR_FOR_COLOR_CHANGES
     /// It gets called N+1 (the color change number) times because first it detects not selection color and then new color on the first two checks
     private void LateUpdate()
     {
@@ -145,7 +173,9 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
         return check;
     }
+    #endregion
 
+    #region CANCEL_FLASH_IF_ANOTHER_FLASH_INITIATED_LATER
     ///cancels the all previous flashes, I do not thing I need an array for that, but good enough for now
     private void CancelAsyncOperations()
     {
@@ -160,7 +190,9 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
         this.cancelationSources.Clear();
     }
+    #endregion
 
+    #region REVERT_NEW_COLOR_AFTER_FLASH 
     ///Flashes the new color if the target gets its color changed while selected
     ///This is canceled if new color comes through so the new collor is flashed 
     ///for the same duration 600ms
@@ -185,7 +217,9 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
         ///painting it back to selection color at the end of a successul flash
         this.myRenderer.material.color = this.selectionColor;
     }
+    #endregion
 
+    #region VEHICLE_ACTIVATION
     ///methods that subscribe to the Vehiche activated and deactivated events
     public void VehicleHasActivated()
     {
@@ -209,4 +243,8 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
         this.myRenderer.material.color = this.selectionColor; 
     }
     ///...
+    #endregion
+
+    #region END_BRACKET
 }
+#endregion

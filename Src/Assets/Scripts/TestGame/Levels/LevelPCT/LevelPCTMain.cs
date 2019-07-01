@@ -68,6 +68,12 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
             "space ship",
             new Type[] { typeof(NewtonianSpaceShipInterface) }
         );
+
+        var solvingCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var tb = solvingCube.AddComponent<TargetBehaviour>();
+        ms.RegisterTarget(solvingCube, ReverseLinkedListTest.Test);
+        solvingCube.name = "SolvingCube";
+        solvingCube.transform.position = new Vector3(10,10,10);
     }
 
     public void ResetLevel()

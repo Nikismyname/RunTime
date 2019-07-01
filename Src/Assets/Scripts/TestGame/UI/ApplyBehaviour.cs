@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,20 +34,34 @@ public class ApplyBehaviour : MonoBehaviour
             return;
         }
 
-        var funcs = await Task.Run(() =>
+        var tb = ms.Target.GetComponent<TargetBehaviour>();
+        if (tb.type == TargetType.Test)
         {
-            var text = textEditorInputField.text;
-            var ass = Compilation.GenerateAssambly(text, false);
-            var functions = Compilation.GenerateAllFunctionsFromAssembpy(ass);
-            return functions;
-        });
+            var solveInfo = await Task.Run(() =>
+            {
+                var text = textEditorInputField.text;
+                var ass = Compilation.GenerateAssambly(text, false);
+                var solveInfoInt = Compilation.GenerateTypeWithSolveMethod(ass);
+                return solveInfoInt;
+            });
 
-        this.Finish(funcs);
-    }
+            var classInstance = Activator.CreateInstance(solveInfo.ClassType);
+            var result = tb.Test(classInstance, solveInfo.SolveMethodInfo);
+            Debug.Log("Test Result: " + result);
+        }
+        else
+        {
+            var functions = await Task.Run(() =>
+            {
+                var text = textEditorInputField.text;
+                var ass = Compilation.GenerateAssambly(text, false);
+                var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
+                return funcs;
+            });
 
-    private void Finish(CompMethodsInAssemblyType functions)
-    {
-        var script = this.ms.AttachMono(functions);
+            var script = this.ms.AttachMono(functions);
+        }
+
         Camera.main.backgroundColor = Color.black;
     }
 

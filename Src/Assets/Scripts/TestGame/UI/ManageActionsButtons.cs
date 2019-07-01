@@ -548,33 +548,3 @@ public class ManageActionsButtons : MonoBehaviour
     #region END_BRACKET
 }
 #endregion
-
-
-
-#region CALCULATE_NEW_START_Y
-//private float CalculateNewStartY()
-//{
-//    if(this.methodCounts.Count == 0)
-//    {
-//        return -marginY;
-//    }
-
-//    var methods = this.methodCounts.Count;
-//    var result = (this.labelY + this.marginLableToItsButtons) * methods; //The label itself + magin to first button
-//    //Debug.Log(result);
-//    for (int i = 0; i < this.methodCounts.Count; i++)
-//    {
-//        result += //The buttons 
-//            this.marginBetweenButtonRows * (this.methodCounts[i] -1) + 
-//            this.buttonY * this.methodCounts[i];
-//    }
-//    //Debug.Log(result);
-//    var marginBetweenGroups = this.marginY * this.methodCounts.Count;
-//    //Debug.Log(marginBetweenGroups);
-//    result += marginBetweenGroups; // margin to other groups
-
-//    result += marginY; //Extra margin on the top;
-
-//    return -result;
-//}
-#endregion
