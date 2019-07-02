@@ -55,6 +55,9 @@ public class NewtonianSpaceshipCamera : MonoBehaviour
 
         this.xDeg = Vector3.Angle(Vector3.right, transform.right);
         this.yDeg = Vector3.Angle(Vector3.up, transform.up);
+
+        this.cursorLocked = true;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     /*
@@ -62,6 +65,20 @@ public class NewtonianSpaceshipCamera : MonoBehaviour
      */
     void LateUpdate()
     {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (cursorLocked)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                cursorLocked = false;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                cursorLocked = true;
+            }
+        }
+
         // If Control and Alt and Middle button? ZOOM!
         if (Input.GetMouseButton(2) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.LeftControl))
         {
@@ -76,31 +93,18 @@ public class NewtonianSpaceshipCamera : MonoBehaviour
             target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
         }
 
-        //always lock to mouse 
+        if (cursorLocked == true)
+        {
+            xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
+            yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
 
-        // If middle mouse and left alt are selected? ORBIT
-        //Replacing that with Right click alone 
-        // else if (Input.GetMouseButton(2) && Input.GetKey(KeyCode.LeftAlt))
+            // set camera rotation 
+            desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
+            currentRotation = transform.rotation;
 
-
-        xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
-        yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
-
-        ////////OrbitAngle
-
-        //Clamp the vertical axis for the orbit
-
-        //test
-        //yDeg = ClampAngle(yDeg, yMinLimit, yMaxLimit);
-        // set camera rotation 
-        desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
-        currentRotation = transform.rotation;
-
-        //rotation = Quaternion.Lerp(currentRotation, desiredRotation, Time.deltaTime * zoomDampening)
-        rotation = Quaternion.Lerp(currentRotation, desiredRotation, 1);
-        transform.rotation = rotation;
-
-        ////////Orbit Position
+            rotation = Quaternion.Lerp(currentRotation, desiredRotation, 1);
+            transform.rotation = rotation;
+        }
 
         // affect the desired Zoom distance if we roll the scrollwheel
         desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
@@ -114,9 +118,6 @@ public class NewtonianSpaceshipCamera : MonoBehaviour
         transform.position = position;
 
         Input.mousePosition.Set(0, 0, 0);
-
-        //getting the other player 
-
     }
 
     private static float ClampAngle(float angle, float min, float max)

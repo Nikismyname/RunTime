@@ -6,22 +6,23 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
     private GameObject mainCamera;
     private Camera cameraRef;
 
-    private float maxSpeedCombat = 0.7f;
-    private float rotationSpeedCombat = 150;
+    private float maxCombatSpeed = 0.7f;
+    private float newtonianThrusterForce = 2f;
+    private float combatThrusterForce = 3f;
     private float slowDowntConstant = 0.6f;
-    private float thrusterForceNewtonian = 2f;
-    private float thrusterForceCombat = 3f;
+    private float speedingSlowDownConstant = 0.4f;
+    private float slowingSlowDownConstant = 0.9f;
+    private float rotationSpeedCombat = 150;
 
     private GameObject shipBodyRef;
     private GameObject shipAnchorRef;
     private GameObject cameraTarget;
 
-    private Vector3 shipVelocityNutonian;
-    private float shipVelocityCombat;
+    private Vector3 nutonianVelocity;
+    private float combatVelocityMagnitude;
 
     private bool nutonianMode = false;
-    bool active = false;
-    public bool IsActive => this.active;
+    private bool active = false;
 
     private PlayerHandling playerHandling;
     private float MaxEntranceDistance = float.MaxValue;
@@ -38,12 +39,22 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
     {
         var main = GameObject.Find("Main");
         this.referenceBuffer = main.GetComponent<ReferenceBuffer>();
+        Main ms = main.GetComponent<Main>();
+
         ///Adjusting the speed from the editor;
-        var speedMultiplyer = main.GetComponent<Main>().NSSAllSpeedMultipyer;
-        this.maxSpeedCombat *= speedMultiplyer;
-        this.slowDowntConstant *= speedMultiplyer;
-        this.thrusterForceNewtonian *= speedMultiplyer;
-        this.thrusterForceCombat *= speedMultiplyer;
+        var speedMultiplyer = ms.NSSAllSpeedMultipyer;
+        var slowMultiplayer = ms.NSSAllSlowConstantsMultiplyer; 
+
+        this.maxCombatSpeed *= speedMultiplyer;
+        this.newtonianThrusterForce *= speedMultiplyer;
+        this.combatThrusterForce *= speedMultiplyer;
+
+        ///Adjusting the slow down contants
+        this.slowDowntConstant *= slowMultiplayer;
+        this.speedingSlowDownConstant *= slowMultiplayer;
+        this.slowingSlowDownConstant *= slowMultiplayer;
+
+        ///Rotational Speed Stays constant for now; 
 
         ///The script is on the parent
         this.cameraRef = myCamera.GetComponent<Camera>();
@@ -83,8 +94,8 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
         ///...
 
         ///setting up the ship
-        this.shipVelocityNutonian = Vector3.zero;
-        this.shipVelocityCombat = 0;
+        this.nutonianVelocity = Vector3.zero;
+        this.combatVelocityMagnitude = 0;
         this.mainCamera.SetActive(false);
         this.myCamera.SetActive(true);
         this.active = true;
@@ -97,8 +108,6 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
         ///setting up the player
         this.playerHandling.EnterVehicle();
         ///...
-
-        Cursor.lockState = CursorLockMode.Locked;
 
         ///Invoking the HasActivated event
         this.HasActivated?.Invoke();
@@ -123,14 +132,14 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
     #region SWITCHING_STANCES 
     private void SwitchToNewtonianMode()
     {
-        this.shipVelocityNutonian = shipAnchorRef.transform.forward.normalized * shipVelocityCombat;
+        this.nutonianVelocity = shipAnchorRef.transform.forward.normalized * combatVelocityMagnitude;
         this.shipBodyRef.GetComponent<Renderer>().material.color = Color.blue;
     }
     private void SwithToCombatMode()
     {
         //pssing the speed and direction 
-        shipAnchorRef.transform.forward = shipVelocityNutonian;
-        shipVelocityCombat = shipVelocityNutonian.magnitude;
+        shipAnchorRef.transform.forward = nutonianVelocity;
+        combatVelocityMagnitude = nutonianVelocity.magnitude;
         shipBodyRef.GetComponent<Renderer>().material.color = Color.red;
     }
     #endregion
@@ -140,91 +149,93 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
     {
         if (this.active == false) return;
 
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            if(Cursor.lockState == CursorLockMode.Locked)
-            {
-                Cursor.lockState = CursorLockMode.None; 
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-            }
-        }
-
         var targetRotation = cameraRef.transform.rotation;
 
         //FREE FLIGHT, Nutonian Mode 
         if (nutonianMode)
         {
             //moving the ship
-            shipAnchorRef.transform.position += shipVelocityNutonian;
+            shipAnchorRef.transform.position += nutonianVelocity;
             //Chaging rotation, always in sink with the camera, might change it in future 
             shipAnchorRef.transform.rotation = targetRotation;
 
             if (Input.GetKey("w"))
             {
-                shipVelocityNutonian += shipAnchorRef.transform.forward.normalized * thrusterForceNewtonian * Time.deltaTime;
+                nutonianVelocity += shipAnchorRef.transform.forward.normalized * newtonianThrusterForce * Time.deltaTime;
             }
 
-            if (Input.GetKeyDown("s"))
-            {
-                //full stop in nutionian Mode, temporary.
-                shipVelocityNutonian = Vector3.zero;
-            }
+            ///full stop in nutionian Mode, temporary.
+            //if (Input.GetKeyDown("s"))
+            //{
+            //    shipVelocityNutonian = Vector3.zero;
+            //}
         }
         else //COMBAT MODE
         {
             //moving the ship
-            shipAnchorRef.transform.position += shipAnchorRef.transform.forward.normalized * shipVelocityCombat;
+            shipAnchorRef.transform.position += shipAnchorRef.transform.forward.normalized * combatVelocityMagnitude;
 
             //ChangingTheOrientationTowardsTheCameraWithMaxDegrees 
-            shipAnchorRef.transform.rotation = Quaternion.RotateTowards(shipAnchorRef.transform.rotation,
-                                                      cameraRef.transform.rotation,
-                                                      Time.deltaTime * rotationSpeedCombat);
+            shipAnchorRef.transform.rotation =  
+                Quaternion.RotateTowards(shipAnchorRef.transform.rotation,
+                    cameraRef.transform.rotation,
+                    Time.deltaTime * rotationSpeedCombat);
 
             //GoingForward, Reaching Our Max Fast;
             if (Input.GetKey(KeyCode.W))
             {
-                //If we till have palce to speed up, we do
-                if (shipVelocityCombat < maxSpeedCombat)
+                //If we still have palce to speed up, we do
+                if (combatVelocityMagnitude < maxCombatSpeed)
                 {
-                    shipVelocityCombat += thrusterForceCombat * Time.deltaTime;
+                    combatVelocityMagnitude += combatThrusterForce * Time.deltaTime;
                 }
                 else //this is in case we are in transition from nutonian and Have Extra velocity to play with
                 {
                     //getting the velocity of nutonian ship and decelerating slower than normal by a constant 
                     //making a check the velocity is not too close to an edge Speed(0,maxSpeed), if so we make it that speed, to avoid constantly gpoing over under it 
-                    if (shipVelocityCombat < maxSpeedCombat + 0.01f)
+                    if (combatVelocityMagnitude < maxCombatSpeed + 0.01f)// the speed is between maxCombatSpeed and maxCombatSpeed + 0.01
                     {
                         //we are mooving at a constant max velocity, this is only the magnitude, because in this mode we can shift the velocity a certain angle with no penalty 
-                        shipVelocityCombat = maxSpeedCombat;
+                        combatVelocityMagnitude = maxCombatSpeed;
                     }
                     else
                     {
                         //loosig the velocity wo got from nutonial mode
-                        shipVelocityCombat -= thrusterForceCombat * Time.deltaTime * slowDowntConstant;
+                        combatVelocityMagnitude -= combatThrusterForce * Time.deltaTime * speedingSlowDownConstant;
                     }
+                }
+            }
+            else if(Input.GetKey(KeyCode.S))
+            {
+                if (combatVelocityMagnitude > 0.01)
+                {
+                    //still applying the slow deceleration here, not sure if I want to keep it
+                    combatVelocityMagnitude -= combatThrusterForce * Time.deltaTime * slowingSlowDownConstant;
+                }
+                else
+                {
+                    //to avoid jittering over/under 0
+                    combatVelocityMagnitude = 0;
                 }
             }
             else //Deaccelerating becasue no thrusters 
             {
                 //same thing as before, to avoid jittering 
-                if (shipVelocityCombat > 0.01)
+                if (combatVelocityMagnitude > 0.01)
                 {
                     //still applying the slow deceleration here, not sure if I want to keep it
-                    shipVelocityCombat -= thrusterForceCombat * Time.deltaTime * slowDowntConstant;
+                    combatVelocityMagnitude -= combatThrusterForce * Time.deltaTime * slowDowntConstant;
                 }
                 else
                 {
                     //to avoid jittering over/under 0
-                    shipVelocityCombat = 0;
+                    combatVelocityMagnitude = 0;
                 }
             }
         }
 
         //switches between combat and nutonian Mode
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             if (nutonianMode)
             {
@@ -247,11 +258,11 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
 
         if (nutonianMode)
         {
-            GUI.Label(new Rect(200, 30, 30, 30), shipVelocityNutonian.magnitude.ToString());
+            GUI.Label(new Rect(200, 30, 30, 30), nutonianVelocity.magnitude.ToString());
         }
         else
         {
-            GUI.Label(new Rect(200, 30, 30, 30), shipVelocityCombat.ToString());
+            GUI.Label(new Rect(200, 30, 30, 30), combatVelocityMagnitude.ToString());
         }
     }
     #endregion

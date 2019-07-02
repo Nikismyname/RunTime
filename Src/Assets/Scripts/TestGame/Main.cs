@@ -12,6 +12,7 @@ public class Main : MonoBehaviour
     [SerializeField] public GameObject cylinderPrefab;
     [SerializeField] public float playerSpeed = 0.0005f;
     [SerializeField] public float NSSAllSpeedMultipyer = 0.5f;
+    [SerializeField] public float NSSAllSlowConstantsMultiplyer = 0.8f; 
 
     public GameObject Target { get; set; }
     //private GameObject previousTarget; 

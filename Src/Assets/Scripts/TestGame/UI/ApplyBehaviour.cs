@@ -67,7 +67,7 @@ public class ApplyBehaviour : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.T))
         {
             this.OnClick();
         }
