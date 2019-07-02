@@ -30,7 +30,7 @@ public class FileSelectionButton: MonoBehaviour
     {
         var file = Compilation.ReadFile(this.filePath);
         var alteredFile = file;
-        if (ms.Target.GetComponent<TargetBehaviour>().type != TargetType.Test)
+        if (ms.Target?.GetComponent<TargetBehaviour>().type != TargetType.Test)
         {
             alteredFile = Compilation.AddSelfAttachToSource(file);
         }
