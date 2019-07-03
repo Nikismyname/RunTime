@@ -40,7 +40,7 @@ public class ApplyBehaviour : MonoBehaviour
             var solveInfo = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
-                var ass = Compilation.GenerateAssambly(text, false);
+                var ass = Compilation.GenerateAssembly(text, false);
                 var solveInfoInt = Compilation.GenerateTypeWithSolveMethod(ass);
                 return solveInfoInt;
             });
@@ -54,7 +54,7 @@ public class ApplyBehaviour : MonoBehaviour
             var functions = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
-                var ass = Compilation.GenerateAssambly(text, false);
+                var ass = Compilation.GenerateAssembly(text, false);
                 var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
                 return funcs;
             });

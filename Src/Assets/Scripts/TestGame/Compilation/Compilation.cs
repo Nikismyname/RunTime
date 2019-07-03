@@ -1,18 +1,74 @@
-﻿using Microsoft.CSharp;
+﻿#region INIT
+using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using diagnostics = System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using System.Reflection.Emit;
+using System.Threading;
 
 public static class Compilation
 {
     public const string path = "C:/Users/ASUS G751JY/Unity/ScriptDonor/ScriptDonor/Assets/TestScripts";
     public const string testPath = "C:/Users/ASUS G751JY/Unity/ScriptDonor/ScriptDonor/Assets/Tests/Solutions";
+    public const string pleyerLevelAssembliesPath = "C:/Users/ASUS G751JY/Desktop/Assemblies/ForLevelBuild";
 
-    public static Assembly GenerateAssambly(string str, bool isPath)
+    public static List<Assembly> assemblies = new List<Assembly>();
+    #endregion
+
+    #region LOAD_ASSEMBLY
+    public static Assembly LoadAssembly(string path, string name) /// works
+    {
+        var timer = new diagnostics.Stopwatch();
+        var fullPath = $"{path}/{name}.dll"; 
+
+        timer.Start();
+        var ass = Assembly.Load(File.ReadAllBytes(fullPath));
+        //var ass = Assembly.LoadFile(fullPath); 
+        timer.Stop();
+        Debug.Log("Imported DLL time: " + timer.ElapsedMilliseconds);
+        return ass;
+    }
+    #endregion
+
+    #region  SAVE_ASSEMBLY_TO_DISK
+    public static void WriteAssembly(Assembly assembly, string path, string name) /// Works
+    {
+        var timer = new diagnostics.Stopwatch();
+        timer.Start();
+    
+        AssemblyName asmName = assembly.GetName();
+        AssemblyBuilder asmBuilder = Thread.GetDomain().DefineDynamicAssembly(
+            asmName, AssemblyBuilderAccess.RunAndSave, path);
+
+        asmBuilder.Save($"{name}.dll");
+
+        timer.Stop();
+        Debug.Log("Writing Assembly Took: " + timer.ElapsedMilliseconds);
+    }
+    #endregion
+
+    #region DELETE_ASSEMBLY
+    public static void DeleteAssembly(string path, string name) //works
+    {
+        var fullName = $"{path}/{name}.dll";
+        try
+        {
+            File.Delete(fullName);
+        }
+        catch (Exception e)
+        {
+            Debug.Log("FileNotDeleted: " + e.Message);
+        }
+    }
+    #endregion
+
+    #region GENERATE_ASSEMBLY
+    public static Assembly GenerateAssembly(string str, bool isPath)
     {
         var source = "";
         if (isPath)
@@ -24,11 +80,14 @@ public static class Compilation
             source = str;
         }
 
+        //var path = pleyerLevelAssembliesPath + "/test.dll";
+
         var provider = new CSharpCodeProvider();
-        var param = new CompilerParameters()
+        var compileParameters = new CompilerParameters()
         {
             GenerateExecutable = false,
             GenerateInMemory = true,
+            //OutputAssembly = path,
         };
 
         ///Manualy Provide available assemblies
@@ -38,63 +97,34 @@ public static class Compilation
         ///Add all assemblies form Current Domain?
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            param.ReferencedAssemblies.Add(assembly.Location);
+            compileParameters.ReferencedAssemblies.Add(assembly.Location);
         }
 
-        var compilerResult = provider.CompileAssemblyFromSource(param, source);
+        //File.Delete(path);
 
-        // you'll need to look at result.Errors to see if it compiled, otherwise..
+        var timer = new diagnostics.Stopwatch();
+        timer.Start();
+        /// You can pass multiple sources
+        var compilerResult = provider.CompileAssemblyFromSource(compileParameters, source);
+        timer.Stop();
+        Debug.Log("Compilation Time: " + timer.ElapsedMilliseconds);
+
+        /// you'll need to look at result.Errors to see if it compiled, otherwise..
         foreach (var error in compilerResult.Errors)
         {
-            Debug.Log("Compilation Error " + error);
+            Debug.Log("Compilation Error: " + error);
         }
 
         ///I beleve it returns null if compilation had Error (not Warning)
-        var result = compilerResult.CompiledAssembly;
-        return result;
+        var compiledAssembly = compilerResult.CompiledAssembly;
+
+        assemblies.Add(compiledAssembly);
+
+        return compiledAssembly;
     }
+    #endregion
 
-    public static Type GetSingleTypeFromAssembly(Assembly ass)
-    {
-        var types = ass.GetTypes();
-
-        if (types.Length == 0)
-        {
-            Debug.Log("No types found in assembly!");
-            return null;
-        }
-
-        ///Will be posible to extract more that one in the future
-        if (types.Length > 1)
-        {
-            Debug.Log("More than one type found in assembly!");
-            return null;
-        }
-
-        var type = types[0];
-
-        return type;
-    }
-
-    public static CompTypeWithSolveMehtodInfo GenerateTypeWithSolveMethod(Assembly ass)
-    {
-        var type = GetSingleTypeFromAssembly(ass);
-        var solveMehtod = type.GetMethod("Solve");
-        if (solveMehtod == null)
-        {
-            Debug.Log("Solve Method Not Found!");
-            return null;
-        }
-
-        var result = new CompTypeWithSolveMehtodInfo
-        {
-            ClassType = type,
-            SolveMethodInfo = solveMehtod,
-        };
-
-        return result;
-    }
-
+    #region GENERATE_METHODS_FROM_TYPE
     public static CompMethodsInAssemblyType GenerateAllMethodsFromAssembly(Assembly ass)
     {
         var type = GetSingleTypeFromAssembly(ass);
@@ -170,7 +200,30 @@ public static class Compilation
 
         return result;
     }
+    #endregion
 
+    #region GENERATE_SOLVE_METHOD
+    public static CompTypeWithSolveMehtodInfo GenerateTypeWithSolveMethod(Assembly ass)
+    {
+        var type = GetSingleTypeFromAssembly(ass);
+        var solveMehtod = type.GetMethod("Solve");
+        if (solveMehtod == null)
+        {
+            Debug.Log("Solve Method Not Found!");
+            return null;
+        }
+
+        var result = new CompTypeWithSolveMehtodInfo
+        {
+            ClassType = type,
+            SolveMethodInfo = solveMehtod,
+        };
+
+        return result;
+    }
+    #endregion
+
+    #region ADD_SELF_ATTACH_TO_SOURCE
     public static string AddSelfAttachToSource(string source)
     {
         var lines = GetTrimedSourceLines(source).ToList(); 
@@ -223,19 +276,20 @@ public static class Compilation
             return null;
         }
 
-        var toInsrt = $@"
-    public static {name} Attach(GameObject obj)
-    {{
-        return obj.AddComponent<{name}>();
-    }}
-";
+        var toInsrt = $@"//--ATTACH--METHOD--HERE
+public static {name} Attach(GameObject obj)
+{{
+    return obj.AddComponent<{name}>();
+}}";
 
         lines.Insert(lines.Count - 1, toInsrt);
 
         var result = string.Join("\n", lines);
         return result;
     }
+    #endregion
 
+    #region GET_TRIMED_SOURCE_LINES
     ///Trims source and removes comments  
     public static List<string> GetTrimedSourceLines(string source)
     {
@@ -367,23 +421,23 @@ public static class Compilation
 
         public int CompareTo(CommentInfo other)
         {
-            var colComp = this.Line.CompareTo(other.Line);
-            if (colComp == 0)
+            var lineComp = this.Line.CompareTo(other.Line);
+            if (lineComp == 0)
             {
                 return this.Col.CompareTo(other.Col);
             }
-            else
-            {
-                return colComp;
-            }
+
+            return lineComp;
         }
 
         public override string ToString()
         {
-            return $"Line: {this.Line} Col: {this.Col}"; 
+            return $"Line: {this.Line} Col: {this.Col}";
         }
     }
+    #endregion
 
+    #region GET_ALL_CS_FILES
     public static string[] GetAllCsFiles(string path)
     {
         var result = new List<string>();
@@ -400,12 +454,43 @@ public static class Compilation
 
         return result.ToArray();
     }
+    #endregion
 
+    #region HELPERS
     public static string ReadFile(string path)
     {
         return File.ReadAllText(path);
     }
+
+    public static Type GetSingleTypeFromAssembly(Assembly ass)
+    {
+        var types = ass.GetTypes();
+
+        if (types.Length == 0)
+        {
+            Debug.Log("No types found in assembly!");
+            return null;
+        }
+
+        ///Will be posible to extract more that one in the future
+        if (types.Length > 1)
+        {
+            Debug.Log("More than one type found in assembly!");
+            return null;
+        }
+
+        var type = types[0];
+
+        return type;
+    }
+    #endregion
+
+    #region END_BRACKET
 }
+#endregion
+
+
+
 
 
 #region OLD_CODE
@@ -513,4 +598,25 @@ public static class Compilation
 //    var result = string.Join("\n", lines);
 //    return result;
 //}
+#endregion
+
+#region NOT_WORKING_CODE
+///Trying to write down an assembly through stream does not work
+//var timer = new diagnostics.Stopwatch();
+//timer.Start();
+//byte[] dllAsArray;
+
+//using (MemoryStream stream = new MemoryStream())
+//{
+//    BinaryFormatter formatter = new BinaryFormatter();
+
+//    formatter.Serialize(stream, assembly);
+
+//    dllAsArray = stream.ToArray();
+//}
+
+//Debug.Log("dllAsArray.Length: " + dllAsArray.Length);
+
+//File.WriteAllBytes(path + $"/{name}.dll", dllAsArray);
+///...
 #endregion

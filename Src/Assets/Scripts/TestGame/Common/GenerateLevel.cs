@@ -193,13 +193,11 @@ public class GenerateLevel
             this.ms.RegisterTarget(player);
         }
 
-        if (rigidBody)
+        if(rigidBody == false)
         {
-            var rb = player.AddComponent<Rigidbody>();
-            rb.useGravity = true;
-            rb.isKinematic = false;
-            rb.freezeRotation = true;
+            GameObject.Destroy(player.GetComponent<Rigidbody>());
         }
+
         position.y += 1; 
 
         player.transform.position = position;
