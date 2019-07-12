@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,10 +17,10 @@ public class ApplyBehaviour : MonoBehaviour
         this.ms = GameObject.Find("Main").GetComponent<Main>();
 
         var button = gameObject.GetComponent<Button>();
-        button.onClick.AddListener(OnClick);
+        button.onClick.AddListener(CompileTextAndSendToTarget);
     }
 
-    private void OnClick()
+    private void CompileTextAndSendToTarget()
     {
         Camera.main.backgroundColor = Color.cyan;
         this.CompileText();
@@ -37,17 +37,22 @@ public class ApplyBehaviour : MonoBehaviour
         var tb = ms.Target.GetComponent<TargetBehaviour>();
         if (tb.type == TargetType.Test)
         {
-            var solveInfo = await Task.Run(() =>
+            string ExtPath = "";
+            var assBytes = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
-                var ass = Compilation.GenerateAssembly(text, false);
-                var solveInfoInt = Compilation.GenerateTypeWithSolveMethod(ass);
-                return solveInfoInt;
+                var path = Compilation.GenerateAssemblyNewDomain(text);
+                ExtPath = path;
+                var bytes = File.ReadAllBytes(path);
+                Debug.Log("Path: " + path);
+                File.Delete(path);
+                return bytes;
             });
 
-            var classInstance = Activator.CreateInstance(solveInfo.ClassType);
-            var result = tb.Test(classInstance, solveInfo.SolveMethodInfo);
+            var result = tb.Test(assBytes);
             Debug.Log("Test Result: " + result);
+            Debug.Log("ExtPath " + ExtPath);
+            //Compilation.FinalTest(ExtPath); ///Works does not load assemblies to main;
         }
         else
         {
@@ -69,7 +74,7 @@ public class ApplyBehaviour : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            this.OnClick();
+            this.CompileTextAndSendToTarget();
         }
     }
 }

@@ -16,7 +16,7 @@ public class ManageFileButtons : MonoBehaviour
     private Main ms;
     List<GameObject> buttons;
 
-    private string[] folderPaths = new string[] { Compilation.path, Compilation.testPath };
+    private string[] folderPaths = new string[] { Compilation.Path, Compilation.PestPath };
     private string folderPath = "not set";
     private int folderPathIndex = 0;
 

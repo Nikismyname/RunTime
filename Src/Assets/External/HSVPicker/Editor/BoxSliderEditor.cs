@@ -8,7 +8,6 @@ namespace UnityEditor.UI
 	[CanEditMultipleObjects]
 	public class BoxSliderEditor : SelectableEditor
 	{
-
 		SerializedProperty m_HandleRect;
 		SerializedProperty m_MinValue;
 		SerializedProperty m_MaxValue;

@@ -1,51 +1,51 @@
-﻿using System;
-using System.Reflection;
+﻿//using System;
+//using System.Reflection;
 
-    public static class ReverseLinkedListTest
-    { 
-        public static bool Test(object classInstance, MethodInfo method)
-        {
-            const int count = 30;
+//public static class ReverseLinkedListTest
+//{
+//    public static bool Test(object classInstance, MethodInfo method)
+//    {
+//        const int count = 30;
 
-            var random = new Random();
+//        var random = new Random();
 
-            var vals = new int[count];
-            for (int i = 0; i < count; i++)
-            {
-                vals[i] = random.Next(0, 100);
-            }
+//        var vals = new int[count];
+//        for (int i = 0; i < count; i++)
+//        {
+//            vals[i] = random.Next(0, 100);
+//        }
 
-            var expectedVals = new int[count];
+//        var expectedVals = new int[count];
 
-            Array.Copy(vals, expectedVals, count);
-            Array.Reverse(expectedVals);
+//        Array.Copy(vals, expectedVals, count);
+//        Array.Reverse(expectedVals);
 
-            var list = new RTLinkedList();
+//        var list = new RTLinkedList();
 
-            for (int i = 0; i < count; i++)
-            {
-                list.Add(vals[i]);
-            }
+//        for (int i = 0; i < count; i++)
+//        {
+//            list.Add(vals[i]);
+//        }
 
-            list = (RTLinkedList)method.Invoke(classInstance, new object[] { list });
+//        list = (RTLinkedList)method.Invoke(classInstance, new object[] { list });
 
-            var currentNode = list.First;
-            for (int i = 0; i < count; i++)
-            {
-                if (currentNode == null)
-                {
-                    return false;
-                }
+//        var currentNode = list.First;
+//        for (int i = 0; i < count; i++)
+//        {
+//            if (currentNode == null)
+//            {
+//                return false;
+//            }
 
-                var val = expectedVals[i];
-                if (val != currentNode.Value)
-                {
-                    return false;
-                }
+//            var val = expectedVals[i];
+//            if (val != currentNode.Value)
+//            {
+//                return false;
+//            }
 
-                currentNode = currentNode.Next;
-            }
+//            currentNode = currentNode.Next;
+//        }
 
-            return true;
-        }
-    }
+//        return true;
+//    }
+//}

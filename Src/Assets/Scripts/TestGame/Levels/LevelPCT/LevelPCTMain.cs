@@ -71,7 +71,7 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
 
         var solvingCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         var tb = solvingCube.AddComponent<TargetBehaviour>();
-        ms.RegisterTarget(solvingCube, ReverseLinkedListTest.Test);
+        ms.RegisterTarget(solvingCube, TestMap.ReverseLinkedListName);
         solvingCube.name = "SolvingCube";
         solvingCube.transform.position = new Vector3(10,10,10);
     }

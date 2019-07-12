@@ -12,7 +12,10 @@ public class Main : MonoBehaviour
     [SerializeField] public GameObject cylinderPrefab;
     [SerializeField] public float playerSpeed = 0.0005f;
     [SerializeField] public float NSSAllSpeedMultipyer = 0.5f;
-    [SerializeField] public float NSSAllSlowConstantsMultiplyer = 0.8f; 
+    [SerializeField] public float NSSAllSlowConstantsMultiplyer = 0.8f;
+
+    [SerializeField] public float extraGravity;
+    [SerializeField] public float jumpForce;
 
     public GameObject Target { get; set; }
     //private GameObject previousTarget; 
@@ -37,7 +40,7 @@ public class Main : MonoBehaviour
     #endregion
 
     #region TARGET_MANAGMENT
-    public void RegisterTarget(GameObject newTarget, Func<object, MethodInfo, bool> testFunc = null)
+    public void RegisterTarget(GameObject newTarget, string testName = "")
     {
         var tb = newTarget.GetComponent<TargetBehaviour>();
         if (tb == null)
@@ -48,13 +51,13 @@ public class Main : MonoBehaviour
         }
 
         var newId = this.targets.Count;
-        if (testFunc == null)
+        if (testName == "")
         {
             tb.SetUp(newId);
         }
         else
         {
-            tb.SetUp(newId, TargetType.Test, testFunc);
+            tb.SetUp(newId, TargetType.Test, testName);
         }
         this.targets.Add(newTarget);
     }

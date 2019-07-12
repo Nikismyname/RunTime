@@ -1,7 +1,5 @@
 ﻿#region INIT
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -23,7 +21,7 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     private NewtonianSpaceShipInterface vehicleMono = null;
 
     public TargetType type;
-    private Func<object, MethodInfo, bool> testFunction;
+    string testName;
     private bool passed = false;
 
     private int counter;
@@ -46,25 +44,19 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     public void SetUp(
         int id,
         TargetType type = TargetType.Standard,
-        Func<object, MethodInfo, bool> testFunction = null
+        string testName = ""
     )
     {
         this.id = id;
         this.type = type;
-        this.testFunction = testFunction;
+        this.testName = testName;
     }
     #endregion
 
-    public bool Test(object classInstance, MethodInfo methodInfo)
+    public bool Test(byte[] assembly)
     {
-        var result = false;
-        if(this.testFunction(classInstance, methodInfo) == true)
-        {
-            this.passed = true;
-            myRenderer.material.color = Color.red;
-            result = true;
-        }
-
+        Debug.Log("name: " + this.testName);
+        var result = Compilation.Loader.RTTest(assembly, this.testName);
         return result;
     }
 
