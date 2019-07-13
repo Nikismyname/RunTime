@@ -12,12 +12,11 @@ public class GenerateLevel
         this.rb = rb;
     }
 
-    public GameObject CylinderBasePrefab(bool collider = false)
+    public GameObject CylinderBasePrefab(Vector3 scale, bool collider = false)
     {
         var prefab = this.ms.cylinderPrefab;
         var baseCilinder = GameObject.Instantiate(prefab);
 
-        float yScale = 1;
         baseCilinder.name = "BaseCilinder";
         if (collider == true)
         {
@@ -25,8 +24,8 @@ public class GenerateLevel
             currentCollider.convex = true;
         }
         baseCilinder.GetComponent<Renderer>().material.color = Color.blue;
-        baseCilinder.transform.localScale = new Vector3(30, yScale, 30);
-        baseCilinder.transform.position = new Vector3(0, -yScale, 0);
+        baseCilinder.transform.localScale = scale;
+        baseCilinder.transform.position = new Vector3(0, -scale.y, 0);
         return baseCilinder;
     }
 

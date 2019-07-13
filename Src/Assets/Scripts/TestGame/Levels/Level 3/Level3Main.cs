@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Level3Main : MonoBehaviour, ILevelMain
 {
@@ -25,7 +24,7 @@ public class Level3Main : MonoBehaviour, ILevelMain
         this.ms = gameObject.GetComponent<Main>();
         var gl = new GenerateLevel(this.ms, rb);
 
-        gl.CylinderBasePrefab();
+        gl.CylinderBasePrefab(new Vector3(30,1,30));
 
         var target = gl.GenerateEntity(
             EntityType.Target,

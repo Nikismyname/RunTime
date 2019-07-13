@@ -17,7 +17,7 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         this.gl = new GenerateLevel(this.ms, rb);
 
         ///Generate the environment
-        this.gl.CylinderBasePrefab(true);
+        this.gl.CylinderBasePrefab(new Vector3(50,1,50),true);
 
         ///PLAYER
         this.player = this.gl.Player(new Vector3(-1, 0, 0), true, true);
@@ -31,49 +31,54 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
 
     private void GenerateInGameInterface()
     {
-        var nextLevel = this.gl.GenerateEntity(
-            EntityType.NonTarget,
-            new Vector3(0, 0, 0), PrimitiveType.Sphere,
-            Color.red,
-            null,
-            "NextLevelSphere",
-            new Type[] { typeof(NextLevelSphere) });
+        //var nextLevel = this.gl.GenerateEntity(
+        //    EntityType.NonTarget,
+        //    new Vector3(0, 0, 0), PrimitiveType.Sphere,
+        //    Color.red,
+        //    null,
+        //    "NextLevelSphere",
+        //    new Type[] { typeof(NextLevelSphere) });
 
-        var targetSphere = this.gl.GenerateEntity(
-            EntityType.Target,
-            new Vector3(0, 2, 0),
-            PrimitiveType.Sphere,
-            Color.blue,
-            new Vector3(3, 3, 3),
-            "TargetSphere",
-            new Type[0]
-        );
+        //var targetSphere = this.gl.GenerateEntity(
+        //    EntityType.Target,
+        //    new Vector3(0, 2, 0),
+        //    PrimitiveType.Sphere,
+        //    Color.blue,
+        //    new Vector3(3, 3, 3),
+        //    "TargetSphere",
+        //    new Type[0]
+        //);
 
-        var targetSphere2 = this.gl.GenerateEntity(
-            EntityType.Target,
-            new Vector3(0, 5, 0),
-            PrimitiveType.Sphere,
-            Color.blue,
-            new Vector3(3, 3, 3),
-            "TargetSphere2",
-            new Type[0]
-        );
+        //var targetSphere2 = this.gl.GenerateEntity(
+        //    EntityType.Target,
+        //    new Vector3(0, 5, 0),
+        //    PrimitiveType.Sphere,
+        //    Color.blue,
+        //    new Vector3(3, 3, 3),
+        //    "TargetSphere2",
+        //    new Type[0]
+        //);
 
-        var ship = this.gl.GenerateSpaceShip(
-            EntityType.Target,
-            shipPrefab,
-            new Vector3(20, 0, 20),
-            "Body",
-            null,
-            "space ship",
-            new Type[] { typeof(NewtonianSpaceShipInterface) }
-        );
+        //var ship = this.gl.GenerateSpaceShip(
+        //    EntityType.Target,
+        //    shipPrefab,
+        //    new Vector3(20, 0, 20),
+        //    "Body",
+        //    null,
+        //    "space ship",
+        //    new Type[] { typeof(NewtonianSpaceShipInterface) }
+        //);
 
-        var solvingCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        var tb = solvingCube.AddComponent<TargetBehaviour>();
-        ms.RegisterTarget(solvingCube, TestMap.ReverseLinkedListName);
-        solvingCube.name = "SolvingCube";
-        solvingCube.transform.position = new Vector3(10,10,10);
+        //var solvingCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //var tb = solvingCube.AddComponent<TargetBehaviour>();
+        //ms.RegisterTarget(solvingCube, TestMap.ReverseLinkedListName);
+        //solvingCube.name = "SolvingCube";
+        //solvingCube.transform.position = new Vector3(10,10,10);
+
+        var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.tag = "Wall";
+        wall.name = "Wall1";
+        wall.transform.localScale = new Vector3(40,40, 1);
     }
 
     public void ResetLevel()
