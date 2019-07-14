@@ -75,10 +75,19 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         //solvingCube.name = "SolvingCube";
         //solvingCube.transform.position = new Vector3(10,10,10);
 
-        var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wall.tag = "Wall";
-        wall.name = "Wall1";
-        wall.transform.localScale = new Vector3(40,40, 1);
+        var wall1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall1.tag = "Wall";
+        wall1.name = "Wall1";
+        wall1.transform.localScale = new Vector3(40,40, 1);
+        wall1.transform.rotation = Quaternion.Euler(0,0,0);
+        wall1.transform.position = new Vector3(0,0,6);
+
+        var wall2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall2.tag = "Wall";
+        wall2.name = "Wall2";
+        wall2.transform.localScale = new Vector3(40, 40, 1);
+        wall2.transform.rotation = Quaternion.Euler(0, 0, 0);
+        wall1.transform.position = new Vector3(0, 0, -6);
     }
 
     public void ResetLevel()

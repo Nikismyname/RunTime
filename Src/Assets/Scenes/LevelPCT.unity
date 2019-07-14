@@ -181,13 +181,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testMode: 0
-  playerPrefab: {fileID: 5966717743065777230, guid: 66652ad0a57ef964fa09bd84f2e64032,
+  playerPrefab: {fileID: 2019461833032781009, guid: d3fe51c5fef54de4a8d90359cc0c8487,
     type: 3}
   cylinderPrefab: {fileID: 8526282169791113798, guid: 328fcd5545c31f64882671debd8cab6e,
     type: 3}
-  playerSpeed: 8
+  playerSpeed: 12
   NSSAllSpeedMultipyer: 0.5
   NSSAllSlowConstantsMultiplyer: 0.8
+  extraGravity: 100
+  jumpForce: 1200
 --- !u!114 &248794164
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -22,6 +22,11 @@ public class PlayerHandling : MonoBehaviour
     private bool collidingWithGround = true;
     private bool collidingWithWall = true;
     private bool wallClimbingInProgress = false;
+    private bool wallJumpLock = false; 
+    private Vector3? climbJumpNormal;
+
+    private GameObject lastTouchedWall;
+    private GameObject lastJumpedOffWall;
 
     private void Start()
     {
@@ -93,9 +98,13 @@ public class PlayerHandling : MonoBehaviour
             return;
         }
 
-        if (this.grounded == false)
+        ///letting the player move the character after jump;
+        if (this.isJumpInProgress)
         {
-            speedDown = 0.4f;
+            var vel = rb.velocity;
+            vel.x = 0;
+            vel.z = 0;
+            rb.velocity = vel;
         }
 
         var cameraForward = this.mainCamera.transform.forward.normalized;
@@ -114,16 +123,30 @@ public class PlayerHandling : MonoBehaviour
 
     public void Jump()
     {
-        if (this.isJumpInProgress == false)
+        if (Input.GetKey(KeyCode.Space))
         {
-            if (Input.GetKey(KeyCode.Space))
+            /// Wall Jump
+            if (this.wallClimbingInProgress && this.wallJumpLock == false)
             {
-                Debug.Log("JUMP ACTIVATION");
+                if (this.climbJumpNormal == null)
+                {
+                    Debug.Log("No Jump Normal!");
+                    return;
+                }
+
+                rb.AddForce(Vector3.up * this.ms.jumpForce * 1);
+                rb.AddForce(this.climbJumpNormal.Value * this.ms.jumpForce * 0.5f);
+                this.wallClimbingInProgress = false;
+            }
+            /// Regular Jump
+            else if (this.isJumpInProgress == false)
+            {
                 this.isJumpInProgress = true;
+                this.wallClimbingInProgress = false;
                 rb.AddForce(Vector3.up * this.ms.jumpForce);
                 rb.AddForce(this.previousVelocity.normalized * 500);
                 this.lastJumpTime = DateTime.Now;
-                this.StartCoroutine("JumpCoroutine");
+                this.StartCoroutine(nameof(this.JumpCoroutine));
             }
         }
     }
@@ -151,42 +174,47 @@ public class PlayerHandling : MonoBehaviour
             }
         }
     }
-
+    private IEnumerator WallJumpTimeOut()
+    {
+        yield return new WaitForSeconds(0.2f);
+        this.wallJumpLock = false;
+    }
     #endregion
 
     #region COLLISIONS
-    private void OnCollisionEnter(Collision other)
+    private void OnCollisionEnter(Collision col)
     {
-        if (other.gameObject.tag == "Ground")
+        if (col.gameObject.tag == "Ground")
         {
-            ///Debug.Log("Grouns Collision Enter"); activates notmaly next to a wall
+            ///Debug.Log("Ground Collision Enter"); activates notmaly next to a wall
             this.grounded = true;
             this.isJumpInProgress = false;
             this.collidingWithGround = true;
             this.wallClimbingInProgress = false;
             this.extraGravity = this.jumpExtraGravity;
         }
-        else if(other.gameObject.tag == "Wall")
+        else if(col.gameObject.tag == "Wall")
         {
-            this.GetDirection(other);
-            
-            this.collidingWithWall = true;
-            if(rb.velocity.magnitude == 0)
+            var normal = col.GetContact(0).normal;
+            Debug.Log(normal);
+            if (normal == new Vector3(0f, 1f, 0f))
             {
-                Debug.Log("Just Wall Collision");
+                Debug.Log("Touched top return!");
+                return;
+            }
+
+            this.collidingWithWall = true;
+            if (this.isJumpInProgress == false)
+            {
                 return;
             }
 
             this.extraGravity = this.climbExtraGravity;
-            var vel = rb.velocity;
-            this.wallClimbingInProgress = true;
-
-            //if(vel.y < 0) //TODO: TEMP
-            //{
-            //    vel.y = -vel.y;
-            //}
-
             rb.AddForce(Vector3.up * this.ms.jumpForce);
+            this.climbJumpNormal = col.GetContact(0).normal;
+            this.wallClimbingInProgress = true;
+            this.wallJumpLock = true;
+            StartCoroutine(nameof(this.WallJumpTimeOut));
         }
     }
 
@@ -202,36 +230,6 @@ public class PlayerHandling : MonoBehaviour
         else if (other.gameObject.tag == "Wall")
         {
             this.collidingWithWall = false;
-        }
-    }
-
-    private void GetDirection(Collision col)
-    {
-        Vector3 hit = col.contacts[0].normal;
-        float angle = Vector3.Angle(hit, Vector3.up);
-
-        if (Mathf.Approximately(angle, 0))
-        {
-            //Down
-            Debug.Log("Down");
-        }
-        if (Mathf.Approximately(angle, 180))
-        {
-            //Up
-            Debug.Log("Up");
-        }
-        if (Mathf.Approximately(angle, 90))
-        {
-            // Sides
-            Vector3 cross = Vector3.Cross(Vector3.forward, hit);
-            if (cross.y > 0)
-            { // left side of the player
-                Debug.Log("Left");
-            }
-            else
-            { // right side of the player
-                Debug.Log("Right");
-            }
         }
     }
     #endregion
@@ -275,9 +273,6 @@ public class PlayerHandling : MonoBehaviour
     #region END_BRACKET
 }
 #endregion
-
-
-
 
 #region OLD_CODE
 //private void MoveRigidBodySetVelocity()
