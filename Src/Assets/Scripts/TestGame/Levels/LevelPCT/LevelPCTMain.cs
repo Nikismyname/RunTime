@@ -17,10 +17,10 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         this.gl = new GenerateLevel(this.ms, rb);
 
         ///Generate the environment
-        this.gl.CylinderBasePrefab(new Vector3(50,1,50),true);
+        this.gl.CylinderBasePrefab(new Vector3(150,1,150),true);
 
         ///PLAYER
-        this.player = this.gl.Player(new Vector3(-1, 0, 0), true, true);
+        this.player = this.gl.Player(new Vector3(20, 0, 10), true, true, true);
 
         this.mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
@@ -78,16 +78,16 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         var wall1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
         wall1.tag = "Wall";
         wall1.name = "Wall1";
-        wall1.transform.localScale = new Vector3(40,40, 1);
-        wall1.transform.rotation = Quaternion.Euler(0,0,0);
-        wall1.transform.position = new Vector3(0,0,6);
+        wall1.transform.localScale = new Vector3(100,100, 1);
+        wall1.transform.rotation = Quaternion.Euler(0,75,0);
+        wall1.transform.position = new Vector3(0,0,9);
 
         var wall2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
         wall2.tag = "Wall";
         wall2.name = "Wall2";
-        wall2.transform.localScale = new Vector3(40, 40, 1);
-        wall2.transform.rotation = Quaternion.Euler(0, 0, 0);
-        wall1.transform.position = new Vector3(0, 0, -6);
+        wall2.transform.localScale = new Vector3(100, 100, 1);
+        wall2.transform.rotation = Quaternion.Euler(0, 15, 0);
+        wall1.transform.position = new Vector3(0, 0, -9);
     }
 
     public void ResetLevel()

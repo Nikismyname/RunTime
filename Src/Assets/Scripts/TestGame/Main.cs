@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 public class Main : MonoBehaviour
 {
     [SerializeField] public bool testMode;
     [SerializeField] public GameObject playerPrefab;
+    [SerializeField] public GameObject playerKinematicPrefab;
     [SerializeField] public GameObject cylinderPrefab;
     [SerializeField] public float playerSpeed = 0.0005f;
     [SerializeField] public float NSSAllSpeedMultipyer = 0.5f;
@@ -16,6 +16,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] public float extraGravity;
     [SerializeField] public float jumpForce;
+    [SerializeField] public float forceToVelocity = 0.05f;
 
     public GameObject Target { get; set; }
     //private GameObject previousTarget; 

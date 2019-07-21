@@ -183,6 +183,8 @@ MonoBehaviour:
   testMode: 0
   playerPrefab: {fileID: 2019461833032781009, guid: d3fe51c5fef54de4a8d90359cc0c8487,
     type: 3}
+  playerKinematicPrefab: {fileID: 5845206833954566513, guid: 88d2b035e4c423c4ea2c069579435528,
+    type: 3}
   cylinderPrefab: {fileID: 8526282169791113798, guid: 328fcd5545c31f64882671debd8cab6e,
     type: 3}
   playerSpeed: 12

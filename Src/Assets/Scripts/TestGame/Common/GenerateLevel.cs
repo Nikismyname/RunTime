@@ -175,15 +175,32 @@ public class GenerateLevel
         return scriptsObject;
     }
 
-    public GameObject Player(Vector3 position, bool rigidBody,bool isTarget, params Type[] scripts)
+    public GameObject Player(Vector3 position,bool kinematic, bool rigidBody,bool isTarget, params Type[] scripts)
     {
-        var player = GameObject.Instantiate(this.ms.playerPrefab);
-        player.name = "Player";
+        GameObject player = null; 
 
+        if (kinematic)
+        {
+            player = GameObject.Instantiate(this.ms.playerKinematicPrefab);
+        }
+        else
+        {
+            player = GameObject.Instantiate(this.ms.playerPrefab);
+        }
+
+        player.name = "Player";
         player.AddComponent<PlayerFailure>();
 
-        var ph = player.AddComponent<PlayerHandling>();
-        this.rb.RegisterPlayerHandling(ph);
+        if (kinematic == false)
+        {
+            var ph = player.AddComponent<PlayerHandling>();
+            this.rb.RegisterPlayerHandling(ph);
+        }
+        else
+        {
+            var ph = player.AddComponent<PlayerHandling2>();
+            //this.rb.RegisterPlayerHandling(ph);
+        }
 
         if (isTarget)
         {

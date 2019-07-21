@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class PlayerHandling : MonoBehaviour
+public class PlayerHandling2 : MonoBehaviour
 {
     private bool active;
     private Camera mainCamera;
@@ -14,9 +14,9 @@ public class PlayerHandling : MonoBehaviour
     private bool isJumpInProgress = false;
     private Vector3 previousVelocity;
 
-    private float jumpHeight = 1500;
-    private float extraGravity = 100;
-    private float jumpExtraGravity = 70f;
+    private float jumpHeight = 1200;
+    private float gravity = 100;
+    private float jumpExtraGravity = 100f;
     private float climbExtraGravity = 50;
 
     private bool collidingWithGround = true;
@@ -27,6 +27,11 @@ public class PlayerHandling : MonoBehaviour
 
     private GameObject lastTouchedWall;
     private GameObject lastJumpedOffWall;
+
+    private Vector3 lastWallCollisionNormal = Vector3.zero; 
+
+    ///VelocitySpecifics 
+    private float forceToVelocity = 0.05f;
 
     private void Start()
     {
@@ -39,6 +44,14 @@ public class PlayerHandling : MonoBehaviour
 
     private DateTime? lastJumpTime;
     private DateTime? lastOnGroundExit;
+    #endregion
+
+    #region ON_GUI 
+
+    private void OnGUI()
+    {
+        GUI.Label(new Rect(10, 10, 100, 20), this.rb.velocity.ToString());
+    }
 
     #endregion
 
@@ -57,14 +70,18 @@ public class PlayerHandling : MonoBehaviour
     }
     #endregion
 
-    #region FIXED_UPDATE
-    private void FixedUpdate()
+    #region UPDATE
+    private void Update()
     {
         if (this.active)
         {
-            ///Increasing the gravity for snapier falls 
-            this.rb.velocity -= new Vector3(0, this.extraGravity * Time.deltaTime, 0);
-
+            ///Simulation The Gravity;
+            if (this.grounded == false)
+            {
+                this.rb.velocity -= new Vector3(0, this.gravity * Time.deltaTime, 0);
+            }
+            ///...
+            
             this.MoveRigidBodyMovePosition();
             this.Jump();
         }
@@ -85,13 +102,12 @@ public class PlayerHandling : MonoBehaviour
 
         float speedDown = 1;
 
-        if (moveHorizontal == 0 && moveVertical == 0)/// No movement
+        if (moveHorizontal == 0 && moveVertical == 0)
         {
-            this.previousVelocity = Vector3.zero; /// Resing the vector the jump uses
+            this.previousVelocity = Vector3.zero;
 
-            //if (this.isJumpInProgress == false && this.grounded == true) /// On the ground
+            //if (this.isJumpInProgress == false && this.grounded == true)
             //{
-            //    ///No movement -> on the ground -> stop sliding
             //    this.rb.velocity = Vector3.zero;
             //    this.rb.angularVelocity = Vector3.zero;
             //}
@@ -124,7 +140,7 @@ public class PlayerHandling : MonoBehaviour
 
     public void Jump()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             /// Wall Jump
             if (this.wallClimbingInProgress && this.wallJumpLock == false)
@@ -135,8 +151,9 @@ public class PlayerHandling : MonoBehaviour
                     return;
                 }
 
-                rb.AddForce(Vector3.up * this.ms.jumpForce * 1);
-                rb.AddForce(this.climbJumpNormal.Value * this.ms.jumpForce * 0.5f);
+                this.rb.velocity = Vector3.zero;
+                this.rb.velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
+                this.rb.velocity += this.climbJumpNormal.Value * this.ms.jumpForce * 0.5f * this.ms.forceToVelocity;
                 this.wallClimbingInProgress = false;
             }
             /// Regular Jump
@@ -144,10 +161,13 @@ public class PlayerHandling : MonoBehaviour
             {
                 this.isJumpInProgress = true;
                 this.wallClimbingInProgress = false;
-                rb.AddForce(Vector3.up * this.ms.jumpForce);
-                rb.AddForce(this.previousVelocity.normalized * 500);
-                Debug.Log(this.previousVelocity.normalized);
-                this.StartCoroutine(nameof(this.JumpCoroutine));
+                this.grounded = false;
+                rb.velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
+                rb.velocity += this.previousVelocity.normalized * 500 * this.ms.forceToVelocity;
+
+                ///This system resets the jump capability after a jump that did not get off the ground.
+                //this.lastJumpTime = DateTime.Now;
+                //this.StartCoroutine(nameof(this.JumpCoroutine));
             }
         }
     }
@@ -187,51 +207,174 @@ public class PlayerHandling : MonoBehaviour
     {
         if (col.gameObject.tag == "Ground")
         {
-            ///Debug.Log("Ground Collision Enter"); activates notmaly next to a wall
-            this.grounded = true;
-            this.isJumpInProgress = false;
-            this.collidingWithGround = true;
-            this.wallClimbingInProgress = false;
-            this.extraGravity = this.jumpExtraGravity;
+            this.GroundPlayer();
         }
         else if(col.gameObject.tag == "Wall")
         {
             var normal = col.GetContact(0).normal;
-            Debug.Log(normal);
             if (normal == new Vector3(0f, 1f, 0f))
             {
-                Debug.Log("Touched top return!");
+                ///the up sides of a wall is considered ground;
+                this.GroundPlayer();
                 return;
             }
 
+            ///Avoiding collistios to the very edge of the walls preventing endless bouncing 
+            if(gameObject.transform.position.y > col.gameObject.transform.localScale.y / 2)
+            {
+                return;
+            } 
+
+            gameObject.GetComponent<Renderer>().material.color = Color.red;
+
             this.collidingWithWall = true;
+            ///If the the collision is happanse from walking into the wall ignore;
             if (this.isJumpInProgress == false)
             {
                 return;
             }
 
-            this.extraGravity = this.climbExtraGravity;
-            rb.AddForce(Vector3.up * this.ms.jumpForce);
-            this.climbJumpNormal = col.GetContact(0).normal;
-            this.wallClimbingInProgress = true;
-            this.wallJumpLock = true;
-            StartCoroutine(nameof(this.WallJumpTimeOut));
+            this.JumpBounseFromWall(normal, col.gameObject.transform.rotation.y);
         }
     }
 
-    private void OnCollisionExit(Collision other)
+    private void OnCollisionExit(Collision col)
     {
-        if (other.gameObject.tag == "Ground")
+        if (col.gameObject.tag == "Ground")
         {
-            /// Debug.Log("Ground Collision Exit"); activates normaly next to a wall
-            this.grounded = false;
-            this.lastOnGroundExit = DateTime.Now;
-            this.collidingWithGround = false;
+            this.DeGroundPlayer();
         }
-        else if (other.gameObject.tag == "Wall")
+        else if (col.gameObject.tag == "Wall")
         {
-            this.collidingWithWall = false;
+            ///We are on top of wall, acting as ground
+            if (this.lastWallCollisionNormal == new Vector3(0f, 1f, 0f))
+            {
+                this.DeGroundPlayer();
+            }
+            else
+            {
+                gameObject.GetComponent<Renderer>().material.color = Color.white;
+                this.collidingWithWall = false;
+            }
         }
+    }
+
+    private void OnCollisionStay(Collision col)
+    {
+        if (col.gameObject.tag == "Wall")
+        {
+            this.lastWallCollisionNormal = col.GetContact(0).normal;
+        }
+    }
+
+    private void DeGroundPlayer()
+    {
+        this.grounded = false;
+        this.lastOnGroundExit = DateTime.Now;
+        this.collidingWithGround = false;
+    }
+
+    private void JumpBounseFromWall(Vector3 normal, float yRotation)
+    {
+        const float UpCheckModifier = 0.3f;
+        var velocity = rb.velocity;
+        var projectedVelocity = Vector3.ProjectOnPlane(velocity, normal); // works
+        var rotatedProjectedVelocity = Quaternion.AngleAxis(yRotation, Vector3.up) * projectedVelocity;
+
+        Vector3 jumpDirection = Vector3.zero;
+        //Quaternion desiredRotation = Quaternion.AngleAxis(45, normal);
+        //Quaternion currentRotation = Quaternion.LookRotation(projectedVelocity);
+        jumpDirection = /*desiredRotation **/ projectedVelocity.normalized;
+        //jumpDirection = (desiredRotation * currentRotation) * projectedVelocity.normalized;
+        var leftFromNormal = Quaternion.AngleAxis(90, Vector3.up) * normal;
+        var angle = Vector3.Angle(leftFromNormal, jumpDirection);
+
+        if(rotatedProjectedVelocity.x < 0)
+        {
+            jumpDirection = Quaternion.AngleAxis(-angle + 135, normal) * jumpDirection;
+        }
+        else
+        {
+            jumpDirection = Quaternion.AngleAxis(-angle + 45, normal) * jumpDirection;
+        }
+
+        var angle2 = Vector3.Angle(leftFromNormal, jumpDirection);
+        Debug.Log("Angle from right: " + angle2);
+
+        Debug.DrawLine(rb.transform.position, rb.transform.position + jumpDirection * 4, Color.red, 4);
+
+        //var go = new GameObject();
+        //go.transform.rotation = currentRotation;
+
+
+        //if (rotatedProjectedVelocity.x > 0)
+        //{
+        //    jumpDirection = (desiredRotation * currentRotation) * projectedVelocity.normalized; 
+        //}
+        //else
+        //{
+        //    jumpDirection = (desiredRotation * currentRotation) * projectedVelocity.normalized;
+        //}
+
+        if (rotatedProjectedVelocity.y < 0)
+        {
+            //Debug.Log("DOWN");
+        }
+        else
+        {
+            if (rotatedProjectedVelocity.y * UpCheckModifier > Math.Abs(rotatedProjectedVelocity.x))
+            {
+                Debug.Log("UP");
+            }
+            else
+            {
+                rb.velocity = jumpDirection * this.ms.jumpForce * this.ms.forceToVelocity;
+
+                //Debug.DrawLine(rb.transform.position, rb.transform.position + jumpDirection * 4, Color.green,4);
+                //Debug.Log(jumpDirection);
+
+                if (rotatedProjectedVelocity.x < 0)
+                {
+                    Debug.Log("RIGHT");
+                    
+                }
+                else if (rotatedProjectedVelocity.x > 0)
+                {
+                    Debug.Log("LEFT");
+                }
+            }
+        }
+
+        /////Reducing the gravity
+        //this.gravity = this.climbExtraGravity;
+        //rb.velocity = Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
+        /////Saving this so when another the player presses jump we know what direction to send him in;
+        //this.climbJumpNormal = normal;
+        //this.wallClimbingInProgress = true;
+        /////This is a system where wall the player does not get automatically jumped of a wall 
+        /////if he holds the jump key; this should be raplaced with system where holding the space does not 
+        /////trigger it at all
+        //this.wallJumpLock = true;
+        //StartCoroutine(nameof(this.WallJumpTimeOut));
+        /////...
+    }
+
+    private void GroundPlayer()
+    {
+        if (this.rb != null)
+        {
+            ///Reset vertival Velocity; 
+            var vel = this.rb.velocity;
+            vel.y = 0;
+            this.rb.velocity = vel;
+            ///...
+        }
+
+        this.grounded = true;
+        this.isJumpInProgress = false;
+        this.collidingWithGround = true;
+        this.wallClimbingInProgress = false;
+        this.gravity = this.jumpExtraGravity;
     }
     #endregion
 
