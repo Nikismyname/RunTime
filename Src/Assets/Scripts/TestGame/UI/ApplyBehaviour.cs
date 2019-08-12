@@ -41,7 +41,7 @@ public class ApplyBehaviour : MonoBehaviour
             var assBytes = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
-                var path = Compilation.GenerateAssemblyNewDomain(text);
+                var path = Compilation.GenerateAssemblyToFile(text);
                 ExtPath = path;
                 var bytes = File.ReadAllBytes(path);
                 Debug.Log("Path: " + path);
@@ -59,7 +59,7 @@ public class ApplyBehaviour : MonoBehaviour
             var functions = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
-                var ass = Compilation.GenerateAssembly(text, false);
+                var ass = Compilation.GenerateAssemblyInMemory(text, false);
                 var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
                 return funcs;
             });

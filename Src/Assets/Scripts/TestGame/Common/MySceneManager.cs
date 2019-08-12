@@ -18,6 +18,17 @@ public class MySceneManager : MonoBehaviour
         this.level++;
     }
 
+    public void LoadLevel(int level)
+    {
+        SceneManager.LoadScene("Level" + level);
+        this.level = level + 1;
+    }
+
+    public void WallJump()
+    {
+        SceneManager.LoadScene("WallJump"); 
+    }
+
     public void Home()
     {
         SceneManager.LoadScene("LevelPCT");

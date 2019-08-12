@@ -103,7 +103,7 @@ public class GenerateLevel
                 foreach (var scriptType in scriptsToRegister)
                 {
                     var script = (MonoBehaviour)entity.GetComponent(scriptType);
-                    var funcs = Compilation.GenerateAllMethodsFromType(scriptType);
+                    var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
                     this.ms.AttachMono(funcs, false, entity,false,script);
                 }
             }
@@ -156,7 +156,7 @@ public class GenerateLevel
                 foreach (var scriptType in scriptsToRegister)
                 {
                     var script = (MonoBehaviour)scriptsObject.GetComponent(scriptType);
-                    var funcs = Compilation.GenerateAllMethodsFromType(scriptType);
+                    var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
                     this.ms.AttachMono(funcs, false, scriptsObject, false, script);
                 }
             }

@@ -33,20 +33,20 @@ public class TestButton : MonoBehaviour
         //this.TestSeparateDomainLoading();
     }
 
-    private void TestSeparateDomainLoading()
-    {
-        if (counter == 0)
-        {
-            var text = this.rb.TextEditorInputField.text;
-            Debug.Log("TEXT: " + text);
-            this.path = Compilation.GenerateAssemblyNewDomain(text);
-            counter++;
-        }
-        else if (counter == 1)
-        {
-            Compilation.GetTypesFromAssemblySeparateDomain(this.path);
-        }
-    }
+    //private void TestSeparateDomainLoading()
+    //{
+    //    if (counter == 0)
+    //    {
+    //        var text = this.rb.TextEditorInputField.text;
+    //        Debug.Log("TEXT: " + text);
+    //        this.path = Compilation.GenerateAssemblyToFile(text);
+    //        counter++;
+    //    }
+    //    else if (counter == 1)
+    //    {
+    //        Compilation.GetTypesFromAssemblySeparateDomain(this.path);
+    //    }
+    //}
 
     private void SwitchUpdate()
     {

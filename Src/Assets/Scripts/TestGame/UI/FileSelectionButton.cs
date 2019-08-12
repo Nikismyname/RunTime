@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class FileSelectionButton: MonoBehaviour
@@ -23,12 +24,12 @@ public class FileSelectionButton: MonoBehaviour
     public void SetUp(string path)
     {
         this.filePath = path;
-    } 
+    }
 
     ///TODO: the self attach functionality show not be here;
     private void OnClick()
     {
-        var file = Compilation.ReadFile(this.filePath);
+        var file = File.ReadAllText(this.filePath);
         var alteredFile = file;
         if (ms.Target?.GetComponent<TargetBehaviour>().type != TargetType.Test)
         {
