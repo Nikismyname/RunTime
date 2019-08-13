@@ -22,21 +22,23 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
     public TargetType type;
     string testName;
-    private bool passed = false;
+    private bool solved = false;
 
     private int counter;
 
     private void Start()
     {
-        if(gameObject.TryGetComponent(out NewtonianSpaceShipInterface mono))
+        /// If the target has ship behaviour get the mono and set up target as ship.
+        if (gameObject.TryGetComponent(out NewtonianSpaceShipInterface mono))
         {
             this.vehicleMono = mono;
             this.isVehicle = true;
             mono.handling.HasActivated += this.VehicleHasActivated;
             mono.handling.HasDeactivated += this.VehicleHasDeactivated;
-        }  
+        }
 
         ms = GameObject.Find("Main").GetComponent<Main>();
+        /// Saving the original color of the object.
         this.myRenderer = gameObject.GetComponent<Renderer>();
         this.originalColor = myRenderer.material.color;
     }
@@ -53,16 +55,37 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     }
     #endregion
 
+    #region TEST
+    /// <summary>
+    /// Recives the assembly as bytes and sends it to the test app domain.
+    /// This prevents the assembly to be loaded in the main app domain,
+    /// making it posible to release the assembly memory.
+    /// If the test passes, it returns true else false 
+    /// </summary>
     public bool Test(byte[] assembly)
     {
+        if(this.type != TargetType.Test)
+        {
+            Debug.Log("This is not a test target!");
+            return false; 
+        } 
+
         Debug.Log("name: " + this.testName);
         var result = Compilation.Loader.RTTest(assembly, this.testName);
+        if (result == true)
+        {
+            this.originalColor = Color.blue;
+            this.solved = true; 
+        }
         return result;
     }
+    #endregion
 
     #region MAUSE_INPUT
     public void OnPointerDown(PointerEventData eventData)
     {
+        Debug.Log("here");
+
         if (this.selected == true)
         {
             this.ms.RegisterDeselection(this.id);
@@ -118,21 +141,21 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     /// It gets called N+1 (the color change number) times because first it detects not selection color and then new color on the first two checks
     private void LateUpdate()
     {
-        if(this.selected == false)
+        if (this.selected == false)
         {
             return;
         }
 
-        if(this.isVehicle && this.vehicleIsActive)
+        if (this.isVehicle && this.vehicleIsActive)
         {
             return;
-        }        
+        }
 
         if (this.ColorChangedCheck())
         {
             ///Flash is a preiod of time after color change for selected target that the color is showd
             ///after flash the selection color is applied again
-            
+
             ///if flash AND Changed Color then we update the original color
             if (this.flash)
             {
@@ -193,15 +216,15 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
         await Task.Delay(600); /// flashing for 600 miliseconds
 
         ///if the task has been canceled do NOT revert the color to selection color
-        if (t.IsCancellationRequested) 
+        if (t.IsCancellationRequested)
         {
             return;
         }
 
         /// noting that a flash has ended
-        flash = false; 
+        flash = false;
         /// the target has been deselected we do NOT paint it green at the end of the flash
-        if (this.selected == false) 
+        if (this.selected == false)
         {
             return;
         }
@@ -215,9 +238,9 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     ///methods that subscribe to the Vehiche activated and deactivated events
     public void VehicleHasActivated()
     {
-        if(this.selected == false)
+        if (this.selected == false)
         {
-            return; 
+            return;
         }
 
         this.vehicleIsActive = true;
@@ -228,11 +251,11 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     {
         if (this.selected == false)
         {
-            return; 
+            return;
         }
 
         this.vehicleIsActive = false;
-        this.myRenderer.material.color = this.selectionColor; 
+        this.myRenderer.material.color = this.selectionColor;
     }
     ///...
     #endregion

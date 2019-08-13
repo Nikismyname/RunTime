@@ -23,13 +23,16 @@ public class CamHandling : MonoBehaviour
     private Quaternion rotation;
     private Vector3 position;
 
+    private InputFocusManager inputFocusManager;
+
     private bool rotate;
 
     void Start()
     {
         this.rotate = false;
         Cursor.lockState = CursorLockMode.None;
-
+        var main = GameObject.Find("Main");
+        this.inputFocusManager = main.GetComponent<InputFocusManager>();
         Init();
     }
 
@@ -67,7 +70,7 @@ public class CamHandling : MonoBehaviour
      */
     void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.F) && this.inputFocusManager.SafeToTrigger())
         {
             //Debug.Log("F Down");
             if (this.rotate == true)

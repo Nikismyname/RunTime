@@ -8,16 +8,20 @@ public class ApplyBehaviour : MonoBehaviour
     private InputField textEditorInputField;
     private Camera myCamera;
     private Main ms;
+    private InputFocusManager inputFocusManager;
 
     void Start()
     {
         this.myCamera = Camera.main;
 
         this.textEditorInputField = GameObject.Find("TextEditor").GetComponent<InputField>();
-        this.ms = GameObject.Find("Main").GetComponent<Main>();
+        var main = GameObject.Find("Main");
+        this.ms = main.GetComponent<Main>();
+        this.inputFocusManager = main.GetComponent<InputFocusManager>();
 
         var button = gameObject.GetComponent<Button>();
         button.onClick.AddListener(CompileTextAndSendToTarget);
+
     }
 
     private void CompileTextAndSendToTarget()
@@ -72,7 +76,7 @@ public class ApplyBehaviour : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T) && this.inputFocusManager.SafeToTrigger())
         {
             this.CompileTextAndSendToTarget();
         }

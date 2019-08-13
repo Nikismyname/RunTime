@@ -23,7 +23,7 @@ public class GenerateLevel
             var currentCollider = baseCilinder.AddComponent<MeshCollider>();
             currentCollider.convex = true;
         }
-        baseCilinder.GetComponent<Renderer>().material.color = Color.blue;
+        baseCilinder.GetComponent<Renderer>().material.color = Colors.BaseColor;
         baseCilinder.transform.localScale = scale;
         baseCilinder.transform.position = new Vector3(0, -scale.y, 0);
         return baseCilinder;

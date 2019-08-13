@@ -4,21 +4,33 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+///    This script is attached to scrollable panel in the UI. 
+/// It recives information from the Main <see cref="Main"> about the 
+/// targets and what monos are attached to them and creates a UI that 
+/// reflects that information for the currently selected target. 
+/// 
+///    It displays the name of every attached mono, buttons for every 
+/// method of those monos as well as inputs for every parameter of 
+/// every method. Clicking the method button invokes the method with 
+/// the entered inputs.
+/// </summary>
 public class ManageActionsButtons : MonoBehaviour
 {
     public GameObject buttonPreFab;
     public GameObject labelPreFab;
     public GameObject inputPrefab;
     private GameObject colorPicker;
-    private Transform parentTransform;
     private GameObject currentTarget;
     private GameObject previousTarget;
+    private Transform parentTransform;
+    private InputFocusManager inputFocusManager;
 
     private float marginX;
     private float marginY;
     private float marginLableToItsButtons;
     private float marginBetweenButtonRows;
-    private float horizontalLength;
+    private float xLength;
     private float buttonX;
     private float buttonY;
     private float labelY;
@@ -26,6 +38,7 @@ public class ManageActionsButtons : MonoBehaviour
     private float inputX;
     private float inputY;
 
+    /// Here we hold all the attached mono info for every target GameObject 
     private Dictionary<GameObject, List<UiMonoGroupInformation>> monosPerObjectData = new Dictionary<GameObject, List<UiMonoGroupInformation>>();
     private List<ColorSelectionButton> collorPickerButtons = new List<ColorSelectionButton>();
 
@@ -36,29 +49,39 @@ public class ManageActionsButtons : MonoBehaviour
 
     void Start()
     {
+        /// Creating the paraent object that will hold all UI Elements
         var globalParent = new GameObject("TestParent");
         globalParent.transform.SetParent(gameObject.transform, false);
         globalParent.transform.position = gameObject.transform.position;
         this.parentTransform = globalParent.transform;
+        ///...
 
         this.marginX = 10;
         this.marginY = 20;
         this.marginLableToItsButtons = 0;
         this.marginBetweenButtonRows = 0;
-        this.horizontalLength = gameObject.GetComponent<RectTransform>().sizeDelta.x;
-        this.buttonX = (horizontalLength - 3 * this.marginX) / 2;
+        this.xLength = gameObject.GetComponent<RectTransform>().sizeDelta.x;
+        /// Calculating the dimentions for lables, buttons and inputs
+        this.buttonX = (xLength - 3 * this.marginX) / 2;
         this.buttonY = this.buttonX / 5;
         this.labelY = this.buttonY;
         this.labelX = this.buttonX * 2 + marginX;
         this.inputX = buttonX;
         this.inputY = this.buttonY;
+        ///...
 
         this.startY = -this.marginY;
 
-        var mainGO = GameObject.Find("Main");
-        this.ms = mainGO.GetComponent<Main>();
-        this.colorPicker = mainGO.GetComponent<ReferenceBuffer>().ColorPicker;
+        /// Cashing scripts
+        var main = GameObject.Find("Main");
+        this.ms = main.GetComponent<Main>();
+        ///InputFocusManager is used to register inputs so when a shortcut is pressed
+        ///during typing, it does not trigger the shortcut
+        this.inputFocusManager = main.GetComponent<InputFocusManager>(); 
+        this.colorPicker = main.GetComponent<ReferenceBuffer>().ColorPicker;
+        ///...
 
+        /// Cashing the panel RectTransform
         this.parentRT = gameObject.GetComponent<RectTransform>();
 
         this.currentTarget = null;
@@ -67,47 +90,66 @@ public class ManageActionsButtons : MonoBehaviour
     }
     #endregion
 
+    #region SET_TARGET
+    /// <summary>
+    /// This mothod is called from main <see cref="Main"> to indicate that new target 
+    /// has been selected. As a result, new actions need to be displayed.
+    /// </summary>
     public void SetTarget(GameObject newTarget)
     {
-        //Debug.Log("SetTarget: " + newTarget.name);
+        /// If a the new target for some reason is the current target here, ignore.
         if (newTarget == this.currentTarget)
         {
             return;
         }
 
+        /// Keeping a reference to the preveous target as well as setting the new current target.
         this.previousTarget = this.currentTarget;
         this.currentTarget = newTarget;
+        ///...
 
+        /// In case a color picker is active at the time of switching, disable it. 
         this.colorPicker.SetActive(false);
 
-        //setting the data structire for this targets mono so we do not have to check later
+        /// Setting the data structire for this target's mono so we do not have to check later.
         if (!this.monosPerObjectData.ContainsKey(currentTarget))
         {
             this.monosPerObjectData[currentTarget] = new List<UiMonoGroupInformation>();
         }
 
+        /// Hide all the UI for the previous target.
         this.ClearUI(this.previousTarget);
+        
         this.DisplayInterfaceForTarger(this.currentTarget);
     }
+    #endregion
 
     #region REGISTER_MONOS
+    /// <summary>
+    /// Registers new monos as well as changes to previous monos and creates 
+    /// the interface necessary for said mono.
+    /// </summary>
     public void RegisterNewOrChangedMono(UiMonoWithMethods monoData)
     {
         var target = monoData.Object;
 
+        /// If new target set up the data structure for it.
         if (!this.monosPerObjectData.ContainsKey(target))
         {
             this.monosPerObjectData[target] = new List<UiMonoGroupInformation>();
         }
 
-        var list = this.monosPerObjectData[target];
-        if (list.Any(x => x.MonoName == monoData.MonoName))
+        var listOfMonoData = this.monosPerObjectData[target];
+        /// If we already have data with the same mono name, destroy it.
+        if (listOfMonoData.Any(x => x.MonoName == monoData.MonoName))
         {
             this.RemoveDestroyedMono(target, monoData.MonoName, false);
         }
 
+        /// Creates the inteface as well as meta data.
         var createResult = this.CreateScriptUI(monoData.MonoName, monoData.Methods);
 
+        ///All the data we need to visualise the UI
         var monoGroup = new UiMonoGroupInformation
         {
             MonoName = monoData.MonoName,
@@ -121,42 +163,62 @@ public class ManageActionsButtons : MonoBehaviour
             GrandParent = createResult.GrandParent,
         };
 
+        /// Setting up the mono name label to be able to callapse and expand the method 
         createResult.LabelButtonScritp.SetUp(monoGroup, this);
 
-        list.Add(monoGroup);
+        /// Storing the resulting UI data
+        listOfMonoData.Add(monoGroup);
 
+        /// If the new UI ifromation is for current target - display the updated version 
         if (this.currentTarget!= null && this.currentTarget == target) {
             this.DisplayInterfaceForTarger(target);
         }
     }
+    #endregion
 
-    //Removes it from the dict as well as destroys the object visualisation
+    #region REMOVE_DESTROYED_MONO
+    /// <summary>
+    /// Removes it from the store as well as destroys the UI elements.
+    /// </summary>
     public void RemoveDestroyedMono(GameObject target, string monoName, bool reorder = true)
     {
+        /// If the target is not in monosPerObjectData return.
         if (!this.monosPerObjectData.ContainsKey(target))
         {
-            Debug.Log("Can not remove mono, there is no such target overhere!");
+            Debug.Log("Can not remove mono, there is no such target over here!");
             return;
         }
 
-        var list = this.monosPerObjectData[target];
-        if (!list.Any(x => x.MonoName == monoName))
+        /// Get the list of mono for given target GameObject
+        var nomosList = this.monosPerObjectData[target];
+
+        /// If there is no mono with that name for target GameObject, return
+        if (!nomosList.Any(x => x.MonoName == monoName))
         {
-            Debug.Log("Can not remove mono, there is no such mono on the giver target overhere!");
+            Debug.Log("Can not remove mono, there is no such mono on the giver target over here!");
             return;
         }
 
-        var mono = list.Single(x => x.MonoName == monoName);
+        /// Getting the mono info that needs to be destroyed  
+        var mono = nomosList.Single(x => x.MonoName == monoName);
 
+        /// Destroying the generated UI.
         Destroy(mono.GrandParent);
-        list.Remove(mono);
+        /// Removing the mono from the list.
+        nomosList.Remove(mono);
 
+        /// If we want to reorder and are currently displaying for the same targetGO, redisplay the updated UI
         if (reorder && this.currentTarget == target)
         {
             this.DisplayInterfaceForTarger(target);
         }
     }
+    #endregion
 
+    #region CLEAR_UI
+    /// <summary>
+    /// Hides All UI elements that for given targetGO
+    /// </summary>
     private void ClearUI(GameObject objToClear)
     {
         if (objToClear == null)
@@ -172,11 +234,15 @@ public class ManageActionsButtons : MonoBehaviour
             item.MonoButtonLabel.SetActive(false);
         }
     }
+    #endregion
 
-    //Check again when this gets called it seems like way too often.
+    #region DISPLAY_INTERFACE_FOR_TARGET
+    ///TODO: Check again when this gets called it seems like way too often.
+    /// <summary>
+    /// Displays the already created interface for a given target.
+    /// </summary>
     public void DisplayInterfaceForTarger(GameObject displayTarget, bool useCurrentTarget = false)
     {
-        //Debug.Log("Display Interface: " + displayTarget.name);
         if (useCurrentTarget)
         {
             displayTarget = this.currentTarget;
@@ -211,13 +277,13 @@ public class ManageActionsButtons : MonoBehaviour
             if (item.Collapsed)
             {
                 item.Methods.SetActive(false);
-                item.MonoButtonLabel.SetActive(true);
             }
             else
             {
                 item.Methods.SetActive(true);
-                item.MonoButtonLabel.SetActive(true);
             }
+
+            item.MonoButtonLabel.SetActive(true);
         }
 
         var totalHeight = initialY;
@@ -225,17 +291,27 @@ public class ManageActionsButtons : MonoBehaviour
         /// expanding the box if need be
         var y = parentRT.sizeDelta.y;
         var x = parentRT.sizeDelta.x;
-
         if (y < totalHeight)
         {
             parentRT.sizeDelta = new Vector2(x, totalHeight);
         }
+        ///...
     }
     #endregion
 
     #region CREATE_SCRIPT_UI
+    /// <summary>
+    /// Creates the UI to visualise given mono's methods as buttons and their paramaters as inputs
+    /// </summary>
+    /// <param name="monoName">The name of the mono script</param>
+    /// <param name="methods">Information abouth the methods in the script</param>
+    /// <returns>The generated UI as well as meta data for it</returns>
     private CreateMonUIResult CreateScriptUI(string monoName, UiMethodNameWithParameters[] methods)
     {
+        /// localGrandParent hold the whole UI
+        /// Directly howds only the buttonLabel(the mono name) and the local parent
+        /// the local parent holds everything else (method buttons and parameter inputs)
+        /// clicking on the buttonLabel collapses the local parent
         var localGrandParent = new GameObject(monoName + "GrandParent");
         localGrandParent.transform.SetParent(this.parentTransform, false);
         localGrandParent.transform.position = this.parentTransform.position;
@@ -253,24 +329,28 @@ public class ManageActionsButtons : MonoBehaviour
 
         localHeight -= labelInfo.Height;
 
-        ///Collectiong All The method button behaviurs so that we can extract all colorButton scripts 
-        ///from them
+        /// Collectiong all the method button behaviours so that we can extract 
+        /// all colorButton scripts from them.
         List<MethodButtonBehaviour> methodButtonBehs = new List<MethodButtonBehaviour>();
 
-        ///all others are assigned to the parent so we can deactivate them seperately
+        /// All others are assigned to the parent so we can deactivate them seperately.
+        /// We are doing to buttons on the same time, putting them side by side
         for (int i = 0; i < methods.Length; i += 2)
         {
-            if (i + 1 == methods.Length)
+            /// If we have unevent mothod count, we place the last button individualy to the left
+            if (i == methods.Length - 1)
             {
                 var method = methods[i];
                 var pos = new Vector2(marginX, localHeight);
                 var beh = this.SpawnOneButton(pos, method.Name, monoName, localTransform);
                 pos.y -= this.buttonY;
                 var height = this.SpawnAllInputs(pos, beh, method, localTransform);
-                localHeight -= (height + buttonY + marginY);
+
+                localHeight -= (height + this.buttonY + this.marginY);
 
                 methodButtonBehs.Add(beh);
             }
+            /// Placing two buttons side by side.
             else
             {
                 var method1 = methods[i];
@@ -285,6 +365,7 @@ public class ManageActionsButtons : MonoBehaviour
                 var beh2 = this.SpawnOneButton(pos2, method2.Name, monoName, localTransform);
                 pos2.y -= this.buttonY;
                 var height2 = this.SpawnAllInputs(pos2, beh2, method2, localTransform);
+
                 localHeight -= (Mathf.Max(height1, height2) + buttonY + marginY);
 
                 methodButtonBehs.Add(beh1);
@@ -330,11 +411,7 @@ public class ManageActionsButtons : MonoBehaviour
         button.GetComponent<RectTransform>().anchoredPosition = position;
         button.GetComponentInChildren<Text>().text = method;
 
-        button.GetComponent<Image>().color = new Color32(229, 200, 25, 255);
-        //button.GetComponent<Button>().image.color = new Color(229, 200, 25);
-        //var thing = button.GetComponent<Button>().colors;
-        //thing.normalColor = new Color(229, 200, 25);
-        //button.GetComponent<Button>().colors = thing;
+        button.GetComponent<Image>().color = Colors.ActionButtonColor;
 
         var script = button.AddComponent<MethodButtonBehaviour>();
         script.SetUp(mono, method);
@@ -405,6 +482,10 @@ public class ManageActionsButtons : MonoBehaviour
             var phText = input.transform.Find("Placeholder").GetComponent<Text>();
             phText.text = placeHolderText;
         }
+
+        ///Registering with InputFocusManager
+        this.inputFocusManager.Register(inputField);
+
         return inputField;
     }
 

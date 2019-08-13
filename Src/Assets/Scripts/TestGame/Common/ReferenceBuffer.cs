@@ -8,6 +8,7 @@ public class ReferenceBuffer : MonoBehaviour
     public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
     public GameObject ColorPicker { get; set; }
     public PlayerHandling PlayerHandling { get; set; }
+    ///public InputFocusManager InputFocusManager { get; set; }
 
     private void Awake()
     {
@@ -18,7 +19,9 @@ public class ReferenceBuffer : MonoBehaviour
 
         this.ShowActions = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
 
-        this.ShowAvailableCSFiles = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>(); 
+        this.ShowAvailableCSFiles = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>();
+
+        ///this.InputFocusManager = gameObject.GetComponent<InputFocusManager>(); 
     }
 
     public void RegisterPlayerHandling (PlayerHandling playerHandling)

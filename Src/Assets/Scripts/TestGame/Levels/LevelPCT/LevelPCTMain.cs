@@ -17,7 +17,7 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         this.gl = new GenerateLevel(this.ms, rb);
 
         ///Generate the environment
-        this.gl.CylinderBasePrefab(new Vector3(150, 1, 150), true);
+        this.gl.CylinderBasePrefab(new Vector3(40, 1, 40), true);
 
         ///PLAYER
         this.player = this.gl.Player(new Vector3(20, 0, 10), true, true, true);
