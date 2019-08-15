@@ -49,7 +49,7 @@ public class Level1Main: MonoBehaviour, ILevelMain
     public void ResetLevel()
     {
         Destroy(this.t);
-        this.ms.UnregeisterTarget(this.t);
+        this.ms.UnregisterTarget(this.t);
         this.t = this.gl.GenerateEntity(EntityType.Target, new Vector3(0, -5, 0), PrimitiveType.Cube, Color.gray, null, "Target");
         this.targetCollider = this.t.GetComponent<Collider>();
     }

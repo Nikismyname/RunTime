@@ -124,7 +124,7 @@ public class ManageActionsButtons : MonoBehaviour
     }
     #endregion
 
-    #region REGISTER_MONOS
+    #region REGISTER_OR_CHANGE_MONOS
     /// <summary>
     /// Registers new monos as well as changes to previous monos and creates 
     /// the interface necessary for said mono.

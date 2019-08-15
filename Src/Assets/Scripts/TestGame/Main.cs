@@ -4,6 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Responsible for: 
+///     Registering targets. 
+///     Tracking the currently selected target.
+///     Registering monos for targets.
+///     Comunicating current target and attached monos to the UI <see cref="ManageActionsButtons">
+/// </summary>
 public class Main : MonoBehaviour
 {
     [SerializeField] public bool testMode;
@@ -18,29 +25,40 @@ public class Main : MonoBehaviour
     [SerializeField] public float jumpForce;
     [SerializeField] public float forceToVelocity = 0.05f;
 
+    /// The currently selected Target
     public GameObject Target { get; set; }
-    //private GameObject previousTarget; 
-
-    private List<GameObject> targets;
+    /// List of all Targets
+    private List<GameObject> targets = new List<GameObject>();
+    /// All attached monos per Target
     private Dictionary<GameObject, List<MainMonoWithName>> attachedMonos = new Dictionary<GameObject, List<MainMonoWithName>>();
-
-    private ManageActionsButtons mangeButtons;
+    /// Reference to the script that manages action buttons 
+    private ManageActionsButtons manageButtons;
 
     void Awake()
     {
-        this.mangeButtons = GameObject.Find("ActionsContent").GetComponent<ManageActionsButtons>();
-        this.targets = new List<GameObject>();
+        this.manageButtons = GameObject.Find("ActionsContent").GetComponent<ManageActionsButtons>();
 
-        if (this.testMode)
-        {
-            this.GenerateTargetsTest();
-        }
+        //if (this.testMode)
+        //{
+        //    this.GenerateTargetsTest();
+        //}
 
+        ///Every two seconds check for destroyed monos and send message to <see cref="ManageActionsButtons"> 
+        ///to remove them from the UI. 
         InvokeRepeating("PruneDestroyedMonoBehaviurs", 1, 2);
     }
     #endregion
 
     #region TARGET_MANAGMENT
+    /// <summary>
+    /// Registers new target. Eather a standart target or test target. 
+    /// Poth can be selected and scripts attached to them, but different kinds. 
+    /// Standart targets accept Monos with attach funcs that modify the behaviour
+    /// of the target. Tests accept scripts (not monos) with a solve method and return bool 
+    /// which indicates if the test passed.
+    /// </summary>
+    /// <param name="newTarget">The new target itself</param>
+    /// <param name="testName">If it is a test target this is the name of the test they are for.</param>
     public void RegisterTarget(GameObject newTarget, string testName = "")
     {
         var tb = newTarget.GetComponent<TargetBehaviour>();
@@ -63,20 +81,31 @@ public class Main : MonoBehaviour
         this.targets.Add(newTarget);
     }
 
+    /// <summary>
+    /// Registers selection change. New target has been clicked.
+    /// </summary>
+    /// <param name="id">The id of the selected target.</param>
     public void RegisterSelection(int id)
     {
+        /// Finding the target.
         this.Target = this.targets.SingleOrDefault(x => x.GetComponent<TargetBehaviour>().id == id);
 
-        //this.mangeButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation());
-
+        /// Telling all the targets to change their color according to the the id of the selected target. 
+        /// Previously selected target will change to default color, currently selected will hange to select color
         foreach (var target in this.targets)
         {
             target.GetComponent<TargetBehaviour>().VisualiseSelection(id);
         }
 
-        this.mangeButtons.SetTarget(this.Target);
+        /// Informing the action button UI about the change of target, so it displays the UI for current target.
+        this.manageButtons.SetTarget(this.Target);
     }
 
+    /// <summary>
+    /// This is called from the onPointDown event in <see cref="TargetBehaviour">. 
+    /// The deselection login is in TargetBehaviour, this method only sets current Target to null.
+    /// </summary>
+    /// <param name="id">The id of delected target</param>
     public void RegisterDeselection(int id)
     {
         if (this.Target.GetComponent<TargetBehaviour>().id != id)
@@ -87,7 +116,12 @@ public class Main : MonoBehaviour
         this.Target = null;
     }
 
-    public void UnregeisterTarget(GameObject obj)
+    /// <summary>
+    /// This is currently only called from ResetLevel function of <see cref="Level1Main">. 
+    /// It simply removes the date for the Target GamoObject from memory.
+    /// </summary>
+    /// <param name="obj"></param>
+    public void UnregisterTarget(GameObject obj)
     {
         var tb = obj.GetComponent<TargetBehaviour>();
 
@@ -101,59 +135,108 @@ public class Main : MonoBehaviour
     #endregion
 
     #region ATTACH
-    ///TODO: make attach mono and register mono separate function to recduse confusion.
-    public MonoBehaviour AttachMono(
-        CompMethodsInAssemblyType funcs,
-        bool toTarget = true,
-        GameObject actTarget = null,
-        bool attach = true,
-        MonoBehaviour incMono = null)
+    
+    /// <summary>
+    /// Attaches a runtime generated mono to a given target. 
+    /// </summary>
+    /// <param name="target">Target to which to attach the runtime mono.</param>
+    /// <param name="funcs">Mono information: name, methods and pramaters.</param>
+    /// <returns></returns>
+    public MonoBehaviour AttachRuntimeMono(GameObject target, CompMethodsInAssemblyType funcs)
     {
-        //Debug.Log(actTarget?.name);
+        /// Attaches the given mono and registeres in <see cref="attachedMonos">
+        var monoData = this.AttachAndAddToDict(funcs, target, true, null);
 
-        GameObject internalTarget = null;
-
-        if (toTarget == false)
+        /// If a mono with the same name exists and the method singnature changed send it to the UI to redraw it.
+        if (monoData.changesInMethodSignature)
         {
-            if (actTarget == null)
-            {
-                Debug.Log("You chose to privade custom target but sent null as its value!");
-                Debug.Break();
-            }
-
-            internalTarget = actTarget;
-        }
-        else
-        {
-            internalTarget = this.Target;
+            this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(monoData, target));
+            monoData.changesInMethodSignature = false;
         }
 
-        var mono = this.AttachAndAddToDict(funcs, internalTarget, attach, incMono);
-
-        if (mono.changesInMethodSignature)
-        {
-            this.mangeButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(mono, internalTarget));
-            mono.changesInMethodSignature = false;
-        }
-
-        return mono.Mono;
+        return monoData.Mono; 
     }
 
+    /// <summary>
+    /// Registers a compile time mono to given target. 
+    /// </summary>
+    /// <param name="target">Target to which to attach the runtime mono.</param>
+    /// <param name="funcs">Mono information: name, methods and pramaters.</param>
+    /// <returns></returns>
+    public MonoBehaviour RegisterCompileTimeMono(GameObject target, CompMethodsInAssemblyType funcs, MonoBehaviour mono)
+    {
+        /// Attaches the given mono and registeres in <see cref="attachedMonos">
+        var monoData = this.AttachAndAddToDict(funcs, target, false, mono);
+
+        /// If a mono with the same name exists and the method singnature changed send it to the UI to redraw it.
+        if (monoData.changesInMethodSignature)
+        {
+            this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(monoData, target));
+            monoData.changesInMethodSignature = false;
+        }
+        return null; 
+    }
+
+
+    //public MonoBehaviour AttachMono(
+    //    CompMethodsInAssemblyType funcs,
+    //    bool toTarget = true,
+    //    GameObject actTarget = null,
+    //    bool attach = true,
+    //    MonoBehaviour incMono = null)
+    //{
+    //    GameObject internalTarget = null;
+
+    //    if (toTarget == false)
+    //    {
+    //        if (actTarget == null)
+    //        {
+    //            Debug.Log("You chose to privade custom target but sent null as its value!");
+    //            Debug.Break();
+    //        }
+
+    //        internalTarget = actTarget;
+    //    }
+    //    else
+    //    {
+    //        internalTarget = this.Target;
+    //    }
+
+    //    var mono = this.AttachAndAddToDict(funcs, internalTarget, attach, incMono);
+
+    //    if (mono.changesInMethodSignature)
+    //    {
+    //        this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(mono, internalTarget));
+    //        mono.changesInMethodSignature = false;
+    //    }
+
+    //    return mono.Mono;
+    //}
+
+    /// <summary>
+    /// Does tho things: 
+    ///     If attach is true, it attaches the mono to the target and registeres it in <see cref="attachedMonos">.
+    ///     If attach is false, means that the script is already attached and it only regerteres it in the same collection.
+    /// Also if there is a mono with that name already, it remeves the old one and registeres the new one. 
+    /// </summary>
     private MainMonoWithName AttachAndAddToDict(
         CompMethodsInAssemblyType funcs,
         GameObject intTarget,
         bool attach,
         MonoBehaviour incMono)
     {
+        /// If data for the target does not exist yet, create it.
         if (!attachedMonos.ContainsKey(intTarget))
         {
             this.attachedMonos[intTarget] = new List<MainMonoWithName>();
         }
 
+        /// Getting exsiting monos for target.
         var monoList = this.attachedMonos[intTarget];
 
+        /// Cheking if there is more than one script with given name already registered
+        /// which should never happen.
         var existingMonos = monoList.Where(x => x.Name == funcs.TypeName).ToArray();
-
         if (existingMonos.Length > 1)
         {
             Debug.Log($"There are more that 1 scripts with name {funcs.TypeName} already attached!");
@@ -165,22 +248,23 @@ public class Main : MonoBehaviour
         List<MainMethodInfoWithName> previousMethods = null;
         var preExistionMono = false;
 
-        if (existingMonos.Length == 1) // If a mono with the same name attched we raplace it with the new!
+        /// If a mono with the same name is attched, we destroy the old one!
+        if (existingMonos.Length == 1) 
         {
             preExistionMono = true;
-            var preexistingMonoMithName = existingMonos[0];
-            newVersion = preexistingMonoMithName.Version + 1;
-            previousMethods = preexistingMonoMithName.MyMethods;
+            var preexistingMonoWithName = existingMonos[0];
+            ///Updating the version.
+            newVersion = preexistingMonoWithName.Version + 1;
+            previousMethods = preexistingMonoWithName.MyMethods;
 
-            var monoToDestroy = intTarget.GetComponent(preexistingMonoMithName.Mono.GetType());
+            var monoToDestroy = intTarget.GetComponent(preexistingMonoWithName.Mono.GetType());
             Destroy(monoToDestroy);
             monoList.Remove(monoList.SingleOrDefault(x => x.Name == funcs.TypeName));
             Debug.Log("Old Script is overriden");
         }
 
-        ///Mnaging the mono, if we provide one that is already attached we do not need to attach but still register
+        /// Managing the mono, if we provide one that is already attached we do not need to attach but still register.
         MonoBehaviour script = null;
-
         if (attach == false)
         {
             if (incMono == null)
@@ -206,7 +290,8 @@ public class Main : MonoBehaviour
         newMonoData.Version = newVersion;
         if (preExistionMono == false)
         {
-            newMonoData.changesInMethodSignature = true; // since it is just created, we do not have the signiture
+            /// Since it is just created, the signature has changed. 
+            newMonoData.changesInMethodSignature = true; 
         }
         else
         {
@@ -217,6 +302,7 @@ public class Main : MonoBehaviour
                 return null;
             }
 
+            /// Comparing the two methods' signitures.
             if (this.TwoMehtodCollHaveSameSignatures(previousMethods, newMonoData.MyMethods))
             {
                 newMonoData.changesInMethodSignature = false;
@@ -227,7 +313,8 @@ public class Main : MonoBehaviour
             }
         }
 
-        monoList.Add(newMonoData); // adding it to the collection
+        /// Adding it to the collection for the given target.
+        monoList.Add(newMonoData); 
 
         return newMonoData;
     }
@@ -564,7 +651,7 @@ public class Main : MonoBehaviour
             var obj = item.Key;
             foreach (var str in item.Value)
             {
-                this.mangeButtons.RemoveDestroyedMono(obj, str);
+                this.manageButtons.RemoveDestroyedMono(obj, str);
             }
         }
     }

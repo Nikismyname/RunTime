@@ -84,8 +84,6 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     #region MAUSE_INPUT
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log("here");
-
         if (this.selected == true)
         {
             this.ms.RegisterDeselection(this.id);

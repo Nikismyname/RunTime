@@ -60,6 +60,7 @@ public class ApplyBehaviour : MonoBehaviour
         }
         else
         {
+            var target = this.ms.Target; 
             var functions = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
@@ -68,7 +69,7 @@ public class ApplyBehaviour : MonoBehaviour
                 return funcs;
             });
 
-            var script = this.ms.AttachMono(functions);
+            var script = this.ms.AttachRuntimeMono(target, functions);
         }
 
         Camera.main.backgroundColor = Color.black;

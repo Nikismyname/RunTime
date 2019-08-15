@@ -104,7 +104,7 @@ public class GenerateLevel
                 {
                     var script = (MonoBehaviour)entity.GetComponent(scriptType);
                     var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
-                    this.ms.AttachMono(funcs, false, entity,false,script);
+                    this.ms.RegisterCompileTimeMono(entity,funcs, script); 
                 }
             }
         }
@@ -157,7 +157,7 @@ public class GenerateLevel
                 {
                     var script = (MonoBehaviour)scriptsObject.GetComponent(scriptType);
                     var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
-                    this.ms.AttachMono(funcs, false, scriptsObject, false, script);
+                    this.ms.RegisterCompileTimeMono(scriptsObject, funcs, script);
                 }
             }
         }
@@ -218,5 +218,49 @@ public class GenerateLevel
 
         player.transform.position = position;
         return player;
+    }
+
+    public GameObject GenerateGrid(int x, int y, Vector3? position = null)
+    {
+        if(position == null)
+        {
+            position = Vector3.zero; 
+        }
+        
+        var sideLenght = 5f;
+        var margin = sideLenght * 0.1f;
+
+        var plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var planeX = (x + 1) * sideLenght + (x + 2) * margin;
+        var planeY = (y + 1) * sideLenght + (y + 2) * margin; 
+        plane.transform.localScale = new Vector3(planeX, 1, planeY);
+        plane.transform.position = new Vector3(planeX/2 -( margin + sideLenght), -0.5f, planeY/2 - (margin + sideLenght)); 
+        plane.GetComponent<MeshRenderer>().material.color = Color.blue;
+        plane.GetComponent<MeshRenderer>().material.shader = Shader.Find("Unlit/Color");
+
+        plane.name = "BasePlane";
+
+        for (int i = 0; i < y; i++)
+        {
+            for (int j = 0; j < x; j++)
+            {
+                var tile = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                tile.AddComponent<BoxCollider>();
+                tile.AddComponent<TileBehaviour>();
+                tile.transform.localScale = new Vector3(sideLenght, 0, sideLenght);
+                tile.GetComponent<MeshRenderer>().material.color = Color.green;
+                tile.GetComponent<MeshRenderer>().material.shader = Shader.Find("Unlit/Color");
+                tile.transform.position = new Vector3(
+                    (j+1) * margin + j * sideLenght, 
+                    0.01f,
+                    (i + 1) * margin + i * sideLenght
+                );
+
+                tile.transform.SetParent(plane.transform); 
+            }
+        }
+
+        plane.transform.position = position.Value;
+        return plane;
     }
 }

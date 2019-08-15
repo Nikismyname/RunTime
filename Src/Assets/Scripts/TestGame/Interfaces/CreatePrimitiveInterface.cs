@@ -29,6 +29,6 @@ public static class CreatePrimitiveInterface
         ms.RegisterTarget(createdPrimitive);
 
         var typeWithMethodInfo = Compilation.GenerateAllMethodsFromMonoType(dataModifierScript.GetType());
-        ms.AttachMono(typeWithMethodInfo, false, createdPrimitive, false, dataModifierScript);
+        ms.RegisterCompileTimeMono(createdPrimitive, typeWithMethodInfo, dataModifierScript);
     }
 }
