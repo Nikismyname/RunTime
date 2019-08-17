@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Level1Main: MonoBehaviour, ILevelMain
 {
@@ -17,6 +18,9 @@ public class Level1Main: MonoBehaviour, ILevelMain
         this.ms = main.GetComponent<Main>();
         var rb = main.GetComponent<ReferenceBuffer>();
         this.gl = new GenerateLevel(ms, rb);
+
+        var infoText = rb.InfoTextObject;
+        infoText.GetComponent<Text>().text = ProblemDesctiptions.Level1Problem;
 
         this.t = gl.GenerateEntity(EntityType.Target, new Vector3(0, -5, 0), PrimitiveType.Cube, Color.gray,null,"Target");
         this.goal = gl.GenerateEntity(EntityType.NonTarget, new Vector3(0, 5, 0), PrimitiveType.Cube, Color.blue,null, "Goal");

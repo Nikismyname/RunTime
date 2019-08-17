@@ -4,12 +4,14 @@ using UnityEngine;
 public class GenerateLevel
 {
     private Main ms;
+    private GridManager gm; 
     private ReferenceBuffer rb;
 
-    public GenerateLevel(Main ms, ReferenceBuffer rb)
+    public GenerateLevel(Main ms, ReferenceBuffer rb, GridManager gm = null)
     {
         this.ms = ms;
         this.rb = rb;
+        this.gm = gm;
     }
 
     public GameObject CylinderBasePrefab(Vector3 scale, bool collider = false)
@@ -220,7 +222,14 @@ public class GenerateLevel
         return player;
     }
 
-    public GameObject GenerateGrid(int x, int y, Vector3? position = null)
+    /// <summary>
+    /// Generates a grid based level platform
+    /// </summary>
+    /// <param name="X">The number of columns</param>
+    /// <param name="Y">The number of raws</param>
+    /// <param name="position">The end position of the level</param>
+    /// <returns>The grid parent GameObject</returns>
+    public GameObject GenerateGrid(int Y, int X, Vector3? position = null)
     {
         if(position == null)
         {
@@ -231,36 +240,61 @@ public class GenerateLevel
         var margin = sideLenght * 0.1f;
 
         var plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        var planeX = (x + 1) * sideLenght + (x + 2) * margin;
-        var planeY = (y + 1) * sideLenght + (y + 2) * margin; 
+        var planeX = (X + 2) * sideLenght + (X + 3) * margin;
+        var planeY = (Y + 2) * sideLenght + (Y + 3) * margin; 
         plane.transform.localScale = new Vector3(planeX, 1, planeY);
-        plane.transform.position = new Vector3(planeX/2 -( margin + sideLenght), -0.5f, planeY/2 - (margin + sideLenght)); 
+        plane.transform.position = new Vector3(planeX/2 /*-( margin + sideLenght)*/, -0.5f, planeY/2 /*- (margin + sideLenght)*/); 
         plane.GetComponent<MeshRenderer>().material.color = Color.blue;
         plane.GetComponent<MeshRenderer>().material.shader = Shader.Find("Unlit/Color");
-
         plane.name = "BasePlane";
 
-        for (int i = 0; i < y; i++)
-        {
-            for (int j = 0; j < x; j++)
-            {
-                var tile = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                tile.AddComponent<BoxCollider>();
-                tile.AddComponent<TileBehaviour>();
-                tile.transform.localScale = new Vector3(sideLenght, 0, sideLenght);
-                tile.GetComponent<MeshRenderer>().material.color = Color.green;
-                tile.GetComponent<MeshRenderer>().material.shader = Shader.Find("Unlit/Color");
-                tile.transform.position = new Vector3(
-                    (j+1) * margin + j * sideLenght, 
-                    0.01f,
-                    (i + 1) * margin + i * sideLenght
-                );
+        var oriantationTyle = CreateTile(0, 0, false);
 
-                tile.transform.SetParent(plane.transform); 
+        oriantationTyle.GetComponent<MeshRenderer>().material.color = Colors.OrientationTile; 
+
+        for (int i = 1; i <= Y; i++)
+        {
+            for (int j = 1; j <= X; j++)
+            {
+                CreateTile(i,j, true);
             }
         }
 
         plane.transform.position = position.Value;
         return plane;
+
+        /// Creates a tile in the 0-based grid. 
+        GameObject CreateTile(int y, int x, bool stepable)
+        {
+            var tile = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tile.AddComponent<BoxCollider>();
+            if (stepable)
+            {
+                var script = tile.AddComponent<TileBehaviour>();
+                if(this.gm != null)
+                {
+                    this.gm.RegisterTyle(y-1,x-1,script);
+                }
+                else
+                {
+                    Debug.Log("Grid Manager Not Present!");
+                }
+
+                script.SetUp(y -1,x -1);
+            }
+            tile.transform.localScale = new Vector3(sideLenght, 0, sideLenght);
+            tile.GetComponent<MeshRenderer>().material.color = Color.green;
+            tile.GetComponent<MeshRenderer>().material.shader = Shader.Find("Unlit/Color");
+            tile.transform.position = new Vector3(
+                ///+ 0.5f * sideLenght on x and z is to center tile after calculation upper left corner value
+                (x + 1) * margin + (x) * sideLenght + 0.5f * sideLenght,
+                0.01f,
+                (y + 1) * margin + (y) * sideLenght + 0.5f * sideLenght 
+            );
+
+            tile.transform.SetParent(plane.transform);
+
+            return tile;
+        }
     }
 }

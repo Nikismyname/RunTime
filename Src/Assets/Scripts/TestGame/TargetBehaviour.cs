@@ -9,6 +9,8 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 {
     public int id;
     private Main ms;
+    private GridManager gm;
+    private LevelManager lm;
     private bool selected = false;
     private bool flash = false;
     private Renderer myRenderer;
@@ -18,6 +20,7 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
     private bool isVehicle = false;
     private bool vehicleIsActive = false;
+    private bool isGrid = false;
     private NewtonianSpaceShipInterface vehicleMono = null;
 
     public TargetType type;
@@ -37,33 +40,47 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
             mono.handling.HasDeactivated += this.VehicleHasDeactivated;
         }
 
-        ms = GameObject.Find("Main").GetComponent<Main>();
+        var main = GameObject.Find("Main"); 
+        this.ms = main.GetComponent<Main>();
+        this.gm = main.GetComponent<GridManager>();
+        this.lm = main.GetComponent<LevelManager>(); 
         /// Saving the original color of the object.
         this.myRenderer = gameObject.GetComponent<Renderer>();
         this.originalColor = myRenderer.material.color;
     }
 
+    /// <summary>
+    /// Called From Main and GenerateLevel.Player()
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="type"></param>
+    /// <param name="testName"></param>
+    /// <param name="isGrid"></param>
     public void SetUp(
         int id,
         TargetType type = TargetType.Standard,
-        string testName = ""
+        string testName = "",
+        bool isGrid = false
     )
     {
         this.id = id;
         this.type = type;
         this.testName = testName;
+        this.isGrid = isGrid;
     }
     #endregion
 
     #region TEST
     /// <summary>
+    /// Called from ApplyBehaviour
+    /// 
     /// Recives the assembly as bytes and sends it to the test app domain.
     /// This prevents the assembly to be loaded in the main app domain,
     /// making it posible to release the assembly memory.
     /// If the test passes, it returns true else false 
     /// </summary>
-    public bool Test(byte[] assembly)
-    {
+    public async Task<bool> Test(byte[] assembly)
+    { 
         if(this.type != TargetType.Test)
         {
             Debug.Log("This is not a test target!");
@@ -71,13 +88,43 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
         } 
 
         Debug.Log("name: " + this.testName);
-        var result = Compilation.Loader.RTTest(assembly, this.testName);
+        var result = false;
+        if (isGrid)
+        {
+            result = Compilation.Loader.RTGridTest(assembly, this.testName, out int[][] selections);
+            if (result == true)
+            {
+                await this.gm.LightTiles(selections);
+                this.lm.Success(); 
+            }
+            //PrintSelection(selections);
+        }
+        else
+        {
+            result = Compilation.Loader.RTTest(assembly, this.testName); 
+        }
+
         if (result == true)
         {
             this.originalColor = Color.blue;
             this.solved = true; 
         }
         return result;
+
+        //void PrintSelection(int[][] selection)
+        //{
+        //    string text = "";
+        //    for (int i = 0; i < selection.Length; i++)
+        //    {
+        //        for (int j = 0; j < selection[i].Length; j+= 2)
+        //        {
+        //            text += $"{{{selection[i][j]}, {selection[i][j + 1]}}} "; 
+        //        }
+        //        text += '\n'; 
+        //    }
+
+        //    Debug.Log(text);
+        //}
     }
     #endregion
 

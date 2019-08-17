@@ -1,7 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Level4Main : MonoBehaviour, ILevelMain
+public class Level5Main : MonoBehaviour, ILevelMain
 {
     private GameObject player; 
 
@@ -22,7 +21,7 @@ public class Level4Main : MonoBehaviour, ILevelMain
 
         var solvingSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         var tb = solvingSphere.AddComponent<TargetBehaviour>();
-        ms.RegisterTarget(solvingSphere, GridTestMap.Level4TestName, true);
+        ms.RegisterTarget(solvingSphere, GridTestMap.Level5TestName, true);
         solvingSphere.name = "Solving Sphere";
         solvingSphere.transform.position = new Vector3(0, 10, 0);
     }

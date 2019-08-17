@@ -135,7 +135,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 248794160}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c26f59bcd4fe58a4ebc8cecfb55d243f, type: 3}
+  m_Script: {fileID: 11500000, guid: dd6b844d92d06524eaca4ccd1f96e02e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &248794167
@@ -241,7 +241,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1001 &700661551
+--- !u!1001 &1584241594
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -1191,7 +1191,7 @@ PrefabInstance:
     - target: {fileID: 8988003089260943128, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8988003089260943128, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
@@ -1284,6 +1284,21 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6451156848362962818, guid: 6e7c0d16799cc2e40a5739c42d804c39,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7826691327867657160, guid: 6e7c0d16799cc2e40a5739c42d804c39,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7826691327867657160, guid: 6e7c0d16799cc2e40a5739c42d804c39,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7826691327867657160, guid: 6e7c0d16799cc2e40a5739c42d804c39,
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1411,7 +1426,7 @@ PrefabInstance:
     - target: {fileID: 6138394533263670780, guid: 588b2226ef0b10347bcb001a1954944a,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6138394533263670780, guid: 588b2226ef0b10347bcb001a1954944a,
         type: 3}

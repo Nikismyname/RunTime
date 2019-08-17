@@ -59,7 +59,7 @@ public class Main : MonoBehaviour
     /// </summary>
     /// <param name="newTarget">The new target itself</param>
     /// <param name="testName">If it is a test target this is the name of the test they are for.</param>
-    public void RegisterTarget(GameObject newTarget, string testName = "")
+    public void RegisterTarget(GameObject newTarget, string testName = "", bool isGrid = false)
     {
         var tb = newTarget.GetComponent<TargetBehaviour>();
         if (tb == null)
@@ -76,7 +76,7 @@ public class Main : MonoBehaviour
         }
         else
         {
-            tb.SetUp(newId, TargetType.Test, testName);
+            tb.SetUp(newId, TargetType.Test, testName, isGrid);
         }
         this.targets.Add(newTarget);
     }

@@ -340,8 +340,8 @@ public static class Compilation
         }
 
         allowedAsseblyReferences.Add(loader);
-        //var netstandard = locations.Single(x => x.EndsWith("netstandard.dll"));
-        //allowedAsseblyReferences.Add(netstandard);
+        var netstandard = locations.Single(x => x.EndsWith("netstandard.dll"));
+        allowedAsseblyReferences.Add(netstandard);
 
         foreach (var item in allowedAsseblyReferences)
         {
