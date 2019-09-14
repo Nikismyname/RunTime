@@ -197,7 +197,7 @@ public class PlayerHandling : MonoBehaviour
         else if(col.gameObject.tag == "Wall")
         {
             var normal = col.GetContact(0).normal;
-            Debug.Log(normal);
+            //Debug.Log(normal);
             if (normal == new Vector3(0f, 1f, 0f))
             {
                 Debug.Log("Touched top return!");
@@ -212,7 +212,7 @@ public class PlayerHandling : MonoBehaviour
 
             this.extraGravity = this.climbExtraGravity;
             rb.AddForce(Vector3.up * this.ms.jumpForce);
-            this.climbJumpNormal = col.GetContact(0).normal;
+            this.climbJumpNormal = normal;
             this.wallClimbingInProgress = true;
             this.wallJumpLock = true;
             StartCoroutine(nameof(this.WallJumpTimeOut));
@@ -271,7 +271,7 @@ public class PlayerHandling : MonoBehaviour
     public Vector3 GetCurrentPosition => this.gameObject.transform.position;
     #endregion
 
-    #region END_BRACKET
+    #region }
 }
 #endregion
 

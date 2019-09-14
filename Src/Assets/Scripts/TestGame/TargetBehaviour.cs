@@ -95,9 +95,12 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
             if (result == true)
             {
                 await this.gm.LightTiles(selections);
-                this.lm.Success(); 
+                this.lm.Success();
             }
-            //PrintSelection(selections);
+            else
+            {
+                await this.gm.LightTiles(selections);
+            }
         }
         else
         {

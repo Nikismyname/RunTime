@@ -332,6 +332,8 @@ public static class Compilation
         allowedAsseblyReferences.Add(unityEnginePhysicsModule);
         var unityEngineInputLegacyModule = locations.Single(x => x.EndsWith("UnityEngine.InputLegacyModule.dll"));
         allowedAsseblyReferences.Add(unityEngineInputLegacyModule);
+        var linqAssembly = locations.Single(x => x.EndsWith("System.Core.dll"));
+        allowedAsseblyReferences.Add(linqAssembly);
 
         var loader = locations.SingleOrDefault(x => x.EndsWith("Loader.dll")); ///TODO: Why Am I Adding it
         if (loader == null)

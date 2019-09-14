@@ -20,7 +20,7 @@ public class Level1Main: MonoBehaviour, ILevelMain
         this.gl = new GenerateLevel(ms, rb);
 
         var infoText = rb.InfoTextObject;
-        infoText.GetComponent<Text>().text = ProblemDesctiptions.Level1Problem;
+        infoText.GetComponent<Text>().text = ProblemDesctiptions.Level1MoveUp;
 
         this.t = gl.GenerateEntity(EntityType.Target, new Vector3(0, -5, 0), PrimitiveType.Cube, Color.gray,null,"Target");
         this.goal = gl.GenerateEntity(EntityType.NonTarget, new Vector3(0, 5, 0), PrimitiveType.Cube, Color.blue,null, "Goal");

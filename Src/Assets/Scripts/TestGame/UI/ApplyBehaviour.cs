@@ -53,7 +53,7 @@ public class ApplyBehaviour : MonoBehaviour
                 return bytes;
             });
 
-            var result = tb.Test(assBytes);
+            var result = await tb.Test(assBytes);
             Debug.Log("Test Result: " + result);
             Debug.Log("ExtPath " + ExtPath);
             //Compilation.FinalTest(ExtPath); ///Works does not load assemblies to main;

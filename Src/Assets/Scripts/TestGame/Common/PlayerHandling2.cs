@@ -22,13 +22,13 @@ public class PlayerHandling2 : MonoBehaviour
     private bool collidingWithGround = true;
     private bool collidingWithWall = true;
     private bool wallClimbingInProgress = false;
-    private bool wallJumpLock = false; 
+    private bool wallJumpLock = false;
     private Vector3? climbJumpNormal;
 
     private GameObject lastTouchedWall;
     private GameObject lastJumpedOffWall;
 
-    private Vector3 lastWallCollisionNormal = Vector3.zero; 
+    private Vector3 lastWallCollisionNormal = Vector3.zero;
 
     ///VelocitySpecifics 
     private float forceToVelocity = 0.05f;
@@ -81,7 +81,7 @@ public class PlayerHandling2 : MonoBehaviour
                 this.rb.velocity -= new Vector3(0, this.gravity * Time.deltaTime, 0);
             }
             ///...
-            
+
             this.MoveRigidBodyMovePosition();
             this.Jump();
         }
@@ -93,7 +93,7 @@ public class PlayerHandling2 : MonoBehaviour
     {
         if (this.wallClimbingInProgress)
         {
-            return; 
+            return;
         }
 
         ///Input.GetAxis is incremental GetAxisRaw switches from 0 to 1;
@@ -176,7 +176,7 @@ public class PlayerHandling2 : MonoBehaviour
     {
         yield return new WaitForSeconds(0.2f);
 
-        if(this.lastOnGroundExit == null || this.lastOnGroundExit.Value < this.lastJumpTime.Value)
+        if (this.lastOnGroundExit == null || this.lastOnGroundExit.Value < this.lastJumpTime.Value)
         {
             this.grounded = true;
             this.isJumpInProgress = false;
@@ -209,7 +209,7 @@ public class PlayerHandling2 : MonoBehaviour
         {
             this.GroundPlayer();
         }
-        else if(col.gameObject.tag == "Wall")
+        else if (col.gameObject.tag == "Wall")
         {
             var normal = col.GetContact(0).normal;
             if (normal == new Vector3(0f, 1f, 0f))
@@ -220,11 +220,12 @@ public class PlayerHandling2 : MonoBehaviour
             }
 
             ///Avoiding collistios to the very edge of the walls preventing endless bouncing 
-            if(gameObject.transform.position.y > col.gameObject.transform.localScale.y / 2)
+            if (gameObject.transform.position.y > col.gameObject.transform.localScale.y / 2)
             {
                 return;
-            } 
+            }
 
+            ///visualising touching the wall
             gameObject.GetComponent<Renderer>().material.color = Color.red;
 
             this.collidingWithWall = true;
@@ -276,87 +277,59 @@ public class PlayerHandling2 : MonoBehaviour
 
     private void JumpBounseFromWall(Vector3 normal, float yRotation)
     {
-        const float UpCheckModifier = 0.3f;
+        //Debug.Log(normal);
         var velocity = rb.velocity;
         var projectedVelocity = Vector3.ProjectOnPlane(velocity, normal); // works
-        var rotatedProjectedVelocity = Quaternion.AngleAxis(yRotation, Vector3.up) * projectedVelocity;
+        Vector3 projectedVelNorm = projectedVelocity.normalized;
+        Vector3 leftFromNormal = Quaternion.AngleAxis(90, Vector3.up) * normal;
+        Vector3 rightFromNormal = Quaternion.AngleAxis(-90, Vector3.up) * normal;
+        Vector3 upFromNormal = Quaternion.AngleAxis(-90, leftFromNormal) * normal;
+        float angleFromLeft = Vector3.Angle(leftFromNormal, projectedVelNorm);
+        float angleFromRight = Vector3.Angle(rightFromNormal, projectedVelNorm);
 
-        Vector3 jumpDirection = Vector3.zero;
-        //Quaternion desiredRotation = Quaternion.AngleAxis(45, normal);
-        //Quaternion currentRotation = Quaternion.LookRotation(projectedVelocity);
-        jumpDirection = /*desiredRotation **/ projectedVelocity.normalized;
-        //jumpDirection = (desiredRotation * currentRotation) * projectedVelocity.normalized;
-        var leftFromNormal = Quaternion.AngleAxis(90, Vector3.up) * normal;
-        var angle = Vector3.Angle(leftFromNormal, jumpDirection);
+        Vector3 right45Degrees = Quaternion.AngleAxis(45, normal) * upFromNormal;
+        Vector3 left45Degrees = Quaternion.AngleAxis(-45, normal) * upFromNormal;
 
-        if(rotatedProjectedVelocity.x < 0)
+        var diff = (angleFromLeft - angleFromRight);
+        Debug.Log($"{diff} {angleFromLeft} {angleFromRight}");
+
+        Vector3 resultJumpDirection = Vector3.zero;
+        if (Math.Abs(diff) > 20)
         {
-            jumpDirection = Quaternion.AngleAxis(-angle + 135, normal) * jumpDirection;
-        }
-        else
-        {
-            jumpDirection = Quaternion.AngleAxis(-angle + 45, normal) * jumpDirection;
-        }
-
-        var angle2 = Vector3.Angle(leftFromNormal, jumpDirection);
-        Debug.Log("Angle from right: " + angle2);
-
-        Debug.DrawLine(rb.transform.position, rb.transform.position + jumpDirection * 4, Color.red, 4);
-
-        //var go = new GameObject();
-        //go.transform.rotation = currentRotation;
-
-
-        //if (rotatedProjectedVelocity.x > 0)
-        //{
-        //    jumpDirection = (desiredRotation * currentRotation) * projectedVelocity.normalized; 
-        //}
-        //else
-        //{
-        //    jumpDirection = (desiredRotation * currentRotation) * projectedVelocity.normalized;
-        //}
-
-        if (rotatedProjectedVelocity.y < 0)
-        {
-            //Debug.Log("DOWN");
-        }
-        else
-        {
-            if (rotatedProjectedVelocity.y * UpCheckModifier > Math.Abs(rotatedProjectedVelocity.x))
+            if (diff < 0)
             {
-                Debug.Log("UP");
+                resultJumpDirection = left45Degrees;
             }
             else
             {
-                rb.velocity = jumpDirection * this.ms.jumpForce * this.ms.forceToVelocity;
-
-                //Debug.DrawLine(rb.transform.position, rb.transform.position + jumpDirection * 4, Color.green,4);
-                //Debug.Log(jumpDirection);
-
-                if (rotatedProjectedVelocity.x < 0)
-                {
-                    Debug.Log("RIGHT");
-                    
-                }
-                else if (rotatedProjectedVelocity.x > 0)
-                {
-                    Debug.Log("LEFT");
-                }
+                resultJumpDirection = right45Degrees;
             }
         }
+        else
+        {
+            resultJumpDirection = Vector3.up;
+            Debug.Log("UP UP AND AWAY");
+        }
 
-        /////Reducing the gravity
-        //this.gravity = this.climbExtraGravity;
-        //rb.velocity = Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
-        /////Saving this so when another the player presses jump we know what direction to send him in;
-        //this.climbJumpNormal = normal;
-        //this.wallClimbingInProgress = true;
-        /////This is a system where wall the player does not get automatically jumped of a wall 
-        /////if he holds the jump key; this should be raplaced with system where holding the space does not 
-        /////trigger it at all
-        //this.wallJumpLock = true;
-        //StartCoroutine(nameof(this.WallJumpTimeOut));
-        /////...
+        //Debug.DrawLine(rb.transform.position, rb.transform.position + normal.normalized * 4, Color.white, 4);
+        //Debug.DrawLine(rb.transform.position, rb.transform.position + leftFromNormal.normalized * 4, Color.blue, 4);
+        //Debug.DrawLine(rb.transform.position, rb.transform.position + upFromNormal.normalized * 4, Color.red, 4);
+        //Debug.DrawLine(rb.transform.position, rb.transform.position + right45Degrees.normalized * 4, Color.blue, 4);
+        //Debug.DrawLine(rb.transform.position, rb.transform.position + left45Degrees.normalized * 4, Color.red, 4);
+
+        rb.velocity = resultJumpDirection * this.ms.jumpForce * this.ms.forceToVelocity;
+
+        ///Reducing the gravity
+        this.gravity = this.climbExtraGravity;
+        ///Saving this so when another the player presses jump we know what direction to send him in;
+        this.climbJumpNormal = normal;
+        this.wallClimbingInProgress = true;
+        ///This is a system where wall the player does not get automatically jumped of a wall 
+        ///if he holds the jump key; this should be raplaced with system where holding the space does not 
+        ///trigger it at all
+        this.wallJumpLock = true;
+        StartCoroutine(nameof(this.WallJumpTimeOut));
+        ///...
     }
 
     private void GroundPlayer()
@@ -414,7 +387,7 @@ public class PlayerHandling2 : MonoBehaviour
     public Vector3 GetCurrentPosition => this.gameObject.transform.position;
     #endregion
 
-    #region END_BRACKET
+    #region }
 }
 #endregion
 
@@ -512,3 +485,4 @@ public class PlayerHandling2 : MonoBehaviour
 //    }
 //}
 #endregion
+
