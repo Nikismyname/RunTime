@@ -5,33 +5,38 @@ using UnityEngine;
 
 public class PlayerHandling2 : MonoBehaviour
 {
+    /// <summary>
+    /// Means responds to movement commands. Not in a vahiche for example. 
+    /// </summary>
     private bool active;
     private Camera mainCamera;
     private Main ms;
     private float speed;
     private Rigidbody rb;
-    private bool grounded;
-    private bool isJumpInProgress = false;
-    private Vector3 previousVelocity;
-
     private float jumpHeight = 1200;
     private float gravity = 100;
     private float jumpExtraGravity = 100f;
     private float climbExtraGravity = 50;
 
+    private bool grounded;
+    private bool isJumpInProgress = false;
+    private Vector3 previousVelocity;
     private bool collidingWithGround = true;
     private bool collidingWithWall = true;
     private bool wallClimbingInProgress = false;
-    private bool wallJumpLock = false;
     private Vector3? climbJumpNormal;
-
     private GameObject lastTouchedWall;
     private GameObject lastJumpedOffWall;
-
+    /// <summary>
+    /// Don't know about this too lazy to fix now 
+    /// </summary>
     private Vector3 lastWallCollisionNormal = Vector3.zero;
 
-    ///VelocitySpecifics 
     private float forceToVelocity = 0.05f;
+
+    private Vector3 velocityBeforeCollision = Vector3.zero;
+
+    private WallCollisionStatusManager collisionManager = new WallCollisionStatusManager();
 
     private void Start()
     {
@@ -70,33 +75,39 @@ public class PlayerHandling2 : MonoBehaviour
     }
     #endregion
 
-    #region UPDATE
+    #region FIXED_UPDATE
+
+    private void FixedUpdate()
+    {
+        this.velocityBeforeCollision = this.rb.velocity;
+    }
+
+    #endregion
+
+    #region MOVEMENT
+
     private void Update()
     {
         if (this.active)
         {
-            ///Simulation The Gravity;
-            if (this.grounded == false)
-            {
-                this.rb.velocity -= new Vector3(0, this.gravity * Time.deltaTime, 0);
-            }
-            ///...
+            this.SimulateGravity();
 
-            this.MoveRigidBodyMovePosition();
+            this.Move();
+
             this.Jump();
         }
     }
-    #endregion
 
-    #region MOVEMENT
-    private void MoveRigidBodyMovePosition()
+    private void Move()
     {
+        /// Not responding to movement commands while wall climbing  
+        /// TODO: What about when jumping over a wall?
         if (this.wallClimbingInProgress)
         {
             return;
         }
 
-        ///Input.GetAxis is incremental GetAxisRaw switches from 0 to 1;
+        ///Input.GetAxis is incremental GetAxisRaw switches from 0 to 1
         float moveHorizontal = Input.GetAxisRaw("Horizontal");
         float moveVertical = Input.GetAxisRaw("Vertical");
 
@@ -106,31 +117,16 @@ public class PlayerHandling2 : MonoBehaviour
         {
             this.previousVelocity = Vector3.zero;
 
-            //if (this.isJumpInProgress == false && this.grounded == true)
-            //{
-            //    this.rb.velocity = Vector3.zero;
-            //    this.rb.angularVelocity = Vector3.zero;
-            //}
-
             return;
         }
-
-        ///letting the player move the character after jump;
-        //if (this.isJumpInProgress)
-        //{
-        //    var vel = rb.velocity;
-        //    vel.x = 0;
-        //    vel.z = 0;
-        //    rb.velocity = vel;
-        //}
 
         var cameraForward = this.mainCamera.transform.forward.normalized;
         var forward2D = new Vector2(cameraForward.x, cameraForward.z);
         forward2D.Normalize();
         var forward3D = new Vector3(forward2D.x, 0, forward2D.y);
-        var sideways3d = Quaternion.AngleAxis(-90, Vector3.up) * forward3D;
+        var sideways3D = Quaternion.AngleAxis(-90, Vector3.up) * forward3D;
 
-        var offset = (moveHorizontal * sideways3d * -1 + moveVertical * forward3D).normalized * speed * Time.deltaTime * speedDown;
+        var offset = (moveHorizontal * sideways3D * -1 + moveVertical * forward3D).normalized * speed * Time.deltaTime * speedDown;
 
         this.rb.MovePosition(rb.position + offset);
         this.rb.MoveRotation(Quaternion.LookRotation(-offset));
@@ -142,19 +138,47 @@ public class PlayerHandling2 : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            /// Wall Jump
-            if (this.wallClimbingInProgress && this.wallJumpLock == false)
+            ///Wall Jump
+            if (this.wallClimbingInProgress)
             {
+                ///We do not have the normal of the wall we are climbing
                 if (this.climbJumpNormal == null)
                 {
                     Debug.Log("No Jump Normal!");
                     return;
                 }
 
-                this.rb.velocity = Vector3.zero;
-                this.rb.velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
-                this.rb.velocity += this.climbJumpNormal.Value * this.ms.jumpForce * 0.5f * this.ms.forceToVelocity;
-                this.wallClimbingInProgress = false;
+                ///You can only jump off a wall
+                if (this.collidingWithWall == false)
+                {
+                    return;
+                }
+
+                var velocity = Vector3.zero;
+                var n = Util.GetNormalDerivatives(this.climbJumpNormal.Value, 45);
+
+                if (Input.GetKey(KeyCode.W)) ///X UP
+                {
+                    var upVelocity = n.Up * this.ms.jumpForce * this.ms.forceToVelocity;
+                    velocity += upVelocity;
+                }
+                if (Input.GetKey(KeyCode.S)) ///X DOWN
+                {
+                    velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
+                    velocity += n.Normal * this.ms.jumpForce * 0.5f * this.ms.forceToVelocity;
+                }
+                if (Input.GetKey(KeyCode.A)) /// LEFT
+                {
+                    var leftVelocity = n.LeftXDegrees * this.ms.jumpForce * this.ms.forceToVelocity;
+                    velocity += leftVelocity;
+                }
+                if (Input.GetKey(KeyCode.D))/// RIGHT
+                {
+                    var rightVelocity = n.RightXDegrees * this.ms.jumpForce * this.ms.forceToVelocity;
+                    velocity += rightVelocity;
+                }
+
+                this.rb.velocity = velocity;
             }
             /// Regular Jump
             else if (this.isJumpInProgress == false)
@@ -195,11 +219,15 @@ public class PlayerHandling2 : MonoBehaviour
             }
         }
     }
-    private IEnumerator WallJumpTimeOut()
+
+    private void SimulateGravity()
     {
-        yield return new WaitForSeconds(0.2f);
-        this.wallJumpLock = false;
+        if (this.grounded == false)
+        {
+            this.rb.velocity -= new Vector3(0, this.gravity * Time.deltaTime, 0);
+        }
     }
+
     #endregion
 
     #region COLLISIONS
@@ -212,6 +240,31 @@ public class PlayerHandling2 : MonoBehaviour
         else if (col.gameObject.tag == "Wall")
         {
             var normal = col.GetContact(0).normal;
+            var name = col.gameObject.name;
+
+            ///We are moving from wall to wall
+            if (collisionManager.IsColliding())
+            {
+                var prevNormal = collisionManager.GetPreviousNormal().Value;
+                ///ASSUMPTION: the walls are verticle 
+                var angle = Vector3.SignedAngle(normal, prevNormal, Vector3.up);
+                var otherAngle = Quaternion.FromToRotation(normal, prevNormal).eulerAngles.y;
+                Debug.Log(angle + " " + otherAngle);
+
+                var alteredVelocity = (Quaternion.AngleAxis(-angle, Vector3.up) * this.velocityBeforeCollision);
+
+                Debug.DrawLine(rb.transform.position, rb.transform.position + this.velocityBeforeCollision.normalized * 4, Color.green, 4);
+                Debug.DrawLine(rb.transform.position, rb.transform.position + alteredVelocity.normalized * 4, Color.red, 4);
+
+                var nv = Util.GetNormalDerivatives(normal, 45);
+
+                this.rb.velocity = alteredVelocity;
+                this.collisionManager.RegisterCollisionEnter(name, normal, "Wall");
+                return;
+            }
+
+            this.collisionManager.RegisterCollisionEnter(name, normal, "Wall");
+
             if (normal == new Vector3(0f, 1f, 0f))
             {
                 ///the up sides of a wall is considered ground;
@@ -227,9 +280,10 @@ public class PlayerHandling2 : MonoBehaviour
 
             ///visualising touching the wall
             gameObject.GetComponent<Renderer>().material.color = Color.red;
+            //Debug.Log($"Collision Enter on wall {name}");
 
             this.collidingWithWall = true;
-            ///If the the collision is happanse from walking into the wall ignore;
+            ///If the the collision is happened from walking into the wall ignore;
             if (this.isJumpInProgress == false)
             {
                 return;
@@ -247,15 +301,24 @@ public class PlayerHandling2 : MonoBehaviour
         }
         else if (col.gameObject.tag == "Wall")
         {
-            ///We are on top of wall, acting as ground
+            /// We are exiting top of wall, acting as ground 
             if (this.lastWallCollisionNormal == new Vector3(0f, 1f, 0f))
             {
                 this.DeGroundPlayer();
             }
+            /// Exiting actuall wall
             else
             {
-                gameObject.GetComponent<Renderer>().material.color = Color.white;
+                var name = col.gameObject.name;
+
+                this.collisionManager.RegisterCollisionExit(name);
+
+                if (this.collisionManager.IsColliding() == false)
+                {
+                    gameObject.GetComponent<Renderer>().material.color = Color.white;
+                }
                 this.collidingWithWall = false;
+                this.wallClimbingInProgress = false;
             }
         }
     }
@@ -277,32 +340,29 @@ public class PlayerHandling2 : MonoBehaviour
 
     private void JumpBounseFromWall(Vector3 normal, float yRotation)
     {
-        //Debug.Log(normal);
+        var nv = Util.GetNormalDerivatives(normal, 45);
+
         var velocity = rb.velocity;
         var projectedVelocity = Vector3.ProjectOnPlane(velocity, normal); // works
-        Vector3 projectedVelNorm = projectedVelocity.normalized;
-        Vector3 leftFromNormal = Quaternion.AngleAxis(90, Vector3.up) * normal;
-        Vector3 rightFromNormal = Quaternion.AngleAxis(-90, Vector3.up) * normal;
-        Vector3 upFromNormal = Quaternion.AngleAxis(-90, leftFromNormal) * normal;
-        float angleFromLeft = Vector3.Angle(leftFromNormal, projectedVelNorm);
-        float angleFromRight = Vector3.Angle(rightFromNormal, projectedVelNorm);
 
-        Vector3 right45Degrees = Quaternion.AngleAxis(45, normal) * upFromNormal;
-        Vector3 left45Degrees = Quaternion.AngleAxis(-45, normal) * upFromNormal;
+        var pvNorm = projectedVelocity.normalized;
+
+        float angleFromLeft = Vector3.Angle(nv.Left, pvNorm);
+        float angleFromRight = Vector3.Angle(nv.Right, pvNorm);
 
         var diff = (angleFromLeft - angleFromRight);
-        Debug.Log($"{diff} {angleFromLeft} {angleFromRight}");
+        //Debug.Log($"{diff} {angleFromLeft} {angleFromRight}");
 
         Vector3 resultJumpDirection = Vector3.zero;
         if (Math.Abs(diff) > 20)
         {
             if (diff < 0)
             {
-                resultJumpDirection = left45Degrees;
+                resultJumpDirection = nv.LeftXDegrees;
             }
             else
             {
-                resultJumpDirection = right45Degrees;
+                resultJumpDirection = nv.RightXDegrees;
             }
         }
         else
@@ -327,8 +387,8 @@ public class PlayerHandling2 : MonoBehaviour
         ///This is a system where wall the player does not get automatically jumped of a wall 
         ///if he holds the jump key; this should be raplaced with system where holding the space does not 
         ///trigger it at all
-        this.wallJumpLock = true;
-        StartCoroutine(nameof(this.WallJumpTimeOut));
+        //this.wallJumpLock = true;
+        //StartCoroutine(nameof(this.WallJumpTimeOut));
         ///...
     }
 
@@ -387,102 +447,38 @@ public class PlayerHandling2 : MonoBehaviour
     public Vector3 GetCurrentPosition => this.gameObject.transform.position;
     #endregion
 
+    #region HELPERS
+    #endregion
+
     #region }
 }
 #endregion
 
-#region OLD_CODE
-//private void MoveRigidBodySetVelocity()
+
+#region TRASH_BIN
+/// https://answers.unity.com/questions/163337/velocity-before-collision.html
+//Vector3 ComputeIncidentVelocity(Rigidbody body, Collision collision, out Vector3 otherVelocity)
 //{
-//    float moveHorizontal = Input.GetAxis("Horizontal");
-//    float moveVertical = Input.GetAxis("Vertical");
-
-//    if (moveHorizontal == 0 && moveVertical == 0)
+//    Vector3 impulse = collision.impulse;
+//    // Both participants of a collision see the same impulse, so we need to flip it for one of them.
+//    if (Vector3.Dot(collision.GetContact(0).normal, impulse) < 0f)
+//        impulse *= -1f;
+//    otherVelocity = Vector3.zero;
+//    // Static or kinematic colliders won't be affected by impulses.
+//    var otherBody = collision.rigidbody;
+//    if (otherBody != null)
 //    {
-//        return;
+//        otherVelocity = otherBody.velocity;
+//        if (!otherBody.isKinematic)
+//            otherVelocity += impulse / otherBody.mass;
 //    }
 
-//    if (this.grounded == false)
-//    {
-//        return;
-//    }
+//    var bodyVel = body.velocity;
+//    var inpuls = impulse / body.mass;
 
-//    var cameraForward = this.mainCamera.transform.forward.normalized;
-//    var forward2D = new Vector2(cameraForward.x, cameraForward.z);
-//    forward2D.Normalize();
-//    var forward3D = new Vector3(forward2D.x, 0, forward2D.y);
-//    var sideways3d = Quaternion.AngleAxis(-90, Vector3.up) * forward3D;
+//    Debug.DrawLine(rb.transform.position, rb.transform.position + bodyVel.normalized * 4, Color.green, 4);
+//    Debug.DrawLine(rb.transform.position, rb.transform.position + inpuls.normalized * 5, Color.red, 4);
 
-//    var force = (moveHorizontal * sideways3d * -1 + moveVertical * forward3D) * speed * Time.deltaTime;
-//    this.rb.AddForce(force, ForceMode.VelocityChange); //if other forces are at play too;
-//    //this.rb.velocity = (moveHorizontal * sideways3d * -1 + moveVertical * forward3D) * speed * Time.deltaTime * 100;
-//}
-
-//private void MoveTransform()
-//{
-//    if (Input.GetKey(KeyCode.W))
-//    {
-//        var direction = this.GenerateNormalisedForward();
-//        transform.position += direction * speed * Time.deltaTime;
-//        transform.rotation = Quaternion.LookRotation(-direction);
-//    }
-
-//    if (Input.GetKey(KeyCode.S))
-//    {
-//        var direction = this.GenerateNormalisedForward();
-//        transform.position -= direction * speed * Time.deltaTime;
-//        transform.rotation = Quaternion.LookRotation(direction);
-//    }
-
-
-//    if (Input.GetKey(KeyCode.D))
-//    {
-//        var direction = this.GenerateNormalisedForward(true);
-//        transform.position -= direction * speed * Time.deltaTime;
-//        transform.rotation = Quaternion.LookRotation(direction);
-//    }
-
-//    if (Input.GetKey(KeyCode.A))
-//    {
-//        var direction = this.GenerateNormalisedForward(true);
-//        transform.position += direction * speed * Time.deltaTime;
-//        transform.rotation = Quaternion.LookRotation(-direction);
-//    }
-//}
-
-//private void MoveRigidBodyMovePositionFull()
-//{
-//    if (Input.GetKey(KeyCode.W))
-//    {
-//        var direction = this.GenerateNormalisedForwardRigidBody();
-//        var offset = direction * speed * Time.deltaTime;
-//        this.rb.MovePosition(rb.position + offset);
-//        this.rb.MoveRotation(Quaternion.LookRotation(-direction));
-//    }
-
-//    if (Input.GetKey(KeyCode.S))
-//    {
-//        var direction = this.GenerateNormalisedForwardRigidBody();
-//        var offset = -direction * speed * Time.deltaTime;
-//        this.rb.MovePosition(rb.position + offset);
-//        this.rb.MoveRotation(Quaternion.LookRotation(direction));
-//    }
-
-//    if (Input.GetKey(KeyCode.D))
-//    {
-//        var direction = this.GenerateNormalisedForwardRigidBody(true);
-//        var offset = -direction * speed * Time.deltaTime;
-//        this.rb.MovePosition(rb.position + offset);
-//        this.rb.MoveRotation(Quaternion.LookRotation(direction));
-//    }
-
-//    if (Input.GetKey(KeyCode.A))
-//    {
-//        var direction = this.GenerateNormalisedForwardRigidBody(true);
-//        var offset = direction * speed * Time.deltaTime;
-//        this.rb.MovePosition(rb.position + offset);
-//        this.rb.MoveRotation(Quaternion.LookRotation(-direction));
-//    }
+//    return bodyVel - inpuls;
 //}
 #endregion
-
