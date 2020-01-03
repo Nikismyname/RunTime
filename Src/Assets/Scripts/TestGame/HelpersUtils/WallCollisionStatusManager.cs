@@ -43,7 +43,7 @@ public class WallCollisionStatusManager
     /// Returns the first normal of colliding object or null
     /// </summary>
     /// <returns></returns>
-    public Vector3? GetPreviousNormal() => this.wallCollisions.FirstOrDefault(x => x.IsColliding == true)?.Normal; 
+    public Vector3? GetCurrenNormal() => this.wallCollisions.FirstOrDefault(x => x.IsColliding == true)?.Normal; 
 
     /// <summary>
     /// Is the player colliding with any of the tracked objects.

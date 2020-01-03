@@ -1,10 +1,12 @@
-﻿using System;
+﻿#region INIT
+
+using System;
 using UnityEngine;
 
 public class GenerateLevel
 {
     private Main ms;
-    private GridManager gm; 
+    private GridManager gm;
     private ReferenceBuffer rb;
 
     public GenerateLevel(Main ms, ReferenceBuffer rb, GridManager gm = null)
@@ -13,6 +15,10 @@ public class GenerateLevel
         this.rb = rb;
         this.gm = gm;
     }
+
+    #endregion
+
+    #region CYLINDER BASE PREFAB
 
     public GameObject CylinderBasePrefab(Vector3 scale, bool collider = false)
     {
@@ -31,16 +37,20 @@ public class GenerateLevel
         return baseCilinder;
     }
 
+    #endregion
+
+    #region ENTITY 
+
     public GameObject GenerateEntity(
         EntityType enType,
         Vector3 postions,
         PrimitiveType pType = PrimitiveType.Sphere,
         Color? color = null,
         Vector3? scale = null,
-        string name = "entity",
+        string GOName = "entity",
         Type[] scriptTypes = null)
     {
-        if(scriptTypes == null)
+        if (scriptTypes == null)
         {
             scriptTypes = new Type[0];
         }
@@ -60,7 +70,7 @@ public class GenerateLevel
         if (enType == EntityType.Target)
         {
             entity.AddComponent<TargetBehaviour>();
-            this.ms.RegisterTarget(entity);
+            this.ms.RegisterTarget(entity, TargetType.Standard);
         }
 
         entity.transform.localScale = scale.Value;
@@ -68,8 +78,8 @@ public class GenerateLevel
         var y = entity.GetComponent<MeshRenderer>().bounds.size.y;
         entity.transform.position = postions + new Vector3(0, y / 2, 0);
 
-        entity.GetComponent<Renderer>().material.color = color.Value; 
-        entity.name = name;
+        entity.GetComponent<Renderer>().material.color = color.Value;
+        entity.name = GOName;
 
         foreach (var type in scriptTypes)
         {
@@ -77,6 +87,28 @@ public class GenerateLevel
         }
 
         return entity;
+    }
+
+    public GameObject GenerateTestEntity(
+        string testName,
+        string GOName,
+        TargetType tType,
+        Vector3? position = null,
+        Vector3? scale = null,
+        PrimitiveType pType = PrimitiveType.Sphere
+        )
+    {
+        if (position == null) { position = Vector3.zero; }
+        if (scale == null) { scale = new Vector3(1, 1, 1); }
+
+        var testEntity = GameObject.CreatePrimitive(pType);
+        var tb = testEntity.AddComponent<TargetBehaviour>();
+        ms.RegisterTarget(testEntity, tType, testName);
+        testEntity.name = GOName;
+        testEntity.transform.position = position.Value;
+        testEntity.transform.localScale = scale.Value;
+
+        return testEntity;
     }
 
     public GameObject GenerateEntityFromPrefab(
@@ -98,15 +130,15 @@ public class GenerateLevel
         if (enType == EntityType.Target)
         {
             entity.AddComponent<TargetBehaviour>();
-            this.ms.RegisterTarget(entity);
+            this.ms.RegisterTarget(entity, TargetType.Standard);
 
-            if(scriptsToRegister != null)
+            if (scriptsToRegister != null)
             {
                 foreach (var scriptType in scriptsToRegister)
                 {
                     var script = (MonoBehaviour)entity.GetComponent(scriptType);
                     var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
-                    this.ms.RegisterCompileTimeMono(entity,funcs, script); 
+                    this.ms.RegisterCompileTimeMono(entity, funcs, script);
                 }
             }
         }
@@ -123,6 +155,10 @@ public class GenerateLevel
 
         return entity;
     }
+
+    #endregion
+
+    #region SPACE SHIP
 
     public GameObject GenerateSpaceShip(
         EntityType enType,
@@ -151,7 +187,7 @@ public class GenerateLevel
         if (enType == EntityType.Target)
         {
             scriptsObject.AddComponent<TargetBehaviour>();
-            this.ms.RegisterTarget(scriptsObject);
+            this.ms.RegisterTarget(scriptsObject, TargetType.Standard);
 
             if (scriptsToRegister != null)
             {
@@ -177,9 +213,13 @@ public class GenerateLevel
         return scriptsObject;
     }
 
-    public GameObject Player(Vector3 position,bool kinematic, bool rigidBody,bool isTarget, params Type[] scripts)
+    #endregion
+
+    #region PLAYER
+
+    public GameObject Player(Vector3 position, bool kinematic, bool rigidBody, bool isTarget, params Type[] scripts)
     {
-        GameObject player = null; 
+        GameObject player = null;
 
         if (kinematic)
         {
@@ -207,20 +247,24 @@ public class GenerateLevel
         if (isTarget)
         {
             var tb = player.AddComponent<TargetBehaviour>();
-            tb.SetUp(99);
-            this.ms.RegisterTarget(player);
+            //tb.SetUp(99, TargetType.Standard);
+            this.ms.RegisterTarget(player, TargetType.Standard);
         }
 
-        if(rigidBody == false)
+        if (rigidBody == false)
         {
             GameObject.Destroy(player.GetComponent<Rigidbody>());
         }
 
-        position.y += 1; 
+        position.y += 1;
 
         player.transform.position = position;
         return player;
     }
+
+    #endregion
+
+    #region GENERATE GRID
 
     /// <summary>
     /// Generates a grid based level platform
@@ -231,32 +275,32 @@ public class GenerateLevel
     /// <returns>The grid parent GameObject</returns>
     public GameObject GenerateGrid(int Y, int X, Vector3? position = null)
     {
-        if(position == null)
+        if (position == null)
         {
-            position = Vector3.zero; 
+            position = Vector3.zero;
         }
-        
+
         var sideLenght = 5f;
         var margin = sideLenght * 0.1f;
 
         var plane = GameObject.CreatePrimitive(PrimitiveType.Cube);
         var planeX = (X + 2) * sideLenght + (X + 3) * margin;
-        var planeY = (Y + 2) * sideLenght + (Y + 3) * margin; 
+        var planeY = (Y + 2) * sideLenght + (Y + 3) * margin;
         plane.transform.localScale = new Vector3(planeX, 1, planeY);
-        plane.transform.position = new Vector3(planeX/2 /*-( margin + sideLenght)*/, -0.5f, planeY/2 /*- (margin + sideLenght)*/); 
+        plane.transform.position = new Vector3(planeX / 2 /*-( margin + sideLenght)*/, -0.5f, planeY / 2 /*- (margin + sideLenght)*/);
         plane.GetComponent<MeshRenderer>().material.color = Color.blue;
         plane.GetComponent<MeshRenderer>().material.shader = Shader.Find("Unlit/Color");
         plane.name = "BasePlane";
 
         var oriantationTyle = CreateTile(0, 0, false);
 
-        oriantationTyle.GetComponent<MeshRenderer>().material.color = Colors.OrientationTile; 
+        oriantationTyle.GetComponent<MeshRenderer>().material.color = Colors.OrientationTile;
 
         for (int i = 1; i <= Y; i++)
         {
             for (int j = 1; j <= X; j++)
             {
-                CreateTile(i,j, true);
+                CreateTile(i, j, true);
             }
         }
 
@@ -271,16 +315,16 @@ public class GenerateLevel
             if (stepable)
             {
                 var script = tile.AddComponent<TileBehaviour>();
-                if(this.gm != null)
+                if (this.gm != null)
                 {
-                    this.gm.RegisterTyle(y-1,x-1,script);
+                    this.gm.RegisterTyle(y - 1, x - 1, script);
                 }
                 else
                 {
                     Debug.Log("Grid Manager Not Present!");
                 }
 
-                script.SetUp(y -1,x -1);
+                script.SetUp(y - 1, x - 1);
             }
             tile.transform.localScale = new Vector3(sideLenght, 0, sideLenght);
             tile.GetComponent<MeshRenderer>().material.color = Color.green;
@@ -289,7 +333,7 @@ public class GenerateLevel
                 ///+ 0.5f * sideLenght on x and z is to center tile after calculation upper left corner value
                 (x + 1) * margin + (x) * sideLenght + 0.5f * sideLenght,
                 0.01f,
-                (y + 1) * margin + (y) * sideLenght + 0.5f * sideLenght 
+                (y + 1) * margin + (y) * sideLenght + 0.5f * sideLenght
             );
 
             tile.transform.SetParent(plane.transform);
@@ -297,4 +341,129 @@ public class GenerateLevel
             return tile;
         }
     }
+
+    #endregion
+
+    #region
+
+    public GameObject CreatePlottedWall
+        (
+            Vector3 position,
+            Vector3 scale,
+            Vector3 rotation,
+            Color color,
+            bool plot,
+            Color plotColor,
+            float plotSize = 1
+        )
+    {
+        var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.transform.localScale = scale;
+
+        var xRepetitions = scale.x / plotSize;
+        var xReminder = xRepetitions % 1;
+        var yRepetitions = scale.y / plotSize;
+        var yReminder = yRepetitions % 1;
+
+        if (xReminder > 0.5)
+        {
+            xRepetitions = (float)Math.Floor(xRepetitions) + 1;
+        }
+        else
+        {
+
+            xRepetitions = (float)Math.Floor(xRepetitions);
+        }
+
+        if (yReminder > 0.5)
+        {
+            yRepetitions = (float)Math.Floor(yRepetitions) + 1;
+        }
+        else
+        {
+
+            yRepetitions = (float)Math.Floor(yRepetitions);
+        }
+
+        var xLength = scale.x / xRepetitions;
+        var yLength = scale.y / yRepetitions;
+
+        xRepetitions += 1;
+        yRepetitions += 1;
+
+        for (int i = 0; i < xRepetitions; i++)
+        {
+            var xPos = i * xLength - (scale.x / 2);
+            var frontLine = this.CreateLine
+            (
+                new Vector3(xPos, 0, -scale.z / 2),
+                new Vector3(0, 0, 0),
+                new Vector3(0.1f, scale.y / 2, 0.1f),
+                Color.red,
+                wall.transform
+            );
+            frontLine.name = "Front 1";
+
+            var backLine = this.CreateLine
+            (
+                new Vector3(xPos, 0, scale.z / 2),
+                new Vector3(0, 0, 0),
+                new Vector3(0.1f, scale.y / 2, 0.1f),
+                Color.red,
+                wall.transform
+            );
+            backLine.name = "Back 1";
+        }
+
+        for (int i = 0; i < yRepetitions; i++)
+        {
+            var yPos = i * yLength - (scale.y / 2);
+            var frontLine = this.CreateLine
+            (
+                new Vector3(0, yPos, -scale.z / 2),
+                new Vector3(0, 0, 90),
+                new Vector3(0.1f, scale.y / 2, 0.1f),
+                Color.red,
+                wall.transform
+            );
+            frontLine.name = "Front 2";
+
+            var backLine = this.CreateLine
+            (
+                new Vector3(0, yPos, scale.z / 2),
+                new Vector3(0, 0, 90),
+                new Vector3(0.1f, scale.y / 2, 0.1f),
+                Color.red,
+                wall.transform
+            );
+            backLine.name = "Back 2";
+        }
+
+        wall.transform.position = position;
+        wall.transform.eulerAngles = rotation;
+
+        return wall;
+    }
+
+    private GameObject CreateLine
+        (
+            Vector3 position,
+            Vector3 rotation,
+            Vector3 scale,
+            Color color,
+            Transform parent
+        )
+    {
+        var line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        GameObject.Destroy(line.GetComponent<Collider>());
+        line.GetComponent<Renderer>().material.color = color;
+        line.transform.localScale = scale;
+        line.transform.position = position;
+        line.transform.eulerAngles = rotation;
+        line.transform.parent = parent;
+        return line;
+    }
+
+    #endregion
 }
+

@@ -59,7 +59,7 @@ public class Main : MonoBehaviour
     /// </summary>
     /// <param name="newTarget">The new target itself</param>
     /// <param name="testName">If it is a test target this is the name of the test they are for.</param>
-    public void RegisterTarget(GameObject newTarget, string testName = "", bool isGrid = false)
+    public void RegisterTarget(GameObject newTarget, TargetType targetType, string testName = "")
     {
         var tb = newTarget.GetComponent<TargetBehaviour>();
         if (tb == null)
@@ -70,14 +70,7 @@ public class Main : MonoBehaviour
         }
 
         var newId = this.targets.Count;
-        if (testName == "")
-        {
-            tb.SetUp(newId);
-        }
-        else
-        {
-            tb.SetUp(newId, TargetType.Test, testName, isGrid);
-        }
+        tb.SetUp(newId, targetType,  testName);
         this.targets.Add(newTarget);
     }
 
@@ -613,7 +606,7 @@ public class Main : MonoBehaviour
             var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             obj.transform.position = positions[i];
             var scr = obj.AddComponent<TargetBehaviour>();
-            scr.SetUp(i);
+            scr.SetUp(i, TargetType.Standard);
             this.targets.Add(obj);
         }
     }

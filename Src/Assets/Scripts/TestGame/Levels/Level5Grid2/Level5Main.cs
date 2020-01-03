@@ -21,7 +21,7 @@ public class Level5Main : MonoBehaviour, ILevelMain
 
         var solvingSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         var tb = solvingSphere.AddComponent<TargetBehaviour>();
-        ms.RegisterTarget(solvingSphere, GridTestMap.Level5TestName, true);
+        ms.RegisterTarget(solvingSphere, TargetType.Test, GridTestMap.Level5TestName);
         solvingSphere.name = "Solving Sphere";
         solvingSphere.transform.position = new Vector3(0, 10, 0);
     }

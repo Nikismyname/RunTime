@@ -1,6 +1,8 @@
 ﻿public enum TargetType
 {
     Standard, 
-    Test
+    Test,
+    GridTest,
+    BattleMovement
 }
 

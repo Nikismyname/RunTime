@@ -21,7 +21,7 @@ public class Level6Main : MonoBehaviour, ILevelMain
 
         var solvingSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         var tb = solvingSphere.AddComponent<TargetBehaviour>();
-        ms.RegisterTarget(solvingSphere, GridTestMap.level6TestName, true);
+        ms.RegisterTarget(solvingSphere, TargetType.Test, GridTestMap.level6TestName);
         solvingSphere.name = "Solving Sphere";
         solvingSphere.transform.position = new Vector3(0, 10, 0);
     }

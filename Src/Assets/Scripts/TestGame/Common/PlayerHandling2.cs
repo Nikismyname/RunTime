@@ -1,10 +1,11 @@
-﻿#region INIT
-using System;
-using System.Collections;
+﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHandling2 : MonoBehaviour
 {
+    #region VARIABLES
     /// <summary>
     /// Means responds to movement commands. Not in a vahiche for example. 
     /// </summary>
@@ -15,6 +16,7 @@ public class PlayerHandling2 : MonoBehaviour
     private Rigidbody rb;
     private float jumpHeight = 1200;
     private float gravity = 100;
+    private float noGravity = 0;
     private float jumpExtraGravity = 100f;
     private float climbExtraGravity = 50;
 
@@ -24,9 +26,11 @@ public class PlayerHandling2 : MonoBehaviour
     private bool collidingWithGround = true;
     private bool collidingWithWall = true;
     private bool wallClimbingInProgress = false;
-    private Vector3? climbJumpNormal;
-    private GameObject lastTouchedWall;
-    private GameObject lastJumpedOffWall;
+
+    //private Vector3? climbJumpNormal;
+    //private GameObject lastTouchedWall;
+    //private GameObject lastJumpedOffWall;
+
     /// <summary>
     /// Don't know about this too lazy to fix now 
     /// </summary>
@@ -38,6 +42,37 @@ public class PlayerHandling2 : MonoBehaviour
 
     private WallCollisionStatusManager collisionManager = new WallCollisionStatusManager();
 
+    private int maxActionPoints = 3;
+    private int actionPoints = 3;
+    private int jumpTokensRechargeSec = 10;
+
+    private float? firstPressOfW = null;
+    private float doublePressInterval = 0.5f;
+
+    private Image overlayImage;
+    private Image image;
+    private Text text;
+    private Color imageOriginalColor;
+
+    private float actionPointRechargeTime = 15f;
+    private bool recharging = false;
+
+    private delegate void RechargeDone();
+    private event RechargeDone ActionPointRecharged;
+
+    private int tapsCount = 0;
+    private int tapsForActionPoint = 3;
+    private bool holdingWall = false;
+
+    //private DateTime? lastJumpTime;
+    //private DateTime? lastOnGroundExit;
+
+    private KeyCode rechargeWhileHangingKeyCode = KeyCode.V;
+
+    #endregion
+
+    #region START
+
     private void Start()
     {
         this.active = true;
@@ -45,10 +80,100 @@ public class PlayerHandling2 : MonoBehaviour
         this.speed = ms.playerSpeed;
         this.mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
         this.rb = gameObject.GetComponent<Rigidbody>();
+        var actionPoints = GameObject.Find("ActionPoints");
+
+        this.overlayImage = actionPoints.transform.Find("Image").GetComponent<Image>();
+        this.image = actionPoints.GetComponent<Image>();
+        this.text = actionPoints.GetComponentInChildren<Text>();
+
+        this.ActionPointRecharged += TriggerActionPointRecharge;
+        this.text.text = this.maxActionPoints.ToString();
+
+        this.imageOriginalColor = image.color;
+
+        //this.GroundPlayer();
     }
 
-    private DateTime? lastJumpTime;
-    private DateTime? lastOnGroundExit;
+    #endregion
+
+    #region ACTION_POINTS_DISPLAY_VISUALS
+
+    private void APDFlash(int timeInMS, Color color)
+    {
+        this.image.color = color;
+        this.APDEndFlash(timeInMS);
+    }
+
+    private async void APDEndFlash(int time)
+    {
+        await Task.Delay(time);
+        this.image.color = this.imageOriginalColor;
+    }
+
+    #endregion
+
+    #region V_ACTION_POINTS_RECHARGE
+
+    public void TapSpaceToRechargePoint()
+    {
+        if (Input.GetKeyDown(this.rechargeWhileHangingKeyCode))
+        {
+            if (this.holdingWall)
+            {
+                this.tapsCount++;
+                if (this.tapsCount == this.tapsForActionPoint && this.actionPoints < this.maxActionPoints)
+                {
+                    this.actionPoints++;
+                    this.text.text = this.actionPoints.ToString();
+                    this.APDFlash(300, Color.green);
+                    this.tapsCount = 0;
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region ACTION_POINT_RECHARGE
+
+    private void TriggerActionPointRecharge()
+    {
+        if (this.actionPoints < this.maxActionPoints && this.recharging == false)
+        {
+            this.RechargeActionPointsAsync();
+        }
+        else
+        {
+            this.overlayImage.fillAmount = 0.0f;
+        }
+    }
+
+    private async void RechargeActionPointsAsync()
+    {
+        this.recharging = true;
+
+        const int stepsPerSecond = 5;
+        var steps = actionPointRechargeTime * stepsPerSecond;
+
+        for (int i = 0; i < steps; i++)
+        {
+            if (this.actionPoints == this.maxActionPoints)
+            {
+                this.overlayImage.fillAmount = 0.0f;
+                return;
+            }
+
+            var fraction = i / steps;
+            overlayImage.fillAmount = fraction;
+            await Task.Delay(1000 / stepsPerSecond);
+        }
+
+        this.actionPoints++;
+        this.text.text = this.actionPoints.ToString();
+        this.recharging = false;
+        ActionPointRecharged.Invoke();
+    }
+
     #endregion
 
     #region ON_GUI 
@@ -75,7 +200,77 @@ public class PlayerHandling2 : MonoBehaviour
     }
     #endregion
 
-    #region FIXED_UPDATE
+    #region HOLD_WALL_DC_W 
+
+    private void DoubleClickWAction()
+    {
+        if (this.holdingWall)
+        {
+            this.DoubleClickWUnfreeze("W->W");
+        }
+        else if (wallClimbingInProgress)
+        {
+            this.rb.velocity = Vector3.zero;
+            this.gravity = this.noGravity;
+            this.holdingWall = true;
+            Debug.Log("Double Click W");
+        }
+    }
+
+    private void DoubleClickWUnfreeze(string id = null)
+    {
+        if (id != null)
+        {
+            //Debug.Log(id);
+        }
+
+        this.holdingWall = false; ;
+        this.gravity = this.climbExtraGravity;
+    }
+
+    private void DoubleClickWCheck()
+    {
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            var time = Time.time;
+            if (this.firstPressOfW == null)
+            {
+                this.firstPressOfW = time;
+            }
+            else
+            {
+                var deltaT = Math.Abs(this.firstPressOfW.Value - time);
+                if (deltaT <= this.doublePressInterval)
+                {
+                    this.DoubleClickWAction();
+                    this.firstPressOfW = null;
+                }
+                else
+                {
+                    this.firstPressOfW = time;
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region UPDATE
+
+    private void Update()
+    {
+        if (this.active == false) { return; }
+
+        this.DoubleClickWCheck();
+
+        this.SimulateGravity();
+
+        this.Move();
+
+        this.Jump();
+
+        this.TapSpaceToRechargePoint();
+    }
 
     private void FixedUpdate()
     {
@@ -85,18 +280,6 @@ public class PlayerHandling2 : MonoBehaviour
     #endregion
 
     #region MOVEMENT
-
-    private void Update()
-    {
-        if (this.active)
-        {
-            this.SimulateGravity();
-
-            this.Move();
-
-            this.Jump();
-        }
-    }
 
     private void Move()
     {
@@ -116,9 +299,10 @@ public class PlayerHandling2 : MonoBehaviour
         if (moveHorizontal == 0 && moveVertical == 0)
         {
             this.previousVelocity = Vector3.zero;
-
             return;
         }
+
+        this.DoubleClickWUnfreeze("Move");
 
         var cameraForward = this.mainCamera.transform.forward.normalized;
         var forward2D = new Vector2(cameraForward.x, cameraForward.z);
@@ -138,11 +322,12 @@ public class PlayerHandling2 : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            var normal = this.collisionManager.GetCurrenNormal();
             ///Wall Jump
             if (this.wallClimbingInProgress)
             {
                 ///We do not have the normal of the wall we are climbing
-                if (this.climbJumpNormal == null)
+                if (normal == null)
                 {
                     Debug.Log("No Jump Normal!");
                     return;
@@ -155,67 +340,83 @@ public class PlayerHandling2 : MonoBehaviour
                 }
 
                 var velocity = Vector3.zero;
-                var n = Util.GetNormalDerivatives(this.climbJumpNormal.Value, 45);
+                var directionCount = 0;
+                var isDirectionalJump = false;
+
+                var n = Util.GetNormalDerivatives(normal.Value, 45);
 
                 if (Input.GetKey(KeyCode.W)) ///X UP
                 {
+                    directionCount++;
                     var upVelocity = n.Up * this.ms.jumpForce * this.ms.forceToVelocity;
                     velocity += upVelocity;
+                    isDirectionalJump = true;
                 }
                 if (Input.GetKey(KeyCode.S)) ///X DOWN
                 {
+                    directionCount++;
                     velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
                     velocity += n.Normal * this.ms.jumpForce * 0.5f * this.ms.forceToVelocity;
+                    isDirectionalJump = true;
                 }
                 if (Input.GetKey(KeyCode.A)) /// LEFT
                 {
+                    directionCount++;
                     var leftVelocity = n.LeftXDegrees * this.ms.jumpForce * this.ms.forceToVelocity;
+                    isDirectionalJump = true;
                     velocity += leftVelocity;
                 }
                 if (Input.GetKey(KeyCode.D))/// RIGHT
                 {
+                    directionCount++;
                     var rightVelocity = n.RightXDegrees * this.ms.jumpForce * this.ms.forceToVelocity;
+                    isDirectionalJump = true;
                     velocity += rightVelocity;
                 }
 
-                this.rb.velocity = velocity;
+                if (isDirectionalJump)
+                {
+                    if (this.actionPoints > 0)
+                    {
+                        this.actionPoints--;
+                        this.text.text = this.actionPoints.ToString();
+                        this.TriggerActionPointRecharge();
+                        this.rb.velocity = velocity / directionCount;
+                        this.DoubleClickWUnfreeze("Wall Jump");
+                    }
+                    else
+                    {
+                        this.APDFlash(300, Color.red);
+                    }
+                }
             }
             /// Regular Jump
             else if (this.isJumpInProgress == false)
             {
-                this.isJumpInProgress = true;
-                this.wallClimbingInProgress = false;
-                this.grounded = false;
-                rb.velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
-                rb.velocity += this.previousVelocity.normalized * 500 * this.ms.forceToVelocity;
-
-                ///This system resets the jump capability after a jump that did not get off the ground.
-                //this.lastJumpTime = DateTime.Now;
-                //this.StartCoroutine(nameof(this.JumpCoroutine));
-            }
-        }
-    }
-
-    private IEnumerator JumpCoroutine()
-    {
-        yield return new WaitForSeconds(0.2f);
-
-        if (this.lastOnGroundExit == null || this.lastOnGroundExit.Value < this.lastJumpTime.Value)
-        {
-            this.grounded = true;
-            this.isJumpInProgress = false;
-
-            if (this.lastOnGroundExit == null)
-            {
-                Debug.Log("Player is at reset after jump! NULL");
-
+                if (this.collidingWithWall)
+                {
+                    ///TODO: Add directions
+                    var resultJumpDirection = Vector3.up;
+                    rb.velocity = resultJumpDirection * this.ms.jumpForce * this.ms.forceToVelocity;
+                    this.gravity = this.climbExtraGravity;
+                    this.wallClimbingInProgress = true;
+                }
+                else
+                {
+                    this.isJumpInProgress = true;
+                    this.wallClimbingInProgress = false;
+                    this.grounded = false;
+                    rb.velocity += Vector3.up * this.ms.jumpForce * this.ms.forceToVelocity;
+                    rb.velocity += this.previousVelocity.normalized * 500 * this.ms.forceToVelocity;
+                    this.DoubleClickWUnfreeze("Regular Jump");
+                    ///This system resets the jump capability after a jump that did not get off the ground.
+                    //this.lastJumpTime = DateTime.Now;
+                    //this.StartCoroutine(nameof(this.JumpCoroutine));
+                }
             }
             else
             {
-                if (this.lastOnGroundExit.Value < this.lastJumpTime.Value)
-                {
-                    Debug.Log("Player is at reset after jump! TIME");
-                }
+                Debug.Log("isJumpInProgress = true");
             }
         }
     }
@@ -242,22 +443,24 @@ public class PlayerHandling2 : MonoBehaviour
             var normal = col.GetContact(0).normal;
             var name = col.gameObject.name;
 
+            if (normal == new Vector3(0f, 1f, 0f))
+            {
+                Debug.Log("Wall Up!");
+                ///the up sides of a wall is considered ground;
+                this.GroundPlayer();
+                return;
+            }
+
             ///We are moving from wall to wall
             if (collisionManager.IsColliding())
             {
-                var prevNormal = collisionManager.GetPreviousNormal().Value;
+                Debug.Log("Moving frow wall to wall!");
+                var prevNormal = collisionManager.GetCurrenNormal().Value;
                 ///ASSUMPTION: the walls are verticle 
                 var angle = Vector3.SignedAngle(normal, prevNormal, Vector3.up);
                 var otherAngle = Quaternion.FromToRotation(normal, prevNormal).eulerAngles.y;
-                Debug.Log(angle + " " + otherAngle);
-
                 var alteredVelocity = (Quaternion.AngleAxis(-angle, Vector3.up) * this.velocityBeforeCollision);
-
-                Debug.DrawLine(rb.transform.position, rb.transform.position + this.velocityBeforeCollision.normalized * 4, Color.green, 4);
-                Debug.DrawLine(rb.transform.position, rb.transform.position + alteredVelocity.normalized * 4, Color.red, 4);
-
                 var nv = Util.GetNormalDerivatives(normal, 45);
-
                 this.rb.velocity = alteredVelocity;
                 this.collisionManager.RegisterCollisionEnter(name, normal, "Wall");
                 return;
@@ -265,16 +468,10 @@ public class PlayerHandling2 : MonoBehaviour
 
             this.collisionManager.RegisterCollisionEnter(name, normal, "Wall");
 
-            if (normal == new Vector3(0f, 1f, 0f))
-            {
-                ///the up sides of a wall is considered ground;
-                this.GroundPlayer();
-                return;
-            }
-
             ///Avoiding collistios to the very edge of the walls preventing endless bouncing 
             if (gameObject.transform.position.y > col.gameObject.transform.localScale.y / 2)
             {
+                Debug.Log("Collision with endge of the wall!");
                 return;
             }
 
@@ -283,12 +480,12 @@ public class PlayerHandling2 : MonoBehaviour
             //Debug.Log($"Collision Enter on wall {name}");
 
             this.collidingWithWall = true;
-            ///If the the collision is happened from walking into the wall ignore;
             if (this.isJumpInProgress == false)
             {
                 return;
             }
 
+            Debug.Log("Jump from the wall!");
             this.JumpBounseFromWall(normal, col.gameObject.transform.rotation.y);
         }
     }
@@ -316,9 +513,10 @@ public class PlayerHandling2 : MonoBehaviour
                 if (this.collisionManager.IsColliding() == false)
                 {
                     gameObject.GetComponent<Renderer>().material.color = Color.white;
+
+                    this.collidingWithWall = false;
+                    this.wallClimbingInProgress = false;
                 }
-                this.collidingWithWall = false;
-                this.wallClimbingInProgress = false;
             }
         }
     }
@@ -334,7 +532,7 @@ public class PlayerHandling2 : MonoBehaviour
     private void DeGroundPlayer()
     {
         this.grounded = false;
-        this.lastOnGroundExit = DateTime.Now;
+        //this.lastOnGroundExit = DateTime.Now;
         this.collidingWithGround = false;
     }
 
@@ -343,15 +541,14 @@ public class PlayerHandling2 : MonoBehaviour
         var nv = Util.GetNormalDerivatives(normal, 45);
 
         var velocity = rb.velocity;
-        var projectedVelocity = Vector3.ProjectOnPlane(velocity, normal); // works
+        var projectedVelocity = Vector3.ProjectOnPlane(velocity, normal);
 
         var pvNorm = projectedVelocity.normalized;
 
-        float angleFromLeft = Vector3.Angle(nv.Left, pvNorm);
-        float angleFromRight = Vector3.Angle(nv.Right, pvNorm);
+        var angleFromLeft = Vector3.Angle(nv.Left, pvNorm);
+        var angleFromRight = Vector3.Angle(nv.Right, pvNorm);
 
         var diff = (angleFromLeft - angleFromRight);
-        //Debug.Log($"{diff} {angleFromLeft} {angleFromRight}");
 
         Vector3 resultJumpDirection = Vector3.zero;
         if (Math.Abs(diff) > 20)
@@ -368,28 +565,12 @@ public class PlayerHandling2 : MonoBehaviour
         else
         {
             resultJumpDirection = Vector3.up;
-            Debug.Log("UP UP AND AWAY");
         }
-
-        //Debug.DrawLine(rb.transform.position, rb.transform.position + normal.normalized * 4, Color.white, 4);
-        //Debug.DrawLine(rb.transform.position, rb.transform.position + leftFromNormal.normalized * 4, Color.blue, 4);
-        //Debug.DrawLine(rb.transform.position, rb.transform.position + upFromNormal.normalized * 4, Color.red, 4);
-        //Debug.DrawLine(rb.transform.position, rb.transform.position + right45Degrees.normalized * 4, Color.blue, 4);
-        //Debug.DrawLine(rb.transform.position, rb.transform.position + left45Degrees.normalized * 4, Color.red, 4);
 
         rb.velocity = resultJumpDirection * this.ms.jumpForce * this.ms.forceToVelocity;
 
-        ///Reducing the gravity
         this.gravity = this.climbExtraGravity;
-        ///Saving this so when another the player presses jump we know what direction to send him in;
-        this.climbJumpNormal = normal;
         this.wallClimbingInProgress = true;
-        ///This is a system where wall the player does not get automatically jumped of a wall 
-        ///if he holds the jump key; this should be raplaced with system where holding the space does not 
-        ///trigger it at all
-        //this.wallJumpLock = true;
-        //StartCoroutine(nameof(this.WallJumpTimeOut));
-        ///...
     }
 
     private void GroundPlayer()
@@ -455,7 +636,31 @@ public class PlayerHandling2 : MonoBehaviour
 #endregion
 
 
-#region TRASH_BIN
+#region Depricated
+//private IEnumerator JumpCoroutine()
+//{
+//    yield return new WaitForSeconds(0.2f);
+
+//    if (this.lastOnGroundExit == null || this.lastOnGroundExit.Value < this.lastJumpTime.Value)
+//    {
+//        this.grounded = true;
+//        this.isJumpInProgress = false;
+
+//        if (this.lastOnGroundExit == null)
+//        {
+//            Debug.Log("Player is at reset after jump! NULL");
+
+//        }
+//        else
+//        {
+//            if (this.lastOnGroundExit.Value < this.lastJumpTime.Value)
+//            {
+//                Debug.Log("Player is at reset after jump! TIME");
+//            }
+//        }
+//    }
+//}
+
 /// https://answers.unity.com/questions/163337/velocity-before-collision.html
 //Vector3 ComputeIncidentVelocity(Rigidbody body, Collision collision, out Vector3 otherVelocity)
 //{

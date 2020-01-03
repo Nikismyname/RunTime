@@ -70,8 +70,20 @@ public static class Compilation
         {
             loader = locations.SingleOrDefault(x => x.EndsWith("Loader2.dll"));
         }
-
         assembliesToLoad.Add(loader);
+
+        var unityEngine = locations.Single(x => x.EndsWith("System.dll"));
+        assembliesToLoad.Add(unityEngine);
+        var system = locations.Single(x => x.EndsWith("UnityEngine.dll"));
+        assembliesToLoad.Add(system);
+        var unityEngineCoreModule = locations.Single(x => x.EndsWith("UnityEngine.CoreModule.dll"));
+        assembliesToLoad.Add(unityEngineCoreModule);
+        var unityEnginePhysicsModule = locations.Single(x => x.EndsWith("UnityEngine.PhysicsModule.dll"));
+        assembliesToLoad.Add(unityEnginePhysicsModule);
+        var unityEngineInputLegacyModule = locations.Single(x => x.EndsWith("UnityEngine.InputLegacyModule.dll"));
+        assembliesToLoad.Add(unityEngineInputLegacyModule);
+        var linqAssembly = locations.Single(x => x.EndsWith("System.Core.dll"));
+        assembliesToLoad.Add(linqAssembly);
 
         ///Loading from bytes because that does not lock assemblies for others to use.
         ///Since we only load Loader currently, that does not seem to matter
@@ -270,7 +282,7 @@ public static class Compilation
         ///Add all assemblies form Current Domain?
         //foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         //{
-        //    compileParameters.ReferencedAssemblies.Add(assembly.Location);
+        //    compilerParameters.ReferencedAssemblies.Add(assembly.Location);
         //}
         ///... 
 
@@ -1026,42 +1038,42 @@ public static {name} Attach(GameObject obj)
     //    return ass;
     //}
 
-    //private static Assembly AssemblyResolveSeparateDomain(object sender, ResolveEventArgs args)
-    //{
-    //    Debug.Log("SEPARATE_RESOLVER#################################");
-    //    var childDomain = (AppDomain)sender;
-    //    Debug.Log("Domain Name " + childDomain.FriendlyName);
-    //    Debug.Log("searched for: " + args.Name);
-    //    var name = args.Name.Split(',').First();
-    //    var dllName = $"{name}.dll";
-    //    var fullPath = $"{RunTimeAssembliesPath}/{dllName}";
-    //    Debug.Log("FULL_NAME_RECUNSTRUCTED => " + fullPath);
+    private static Assembly AssemblyResolveSeparateDomain(object sender, ResolveEventArgs args)
+    {
+        Debug.Log("SEPARATE_RESOLVER#################################");
+        var childDomain = (AppDomain)sender;
+        Debug.Log("Domain Name " + childDomain.FriendlyName);
+        Debug.Log("searched for: " + args.Name);
+        var name = args.Name.Split(',').First();
+        var dllName = $"{name}.dll";
+        var fullPath = $"{RunTimeAssembliesPath}/{dllName}";
+        Debug.Log("FULL_NAME_RECUNSTRUCTED => " + fullPath);
 
-    //    var assPath = AppDomain.CurrentDomain.GetAssemblies()
-    //        .Select(x => x.Location)
-    //        .Where(x => x.EndsWith(dllName))
-    //        .SingleOrDefault();
+        //var assPath = AppDomain.CurrentDomain.GetAssemblies()
+        //    .Select(x => x.Location)
+        //    .Where(x => x.EndsWith(dllName))
+        //    .SingleOrDefault();
 
-    //    if (assPath != null)
-    //    {
-    //        Debug.Log("Returned Assembly From The Main: " + assPath);
-    //        Debug.Log("SEPARATE_RESOLVER_END#############################");
-    //        return Assembly.LoadFile(assPath);
-    //    }
+        //if (assPath != null)
+        //{
+        //    Debug.Log("Returned Assembly From The Main: " + assPath);
+        //    Debug.Log("SEPARATE_RESOLVER_END#############################");
+        //    return Assembly.LoadFile(assPath);
+        //}
 
-    //    if (name == "Loader")
-    //    {
-    //        Debug.Log("Reterned Loader");
-    //        return Assembly.Load(typeof(Loader).Assembly.FullName);
-    //    }
+        //if (name == "Loader")
+        //{
+        //    Debug.Log("Reterned Loader");
+        //    return Assembly.Load(typeof(Loader).Assembly.FullName);
+        //}
 
-    //    var bytes = File.ReadAllBytes(fullPath);
-    //    Debug.Log(bytes.Length);
-    //    var ass = childDomain.Load(bytes);
-    //    Debug.Log("Loaded Ass Full Name " + ass.FullName);
-    //    Debug.Log("SEPARATE_RESOLVER_END#############################");
-    //    return ass;
-    //}
+        //var bytes = File.ReadAllBytes(fullPath);
+        //Debug.Log(bytes.Length);
+        //var ass = childDomain.Load(bytes);
+        //Debug.Log("Loaded Ass Full Name " + ass.FullName);
+        //Debug.Log("SEPARATE_RESOLVER_END#############################");
+        return null;
+    }
     #endregion
     #region GENERATE_SOLVE_METHOD
     //public static CompTypeWithSolveMehtodInfo GenerateTypeWithSolveMethod(Assembly ass)

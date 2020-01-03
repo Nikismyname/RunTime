@@ -13,13 +13,18 @@ public static class Util
 
         return new NormalVariants
         {
-            Normal = normal, 
-            Left = leftFromNormal, 
-            Right = rightFromNormal, 
-            Up = upFromNormal, 
+            Normal = normal,
+            Left = leftFromNormal,
+            Right = rightFromNormal,
+            Up = upFromNormal,
             LeftXDegrees = leftXDegrees,
             RightXDegrees = rightXDegrees,
         };
+    }
+
+    public static void DrawLine(Vector3 anchorPoint, Vector3 line, Color color, int staySeconds = 4)
+    {
+        Debug.DrawLine(anchorPoint, anchorPoint + line.normalized * 4, color, staySeconds);
     }
 }
 

@@ -39,7 +39,7 @@ public class ApplyBehaviour : MonoBehaviour
         }
 
         var tb = ms.Target.GetComponent<TargetBehaviour>();
-        if (tb.type == TargetType.Test)
+        if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement)
         {
             string ExtPath = "";
             var assBytes = await Task.Run(() =>
@@ -53,7 +53,18 @@ public class ApplyBehaviour : MonoBehaviour
                 return bytes;
             });
 
-            var result = await tb.Test(assBytes);
+            string result = string.Empty;
+
+            if (tb.type == TargetType.Test)
+            {
+                result = (await tb.Test(assBytes)).ToString();
+            }
+            else if(tb.type == TargetType.BattleMovement)
+            {
+                tb.RegisterAI(assBytes);
+                result = "AI Loaded!";
+            }
+
             Debug.Log("Test Result: " + result);
             Debug.Log("ExtPath " + ExtPath);
             //Compilation.FinalTest(ExtPath); ///Works does not load assemblies to main;

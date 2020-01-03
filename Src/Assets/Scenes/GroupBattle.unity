@@ -1683,8 +1683,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 1816067293}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841183b404b94ab4f997263e63f053b8, type: 3}
+  m_Script: {fileID: 11500000, guid: 0b1d402baf1add848a354502efdcaa47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shipPrefab: {fileID: 2383099895054674443, guid: f45c00eff9853a548989fb478507143f,
+  playerPrefab: {fileID: 2019461833032781009, guid: d3fe51c5fef54de4a8d90359cc0c8487,
     type: 3}

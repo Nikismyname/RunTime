@@ -20,7 +20,6 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
     private bool isVehicle = false;
     private bool vehicleIsActive = false;
-    private bool isGrid = false;
     private NewtonianSpaceShipInterface vehicleMono = null;
 
     public TargetType type;
@@ -28,6 +27,9 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     private bool solved = false;
 
     private int counter;
+
+    public delegate void AIAttachedDel();
+    public event AIAttachedDel AIAttachedEvent;
 
     private void Start()
     {
@@ -40,10 +42,10 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
             mono.handling.HasDeactivated += this.VehicleHasDeactivated;
         }
 
-        var main = GameObject.Find("Main"); 
+        var main = GameObject.Find("Main");
         this.ms = main.GetComponent<Main>();
         this.gm = main.GetComponent<GridManager>();
-        this.lm = main.GetComponent<LevelManager>(); 
+        this.lm = main.GetComponent<LevelManager>();
         /// Saving the original color of the object.
         this.myRenderer = gameObject.GetComponent<Renderer>();
         this.originalColor = myRenderer.material.color;
@@ -58,15 +60,13 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     /// <param name="isGrid"></param>
     public void SetUp(
         int id,
-        TargetType type = TargetType.Standard,
-        string testName = "",
-        bool isGrid = false
+        TargetType type,
+        string testName = ""
     )
     {
         this.id = id;
         this.type = type;
         this.testName = testName;
-        this.isGrid = isGrid;
     }
     #endregion
 
@@ -80,16 +80,16 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
     /// If the test passes, it returns true else false 
     /// </summary>
     public async Task<bool> Test(byte[] assembly)
-    { 
-        if(this.type != TargetType.Test)
+    {
+        if (this.type != TargetType.Test)
         {
             Debug.Log("This is not a test target!");
-            return false; 
-        } 
+            return false;
+        }
 
         Debug.Log("name: " + this.testName);
         var result = false;
-        if (isGrid)
+        if (this.type == TargetType.GridTest)
         {
             result = Compilation.Loader.RTGridTest(assembly, this.testName, out int[][] selections);
             if (result == true)
@@ -104,30 +104,40 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
         }
         else
         {
-            result = Compilation.Loader.RTTest(assembly, this.testName); 
+            result = Compilation.Loader.RTTest(assembly, this.testName);
         }
 
         if (result == true)
         {
             this.originalColor = Color.blue;
-            this.solved = true; 
+            this.solved = true;
         }
         return result;
+    }
 
-        //void PrintSelection(int[][] selection)
-        //{
-        //    string text = "";
-        //    for (int i = 0; i < selection.Length; i++)
-        //    {
-        //        for (int j = 0; j < selection[i].Length; j+= 2)
-        //        {
-        //            text += $"{{{selection[i][j]}, {selection[i][j + 1]}}} "; 
-        //        }
-        //        text += '\n'; 
-        //    }
+    public void RegisterAI(byte[] ass)
+    { 
+        if (this.type != TargetType.BattleMovement)
+        {
+            Debug.Log("Calling register AI on a target not of that type!");
+            return;
+        }
 
-        //    Debug.Log(text);
-        //}
+        Compilation.Loader.RTRegisterAI(ass, this.testName);
+        this.AIAttachedEvent?.Invoke();
+    }
+
+    public BattleMoveResult MakeMove(BattleMoveInput input)
+    {
+        if(this.type != TargetType.BattleMovement)
+        {
+            Debug.Log("Calling MakeMove on a target not of that type!");
+            return null; 
+        }
+
+        CrossBoundryBattleMoveResult result1 = Compilation.Loader.RTMakeAIMove(this.testName, input.ToCrossBoundry());
+        BattleMoveResult result2 = result1.ToBattleMoveResult();
+        return result2;
     }
     #endregion
 

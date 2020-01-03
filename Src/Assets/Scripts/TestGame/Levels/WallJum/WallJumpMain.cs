@@ -25,10 +25,10 @@ public class WallJumpMain : MonoBehaviour, ILevelMain
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
 
-        this.GenerateInGameInterface();
+        this.GenerateWalls();
     }
 
-    private void GenerateInGameInterface()
+    private void GenerateWalls()
     {
         //var nextLevel = this.gl.GenerateEntity(
         //    EntityType.NonTarget,
@@ -74,19 +74,47 @@ public class WallJumpMain : MonoBehaviour, ILevelMain
         //solvingCube.name = "SolvingCube";
         //solvingCube.transform.position = new Vector3(10,10,10);
 
-        var wall1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //var wall1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //wall1.tag = "Wall";
+        //wall1.name = "Wall1";
+        //wall1.transform.localScale = new Vector3(100,100, 1);
+        //wall1.transform.rotation = Quaternion.Euler(0,75,0);
+        //wall1.transform.position = new Vector3(0,0,9);
+
+        //var wall2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //wall2.tag = "Wall";
+        //wall2.name = "Wall2";
+        //wall2.transform.localScale = new Vector3(100, 100, 1);
+        //wall2.transform.rotation = Quaternion.Euler(0, 15, 0);
+        //wall1.transform.position = new Vector3(0, 0, -9);
+
+        var spacing = 3; 
+
+        var wall1 = gl.CreatePlottedWall
+            (
+               new Vector3(0, 0, 9),
+               new Vector3(100, 100, 1), 
+               new Vector3(0, 75, 0),
+               Color.white,
+               true,
+               Color.red,
+               spacing
+            );
         wall1.tag = "Wall";
         wall1.name = "Wall1";
-        wall1.transform.localScale = new Vector3(100,100, 1);
-        wall1.transform.rotation = Quaternion.Euler(0,75,0);
-        wall1.transform.position = new Vector3(0,0,9);
 
-        var wall2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var wall2 = gl.CreatePlottedWall
+            (
+               new Vector3(0, 0, 9),
+               new Vector3(100, 100, 1),
+               new Vector3(0, 15, 0),
+               Color.white,
+               true,
+               Color.red,
+               spacing
+            );
         wall2.tag = "Wall";
-        wall2.name = "Wall2";
-        wall2.transform.localScale = new Vector3(100, 100, 1);
-        wall2.transform.rotation = Quaternion.Euler(0, 15, 0);
-        wall1.transform.position = new Vector3(0, 0, -9);
+        wall1.name = "Wall2";
     }
 
     public void ResetLevel()

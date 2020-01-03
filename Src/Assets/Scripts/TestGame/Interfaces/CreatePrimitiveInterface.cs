@@ -26,7 +26,7 @@ public static class CreatePrimitiveInterface
         var ms = GameObject.Find("Main").GetComponent<Main>();
 
         createdPrimitive.AddComponent<TargetBehaviour>();
-        ms.RegisterTarget(createdPrimitive);
+        ms.RegisterTarget(createdPrimitive, TargetType.Standard);
 
         var typeWithMethodInfo = Compilation.GenerateAllMethodsFromMonoType(dataModifierScript.GetType());
         ms.RegisterCompileTimeMono(createdPrimitive, typeWithMethodInfo, dataModifierScript);
