@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BattleUnit : MonoBehaviour
 {
@@ -15,7 +14,7 @@ public class BattleUnit : MonoBehaviour
     //public delegate void UnitDeadDelegate(BattleUnit unit);
     //public event UnitDeadDelegate UnitDeadEvent;  
 
-    public void Shoot(Vector3 position, Vector3 direction, string type)
+    public GameObject Shoot(Vector3 position, Vector3 direction, string type)
     {
         GameObject p = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         p.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -24,6 +23,7 @@ public class BattleUnit : MonoBehaviour
         pScript.SetUp(20, direction);
         p.tag = this.team;
         p.layer = LayerMask.NameToLayer(this.team);
+        return p;
     }
 
     private void OnCollisionEnter(Collision collision)
