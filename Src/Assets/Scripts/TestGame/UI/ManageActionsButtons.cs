@@ -29,7 +29,6 @@ public class ManageActionsButtons : MonoBehaviour
     private float marginX;
     private float marginY;
     private float marginLableToItsButtons;
-    private float marginBetweenButtonRows;
     private float xLength;
     private float buttonX;
     private float buttonY;
@@ -43,9 +42,6 @@ public class ManageActionsButtons : MonoBehaviour
     private List<ColorSelectionButton> collorPickerButtons = new List<ColorSelectionButton>();
 
     private RectTransform parentRT;
-    private Main ms;
-
-    private float startY;
 
     void Start()
     {
@@ -59,7 +55,6 @@ public class ManageActionsButtons : MonoBehaviour
         this.marginX = 10;
         this.marginY = 20;
         this.marginLableToItsButtons = 0;
-        this.marginBetweenButtonRows = 0;
         this.xLength = gameObject.GetComponent<RectTransform>().sizeDelta.x;
         /// Calculating the dimentions for lables, buttons and inputs
         this.buttonX = (xLength - 3 * this.marginX) / 2;
@@ -70,11 +65,8 @@ public class ManageActionsButtons : MonoBehaviour
         this.inputY = this.buttonY;
         ///...
 
-        this.startY = -this.marginY;
-
         /// Cashing scripts
         var main = GameObject.Find("Main");
-        this.ms = main.GetComponent<Main>();
         ///InputFocusManager is used to register inputs so when a shortcut is pressed
         ///during typing, it does not trigger the shortcut
         this.inputFocusManager = main.GetComponent<InputFocusManager>(); 

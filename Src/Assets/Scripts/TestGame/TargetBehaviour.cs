@@ -123,11 +123,11 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
             return;
         }
 
-        Compilation.Loader.RTRegisterAI(ass, this.testName);
+        Compilation.Loader.RTRegisterAIWholeTeam(ass, this.testName);
         this.AIAttachedEvent?.Invoke();
     }
 
-    public BattleMoveResult MakeMove(BattleMoveInput input)
+    public BattleMoveOutputSingle[] MakeMove(BattleMoveInputWholeTeam input)
     {
         if(this.type != TargetType.BattleMovement)
         {
@@ -135,9 +135,8 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
             return null; 
         }
 
-        CrossBoundryBattleMoveResult result1 = Compilation.Loader.RTMakeAIMove(this.testName, input.ToCrossBoundry());
-        BattleMoveResult result2 = result1.ToBattleMoveResult();
-        return result2;
+        BattleMoveOutputSingle[] result = Compilation.Loader.RTMakeAIMoveWholeTeam(this.testName, input);
+        return result;
     }
     #endregion
 

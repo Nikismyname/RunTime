@@ -15,8 +15,7 @@ using System.Runtime.InteropServices;
 
 public static class Compilation
 {
-    public const string Path = "C:/Users/ASUS G751JY/Unity/ScriptDonor/ScriptDonor/Assets/TestScripts";
-    public const string PestPath = "C:/Users/ASUS G751JY/Unity/ScriptDonor/ScriptDonor/Assets/Tests/Solutions";
+    public const string BasePath = "C:/Users/ASUS G751JY/source/repos/11111 Unity/UserCode"; 
     public const string RunTimeAssembliesPath = "C:/Users/ASUS G751JY/source/repos/11111 Unity/RunTime/Src/Assets/Assemblies";
     public const string NewAssembliesLocation = "C:/Users/ASUS G751JY/source/repos/11111 Unity/Assembies";
     public const string testAssemblyFullName = "C:/Users/ASUS G751JY/source/repos/11111 Unity/Assembies/8b15ac31-e824-4ee5-b2a9-3940498e5709.dll";

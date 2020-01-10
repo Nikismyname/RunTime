@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using System.Linq;
 
 public class ManageFileButtons : MonoBehaviour
 {
@@ -14,10 +16,9 @@ public class ManageFileButtons : MonoBehaviour
     private float buttonX;
     private float buttonY;
     RectTransform parentRT;
-    private Main ms;
     List<GameObject> buttons;
 
-    private string[] folderPaths = new string[] { Compilation.Path, Compilation.PestPath };
+    private string[] folderPaths;
     private string folderPath = "not set";
     private int folderPathIndex = 0;
 
@@ -25,6 +26,9 @@ public class ManageFileButtons : MonoBehaviour
 
     void Start()
     {
+        string[] directories = Directory.GetDirectories(Compilation.BasePath);
+        this.folderPaths = directories.Where(x=>x.Split(Path.DirectorySeparatorChar).Last().StartsWith("X")).ToArray(); 
+
         /// Getting the initial folder to display
         this.folderPath = this.folderPaths[this.folderPathIndex];
 
@@ -193,4 +197,7 @@ public class ManageFileButtons : MonoBehaviour
         return -(this.buttons.Count * (this.buttonY + this.marginY) + this.marginY + buttonY + marginY);
     }
     #endregion
+
+    #region END BRACKET
 }
+#endregion
