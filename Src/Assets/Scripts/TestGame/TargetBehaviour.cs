@@ -117,26 +117,39 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
 
     public void RegisterAI(byte[] ass)
     { 
-        if (this.type != TargetType.BattleMovement)
+        if (this.type == TargetType.BattleMovement)
+        {
+            Compilation.Loader.RTRegisterAIWholeTeam(ass, this.testName);
+            this.AIAttachedEvent?.Invoke();
+        }else if (this.type == TargetType.BattleMoveSameDom)
+        {
+            Compilation.LoaderSameDom.RTRegisterAIWholeTeam(ass, this.testName);
+            this.AIAttachedEvent?.Invoke();
+        }
+        else
         {
             Debug.Log("Calling register AI on a target not of that type!");
             return;
         }
-
-        Compilation.Loader.RTRegisterAIWholeTeam(ass, this.testName);
-        this.AIAttachedEvent?.Invoke();
     }
 
     public BattleMoveOutputSingle[] MakeMove(BattleMoveInputWholeTeam input)
     {
-        if(this.type != TargetType.BattleMovement)
+        if(this.type == TargetType.BattleMovement)
+        {
+            BattleMoveOutputSingle[] result = Compilation.Loader.RTMakeAIMoveWholeTeam(this.testName, input);
+            return result;
+        }
+        else if (this.type == TargetType.BattleMoveSameDom)
+        {
+            BattleMoveOutputSingle[] result = Compilation.LoaderSameDom.RTMakeAIMoveWholeTeam(this.testName, input);
+            return result;
+        }
+        else
         {
             Debug.Log("Calling MakeMove on a target not of that type!");
-            return null; 
+            return null;
         }
-
-        BattleMoveOutputSingle[] result = Compilation.Loader.RTMakeAIMoveWholeTeam(this.testName, input);
-        return result;
     }
     #endregion
 

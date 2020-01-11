@@ -3,6 +3,7 @@
     Standard, 
     Test,
     GridTest,
-    BattleMovement
+    BattleMovement,
+    BattleMoveSameDom
 }
 

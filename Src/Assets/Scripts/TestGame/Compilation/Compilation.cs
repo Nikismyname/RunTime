@@ -23,6 +23,7 @@ public static class Compilation
 
     private static AppDomain testDomain;
     public static Loader Loader { get; set; }
+    public static Loader LoaderSameDom { get; set; }
     #endregion
 
     #region SETTING_UP_TEST_DOMAIN
@@ -39,6 +40,7 @@ public static class Compilation
         AddNecessaryAssembliesToDomain(testDomain);
         //AddAllCurrentDomainAssembliesToDomain(testDomain);
         Loader = InitLoader(testDomain);
+        LoaderSameDom = new Loader(); 
     }
 
     #region DOMAIN_SET_UP_AS_MAIN

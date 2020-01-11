@@ -6,6 +6,12 @@ using UnityEngine;
 
 public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
 {
+    public float UnitSpeedMulty;
+    public float ProjSpeedMulty;
+    public int ProjDuration;
+    public int CooldownDuration; 
+    public float MyDeltaTime;
+
     public GameObject playerPrefab;
     private GameObject player;
     private GameObject mainCamera;
@@ -15,29 +21,27 @@ public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
     private bool redAttached = false;
     private bool blueAttached = false;
 
-    TargetBehaviour red;
-    TargetBehaviour blue;
+    TargetBehaviour redTB;
+    TargetBehaviour blueTB;
 
     private bool simulationRunning = false;
 
-    private List<KeyValuePair<GameObject, ProjInfo>> redProjs = new List<KeyValuePair<GameObject, ProjInfo>>();
-    private List<KeyValuePair<GameObject, ProjInfo>> blueProjs = new List<KeyValuePair<GameObject, ProjInfo>>();
+    ///----------------------------------------------------
 
-    private List<KeyValuePair<GameObject, int[]>> projTimeouts = new List<KeyValuePair<GameObject, int[]>>();
+    public readonly string RedTeamName = "red";
+    public readonly string BlueTeamName = "blue";
 
-    /// <summary>
-    /// Removign from one list must also remove from the other list!
-    /// </summary>
-    List<BattleUnit> teamRed = new List<BattleUnit>();
-    List<Dictionary<string, float>> teamRedCooldowns = new List<Dictionary<string, float>>();
-    List<BattleUnit> teamBlue = new List<BattleUnit>();
-    List<Dictionary<string, float>> teamBlueCooldowns = new List<Dictionary<string, float>>();
-
-    public const string RedTeamName = "red";
-    public const string BlueTeamName = "blue";
-
-    private const float MyDeltaTime = 0.05f;
+    //private const float MyDeltaTime = 0.05f;
     private float timer = 0.05f;
+
+    //------------------------------------------------------
+
+    private GroupBattleSimulation battleSimulations;
+
+    List<GameObject> unitViss;
+    List<GameObject> projViss;
+
+    Fix64Vector2[][] positions;
 
     #endregion
 
@@ -45,6 +49,7 @@ public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
 
     private void Start()
     {
+        /// Setting up the level
         var main = GameObject.Find("Main");
         this.ms = main.GetComponent<Main>();
         var rb = main.GetComponent<ReferenceBuffer>();
@@ -58,44 +63,123 @@ public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
         this.mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
+        ///---------------------------------------------------------------------------
+
+        this.positions = new Fix64Vector2[2][];
+        this.positions[0] = new Fix64Vector2[10];
+        this.positions[1] = new Fix64Vector2[10];
+
+        unitViss = new List<GameObject>();
+        projViss = new List<GameObject>();
 
         for (int i = 0; i < 10; i++)
         {
-            GameObject fighter = GameObject.Instantiate(playerPrefab);
-            var tracking = fighter.AddComponent<BattleUnit>();
-            tracking.SetUp("red");
-            fighter.GetComponent<Renderer>().material.color = Color.red;
-            fighter.transform.position = new Vector3(i * 2, 1, -10);
-            teamRed.Add(tracking);
-            this.teamRedCooldowns.Add(new Dictionary<string, float>());
-            this.teamRedCooldowns.Last().Add("fireball", 0);
-            fighter.layer = LayerMask.NameToLayer(RedTeamName);
+            Vector3 pos = new Vector3(i * 2, 1, -10);
+            this.positions[0][i] = pos.ToFixed2d();
+            GameObject vis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            vis.GetComponent<Renderer>().material.color = Color.red;
+            vis.transform.position = pos;
+            Destroy(vis.GetComponent<Collider>());
+            unitViss.Add(vis);
         }
 
         for (int i = 0; i < 10; i++)
         {
-            GameObject fighter = GameObject.Instantiate(playerPrefab);
-            var tracking = fighter.AddComponent<BattleUnit>();
-            tracking.SetUp("blue");
-            fighter.GetComponent<Renderer>().material.color = Color.blue;
-            fighter.transform.position = new Vector3(i * 2, 1, 10);
-            teamBlue.Add(tracking);
-            this.teamBlueCooldowns.Add(new Dictionary<string, float>());
-            this.teamBlueCooldowns.Last().Add("fireball", 0);
-            fighter.layer = LayerMask.NameToLayer(BlueTeamName);
+            Vector3 pos = new Vector3(i * 2, 1, 10);
+            this.positions[1][i] = pos.ToFixed2d();
+            GameObject vis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            vis.GetComponent<Renderer>().material.color = Color.blue;
+            vis.transform.position = pos;
+            Destroy(vis.GetComponent<Collider>());
+            unitViss.Add(vis);
         }
 
-        GameObject controlSphereRed = gl.GenerateTestEntity("team red", "Red Sphere", TargetType.BattleMovement, new Vector3(10, 4, -10));
-        GameObject controlSphereBlue = gl.GenerateTestEntity("team blue", "Blue Sphere", TargetType.BattleMovement, new Vector3(10, 4, 10));
+        /// Setting up the Controll Sphere
+        GameObject controlSphereRed = gl.GenerateTestEntity("team red", "Red Sphere", TargetType.BattleMoveSameDom, new Vector3(10, 4, -10));
+        GameObject controlSphereBlue = gl.GenerateTestEntity("team blue", "Blue Sphere", TargetType.BattleMoveSameDom, new Vector3(10, 4, 10));
 
-        this.red = controlSphereRed.GetComponent<TargetBehaviour>();
-        this.blue = controlSphereBlue.GetComponent<TargetBehaviour>();
+        this.redTB = controlSphereRed.GetComponent<TargetBehaviour>();
+        this.blueTB = controlSphereBlue.GetComponent<TargetBehaviour>();
 
-        this.red.AIAttachedEvent += () => Attached("red");
-        this.blue.AIAttachedEvent += () => Attached("blue");
+        this.redTB.AIAttachedEvent += () => Attached("red");
+        this.blueTB.AIAttachedEvent += () => Attached("blue");
+        ///------------------------------------------------------------------------
+
+        /// Starting the simulation
+        this.battleSimulations = new GroupBattleSimulation();
+        this.battleSimulations.Start(
+            new TeamBundle[] { new TeamBundle(this.RedTeamName, this.redTB), new TeamBundle(this.BlueTeamName, this.blueTB) },
+            this.positions,
+            new string[][] { new string[] { "fireball" }, new string[] { "fireball" } });
+        ///-------------------------------------------------------------------------
     }
 
     #endregion
+
+    private void Update()
+    {
+        if (this.timer <= 0 && this.simulationRunning == true)
+        {
+            UnitData[] unitsData;
+            ProjectileData[] peojectilesData;
+            this.battleSimulations.Update(out unitsData, out peojectilesData, this.UnitSpeedMulty, this.ProjSpeedMulty,this.ProjDuration, this.CooldownDuration);
+            this.UpdateVisualisation(unitsData, peojectilesData, ref this.unitViss, ref this.projViss);
+            this.timer = MyDeltaTime;
+
+            if(unitsData.Length ==0 || unitsData.All(x=>x.Team == unitsData[0].Team))
+            {
+                this.battleSimulations.Start(
+                    new TeamBundle[] { new TeamBundle(this.RedTeamName, this.redTB), new TeamBundle(this.BlueTeamName, this.blueTB) },
+                    this.positions,
+                    new string[][] { new string[] { "fireball" }, new string[] { "fireball" } });
+            }
+        }
+
+        this.timer -= Time.deltaTime;
+    }
+
+    private void UpdateVisualisation(UnitData[] userData, ProjectileData[] projData, ref List<GameObject> userVis, ref List<GameObject> projVis)
+    {
+        for (int i = 0; i < userVis.Count; i++)
+        {
+            Destroy(userVis[i].gameObject);
+        }
+
+        for (int i = 0; i < projVis.Count; i++)
+        {
+            Destroy(projVis[i].gameObject);
+        }
+
+        userVis = userData.Select(x =>
+        {
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            if (x.Team.ToUpper() == "RED")
+            {
+                go.GetComponent<Renderer>().material.color = Color.red;
+            }
+            else
+            {
+                go.GetComponent<Renderer>().material.color = Color.blue;
+            }
+            go.transform.position = x.Position.ToFloat3d(0);
+            return go;
+        }).ToList();
+
+        projVis = projData.Select(x =>
+        {
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            if (x.Team.ToUpper() == "RED")
+            {
+                go.GetComponent<Renderer>().material.color = Color.red;
+            }
+            else
+            {
+                go.GetComponent<Renderer>().material.color = Color.blue;
+            }
+            go.transform.position = x.Position.ToFloat3d(0);
+            return go;
+        }).ToList();
+    }
 
     #region SIMULATION_START_EVENT
 
@@ -122,173 +206,10 @@ public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
     private void StartSimulation()
     {
         this.simulationRunning = true;
+        this.battleSimulations.Start();
     }
 
     #endregion
-
-    private void Update()
-    {
-        if (this.timer <= 0)
-        {
-            this.SimTick();
-            this.timer = MyDeltaTime;
-        }
-
-        this.timer -= Time.deltaTime;
-    }
-
-    private void SimTick()
-    {
-        if (this.simulationRunning)
-        {
-            this.MoveProjs();
-            this.MakeMoves();
-            this.UpdateCooldowns();
-        }
-    }
-
-    private void MoveProjs()
-    {
-        const float speed = 5f;
-
-
-        for (int i = 0; i < this.projTimeouts.Count; i++)
-        {
-            var kvp = this.projTimeouts[i];
-            var values = kvp.Value;
-            values[1]++;
-            if (values[1] >= values[0])
-            {
-                Destroy(kvp.Key);
-            }
-        }
-
-        this.redProjs = this.redProjs.Where(x => x.Key != null).ToList();
-        this.blueProjs = this.blueProjs.Where(x => x.Key != null).ToList();
-
-        for (int i = 0; i < this.redProjs.Count; i++)
-        {
-            var kvp = this.redProjs[i];
-            GameObject proj = kvp.Key;
-            proj.transform.position += kvp.Value.Direction.normalized * speed * MyDeltaTime;
-            kvp.Value.Position = proj.transform.position;
-        }
-
-        for (int i = 0; i < this.blueProjs.Count; i++)
-        {
-            var kvp = this.blueProjs[i];
-            GameObject proj = kvp.Key;
-            proj.transform.position += kvp.Value.Direction.normalized * speed * MyDeltaTime;
-            kvp.Value.Position = proj.transform.position;
-        }
-    }
-
-    private void MakeMoves()
-    {
-        this.teamRed = this.teamRed.Where(x => x != null).ToList();
-        this.teamBlue = this.teamBlue.Where(x => x != null).ToList();
-
-        Vector3[] redLocations = this.teamRed.Select(x => x.transform.position).ToArray();
-        Vector3[] blueLocations = this.teamBlue.Select(x => x.transform.position).ToArray();
-
-        ProjInfo[] redProjectiles = this.redProjs.Select(x => x.Value).ToArray();
-        ProjInfo[] blueProjectiles = this.blueProjs.Select(x => x.Value).ToArray();
-
-        this.MoveTeam(this.teamRed, redLocations, blueLocations, redProjectiles, blueProjectiles, this.teamRedCooldowns, this.red, this.redProjs);
-        this.MoveTeam(this.teamBlue, blueLocations, redLocations, blueProjectiles, redProjectiles, this.teamBlueCooldowns, this.blue, this.blueProjs);
-    }
-
-    private void UpdateCooldowns()
-    {
-        for (int i = 0; i < this.teamRedCooldowns.Count; i++)
-        {
-            var redCopy = this.teamRedCooldowns[i].ToArray();
-
-            for (int j = 0; j < redCopy.Length; j++)
-            {
-                var kvp = redCopy[j];
-
-                if (kvp.Value > 0)
-                {
-                    redCopy[j] = new KeyValuePair<string, float>(redCopy[j].Key, redCopy[j].Value - MyDeltaTime);
-                }
-
-                if (kvp.Value < 0)
-                {
-                    redCopy[j] = new KeyValuePair<string, float>(redCopy[j].Key, 0);
-                }
-            }
-
-            this.teamRedCooldowns[i] = redCopy.ToDictionary(x => x.Key, x => x.Value);
-        }
-
-        for (int i = 0; i < this.teamBlueCooldowns.Count; i++)
-        {
-            var blueCopy = this.teamBlueCooldowns[i].ToArray();
-
-            for (int j = 0; j < blueCopy.Length; j++)
-            {
-                var kvp = blueCopy[j];
-
-                if (kvp.Value > 0)
-                {
-                    blueCopy[j] = new KeyValuePair<string, float>(blueCopy[j].Key, blueCopy[j].Value - MyDeltaTime);
-                }
-
-                if (kvp.Value < 0)
-                {
-                    blueCopy[j] = new KeyValuePair<string, float>(blueCopy[j].Key, 0);
-                }
-            }
-
-            this.teamBlueCooldowns[i] = blueCopy.ToDictionary(x => x.Key, x => x.Value);
-        }
-    }
-
-    //private void MoveTeam(
-    //    List<BattleUnit> team,
-    //    Vector3[] friendlyLocations,
-    //    Vector3[] enemyLocations,
-    //    ProjInfo[] friendlyProjs,
-    //    ProjInfo[] enemyProj,
-    //    List<Dictionary<string, float>> thisTeamCDs,
-    //    TargetBehaviour tb,
-    //    List<KeyValuePair<GameObject, ProjInfo>> projs)
-    //{
-    //    for (int i = 0; i < team.Count; i++)
-    //    {
-    //        BattleUnit unit = team[i];
-
-    //        BattleMoveResult result = tb.MakeMove(new BattleMoveInput
-    //        {
-    //            FriendlyLocations = friendlyLocations,
-    //            EnemyLocations = enemyLocations,
-    //            MyIndex = i,
-    //            Cooldowns = thisTeamCDs[i],
-    //            EnemyProjs = enemyProj,
-    //            FriendlyProjs = friendlyProjs,
-    //        });
-
-    //        if (result.NewLocation != null)
-    //        {
-    //            unit.transform.position += result.NewLocation.Value * MyDeltaTime * 20;
-    //        }
-
-    //        if (result.ProjVelosity != null && thisTeamCDs[i]["fireball"] <= 0)
-    //        {
-    //            var proj = unit.Shoot(unit.transform.position, result.ProjVelosity.Value, "fireball");
-    //            thisTeamCDs[i]["fireball"] = 4;
-    //            projs.Add(new KeyValuePair<GameObject, ProjInfo>(proj, new ProjInfo
-    //            {
-    //                Direction = result.ProjVelosity.Value,
-    //                Position = unit.transform.position,
-    //                Type = result.ProjType,
-    //            }));
-
-    //            projTimeouts.Add(new KeyValuePair<GameObject, int[]>(proj, new int[] { 100, 0 }));
-    //        }
-    //    }
-    //}
 
     public void ResetLevel()
     {

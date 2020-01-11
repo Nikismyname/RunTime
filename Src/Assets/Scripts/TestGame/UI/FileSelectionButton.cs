@@ -31,14 +31,14 @@ public class FileSelectionButton: MonoBehaviour
     {
         var file = File.ReadAllText(this.filePath);
         var alteredFile = file;
-
-        var type = ms.Target?.GetComponent<TargetBehaviour>().type; 
-
-        if (type != TargetType.Test && type != TargetType.BattleMovement)
-        {
-            alteredFile = Compilation.AddSelfAttachToSource(file);
-        }
         this.inputField.text = alteredFile;
+
+        //var type = ms.Target?.GetComponent<TargetBehaviour>().type; 
+
+        //if (type != TargetType.Test && type != TargetType.BattleMovement && type != TargetType.BattleMoveSameDom)
+        //{
+        //    alteredFile = Compilation.AddSelfAttachToSource(file);
+        //}
     }
 }
 

@@ -39,7 +39,7 @@ public class ApplyBehaviour : MonoBehaviour
         }
 
         var tb = ms.Target.GetComponent<TargetBehaviour>();
-        if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement)
+        if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
         {
             string ExtPath = "";
             var assBytes = await Task.Run(() =>
@@ -59,7 +59,7 @@ public class ApplyBehaviour : MonoBehaviour
             {
                 result = (await tb.Test(assBytes)).ToString();
             }
-            else if(tb.type == TargetType.BattleMovement)
+            else if(tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
             {
                 tb.RegisterAI(assBytes);
                 result = "AI Loaded!";
@@ -75,6 +75,7 @@ public class ApplyBehaviour : MonoBehaviour
             var functions = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
+                text = Compilation.AddSelfAttachToSource(text);
                 var ass = Compilation.GenerateAssemblyInMemory(text, false);
                 var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
                 return funcs;
