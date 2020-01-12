@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region INIT
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,6 +28,8 @@ public class GroupBattleSimulation
             throw new Exception("Team data should be the count of the teams![teams, initPositions, projectiles]");
         }
 
+        int counter = 0;
+
         for (int i = 0; i < teams.Length; i++)
         {
             string team = teams[i].Name;
@@ -38,10 +42,18 @@ public class GroupBattleSimulation
                     Team = team,
                     Position = initPos,
                     SpellCooldowns = projectiles.Select(x => new SpellCooldown(x, 0, this.cooldownDuration)).ToList(),
+                    Health = 100,
+                    ID =  counter,
                 });
+
+                counter++;
             }
         }
     }
+
+    #endregion
+
+    #region UPDATE
 
     public void Update(
         out UnitData[] units,
@@ -72,23 +84,22 @@ public class GroupBattleSimulation
 
         this.ProcessCooldowns(this.units);
 
+        List<BattleMoveOutputSingle> results = new List<BattleMoveOutputSingle>();
+
         foreach (TeamBundle team in this.teams)
         {
-            this.MakeTeamMove(team.Name, this.units.ToArray(), this.projectiles.ToArray(), team.TB);
+            results.AddRange(this.MakeTeamMove(team.Name, this.units.ToArray(), this.projectiles.ToArray(), team.TB));
         }
+
+        this.SpawnNewProjectiles(results.ToArray());
 
         this.MoveProjectilesAndRemoveExpired(this.projectiles);
 
-        this.CheckCollisions(this.units, this.projectiles);
+        this.CheckCollisionsAndMove(ref this.units, ref this.projectiles, ref results);
 
         units = this.units.ToArray();
         projectiles = this.projectiles.ToArray();
     }
-
-    //public void Reset()
-    //{
-
-    //}
 
     private void ProcessCooldowns(List<UnitData> units)
     {
@@ -108,67 +119,11 @@ public class GroupBattleSimulation
         }
     }
 
-    private void CheckCollisions(List<UnitData> units, List<ProjectileData> projectiles)
-    {
-        List<int> removedUnitsIndecies = new List<int>();
-        List<int> removedProjsIndecies = new List<int>();
-
-        for (int i = units.Count - 1; i >= 0; i--)
-        {
-            for (int j = projectiles.Count - 1; j >= 0; j--)
-            {
-                UnitData unit = units[i];
-                ProjectileData proj = projectiles[j];
-
-                if ((unit.Position - proj.Position).Magnitude < (Fix64)1f && unit.Team != proj.Team)
-                {
-                    unit.Health -= proj.Demage;
-                    if (unit.Health <= 0)
-                    {
-                        removedUnitsIndecies.Add(i);
-                    }
-
-                    removedProjsIndecies.Add(j);
-                }
-            }
-        }
-
-        foreach (var ind  in removedUnitsIndecies.OrderByDescending(x=>x))
-        {
-            units.RemoveAt(ind);
-        }
-
-        foreach (var ind in removedProjsIndecies.OrderByDescending(x => x))
-        {
-            projectiles.RemoveAt(ind);
-        }
-    }
-
-    private void MoveProjectilesAndRemoveExpired(List<ProjectileData> projectiles)
-    {
-        for (int i = projectiles.Count - 1; i >= 0; i--)
-        {
-            ProjectileData proj = projectiles[i];
-            proj.CurrentIteration++;
-            if (proj.CurrentIteration >= proj.MaxIteration)
-            {
-                projectiles.RemoveAt(i);
-                continue;
-            }
-
-            Fix64Vector2 direction = proj.Direction;
-            Fix64Vector2 normalDirection = direction.Normalized;
-            Fix64Vector2 adjustedDirection = normalDirection * this.projSpeed; /// ps -> 0.1f
-
-            proj.Position += adjustedDirection;
-        }
-    }
-
-    private void MakeTeamMove(
-        string teamName,
-        UnitData[] allUnits,
-        ProjectileData[] allProjs,
-        TargetBehaviour tb)
+    private BattleMoveOutputSingle[] MakeTeamMove(
+    string teamName,
+    UnitData[] allUnits,
+    ProjectileData[] allProjs,
+    ITeamBattleMoveMaker tb)
     {
         UnitData[] friendlyUnits = allUnits.Where(x => x.Team == teamName).ToArray();
         UnitData[] enemyUnits = allUnits.Where(x => x.Team != teamName).ToArray();
@@ -192,28 +147,34 @@ public class GroupBattleSimulation
         {
             BattleMoveOutputSingle data = result[i];
             UnitData unit = friendlyUnits[i];
+            data.ID = unit.ID;
+        }
 
-            if (data.NewLocation != null)
-            {
-                unit.Position += data.NewLocation.Value.Normalized * this.unitSpeed;
-            }
+        return result;
+    }
 
-            if (data.ProjVelosity != null)
+    private void SpawnNewProjectiles(BattleMoveOutputSingle[] results)
+    {
+        foreach (var result in results)
+        {
+            if (result.ProjVelosity != null)
             {
-                SpellCooldown spellCD= unit.SpellCooldowns.FirstOrDefault(x => x.Spell == "fireball");
+                UnitData unit = this.units.Single(x => x.ID == result.ID); 
+
+                SpellCooldown spellCD = unit.SpellCooldowns.FirstOrDefault(x => x.Spell == "fireball");
 
                 if (spellCD.CurrentIteration <= 0)
                 {
-                    spellCD.CurrentIteration = spellCD.MaxIteration; 
+                    spellCD.CurrentIteration = spellCD.MaxIteration;
 
                     ProjectileData proj = new ProjectileData()
                     {
                         Demage = 20,
-                        Direction = data.ProjVelosity.Value,
+                        Direction = result.ProjVelosity.Value,
                         Position = unit.Position,
                         Radious = (Fix64)1f,
                         Team = unit.Team,
-                        Type = data.ProjType,
+                        Type = result.ProjType,
                         CurrentIteration = 0,
                         MaxIteration = this.projDuration,
                     };
@@ -224,6 +185,91 @@ public class GroupBattleSimulation
         }
     }
 
+    private void MoveProjectilesAndRemoveExpired(List<ProjectileData> projectiles)
+    {
+        for (int i = projectiles.Count - 1; i >= 0; i--)
+        {
+            ProjectileData proj = projectiles[i];
+            proj.CurrentIteration++;
+            if (proj.CurrentIteration >= proj.MaxIteration)
+            {
+                projectiles.RemoveAt(i);
+                continue;
+            }
+
+            Fix64Vector2 direction = proj.Direction;
+            Fix64Vector2 normalDirection = direction.Normalized;
+            Fix64Vector2 adjustedDirection = normalDirection * this.projSpeed; /// ps -> 0.1f
+
+            proj.Position += adjustedDirection;
+        }
+    }
+
+    private void CheckCollisionsAndMove(ref List<UnitData> units,ref List<ProjectileData> projectiles, ref List<BattleMoveOutputSingle> results)
+    {
+        List<int> removedUnitsIndecies = new List<int>();
+        List<int> removedProjsIndecies = new List<int>();
+
+        units = units.OrderBy(x=> x.ID).ToList();
+        results = results.OrderBy(x => x.ID).ToList();
+
+        for (int i = units.Count - 1; i >= 0; i--)
+        {
+            UnitData unit = units[i];
+
+            for (int j = projectiles.Count - 1; j >= 0; j--)
+            {
+                ProjectileData proj = projectiles[j];
+
+                if ((unit.Position - proj.Position).Magnitude < (Fix64)1f && unit.Team != proj.Team)
+                {
+                    unit.Health -= proj.Demage;
+                    if (unit.Health <= 0)
+                    {
+                        removedUnitsIndecies.Add(i);
+                    }
+
+                    removedProjsIndecies.Add(j);
+                }
+            }
+
+
+            BattleMoveOutputSingle result = results[i];
+            if (result.NewLocation == null) { continue; }
+            Fix64Vector2 currentPos = unit.Position;
+            Fix64Vector2 nextPos = unit.Position + result.NewLocation.Value.Normalized * this.unitSpeed;
+
+            List<UnitData> overlapers = this.units
+                .Where(x=>x.ID != unit.ID)
+                .Where(x => (x.Position - currentPos).Magnitude < (Fix64)1f)
+                .Where(x=> (x.Position - currentPos).Magnitude > (x.Position - nextPos).Magnitude) 
+                .ToList();
+
+            if (overlapers.Any())
+            {
+                ///No move is made!
+            }
+            else
+            {
+                unit.Position = nextPos;
+            }
+        }
+
+        foreach (var ind  in removedUnitsIndecies.OrderByDescending(x=>x))
+        {
+            units.RemoveAt(ind);
+        }
+
+        foreach (var ind in removedProjsIndecies.OrderByDescending(x => x))
+        {
+            projectiles.RemoveAt(ind);
+        }
+    }
+
+    #endregion
+
+    #region EXTERNAL
+
     public void Stop()
     {
         this.Running = false;
@@ -233,18 +279,25 @@ public class GroupBattleSimulation
     {
         this.Running = true;
     }
+
+    #endregion
+
+    #region END_BRACKET
 }
+#endregion
+
+#region DATA_CLASSES
 
 public class TeamBundle
 {
-    public TeamBundle(string name, TargetBehaviour tB)
+    public TeamBundle(string name, ITeamBattleMoveMaker tB)
     {
         Name = name;
         TB = tB;
     }
 
     public string Name { get; set; }
-    public TargetBehaviour TB { get; set; }
+    public ITeamBattleMoveMaker TB { get; set; }
 }
 
 public class RemovedEntities
@@ -253,3 +306,5 @@ public class RemovedEntities
 
     public int[] RemovedUnits { get; set; }
 }
+
+#endregion

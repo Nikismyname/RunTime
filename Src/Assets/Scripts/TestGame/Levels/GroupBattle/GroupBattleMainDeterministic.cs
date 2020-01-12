@@ -108,9 +108,10 @@ public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
         /// Starting the simulation
         this.battleSimulations = new GroupBattleSimulation();
         this.battleSimulations.Start(
-            new TeamBundle[] { new TeamBundle(this.RedTeamName, this.redTB), new TeamBundle(this.BlueTeamName, this.blueTB) },
+            new TeamBundle[] { new TeamBundle(this.RedTeamName, new AI1()), new TeamBundle(this.BlueTeamName, new AI1()) },
             this.positions,
             new string[][] { new string[] { "fireball" }, new string[] { "fireball" } });
+        this.StartSimulation();
         ///-------------------------------------------------------------------------
     }
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class TargetBehaviour : MonoBehaviour, IPointerDownHandler
+public class TargetBehaviour : MonoBehaviour, IPointerDownHandler, ITeamBattleMoveMaker
 {
     public int id;
     private Main ms;
