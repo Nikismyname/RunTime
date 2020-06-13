@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Attached to ShowAvailableFilesButton
+/// </summary>
 public class ShowAvailableCSFiles : MonoBehaviour
 {
     private bool shouldShow = true;

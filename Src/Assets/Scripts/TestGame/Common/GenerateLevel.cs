@@ -240,8 +240,11 @@ public class GenerateLevel
         }
         else
         {
-            var ph = player.AddComponent<PlayerHandling2>();
-            //this.rb.RegisterPlayerHandling(ph);
+            ///TODO: What is player handling2???
+            ///two is the parcour stuff, fix the space ship to work with two or diferinciate on different ground than "kinematic"
+            //var ph = player.AddComponent<PlayerHandling2>();
+            var ph = player.AddComponent<PlayerHandling>();
+            this.rb.RegisterPlayerHandling(ph);
         }
 
         if (isTarget)

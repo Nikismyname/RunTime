@@ -12,9 +12,9 @@ public class CreateProcUI: MonoBehaviour
     {
         //Canvas[] canvases = GameObject.FindObjectsOfType<Canvas>();
         //Canvas mainCanvas = canvases.Length == 0 ? new Canvas() : canvases[0];
-        GameObject canvasObject = new GameObject();
-        canvasObject.name = "Canvas";
-        Canvas canvas = canvasObject.AddComponent<Canvas>(); 
+        //GameObject canvasObject = new GameObject();
+        //canvasObject.name = "Canvas";
+        //Canvas canvas = canvasObject.AddComponent<Canvas>();
     }
 }
 

@@ -32,13 +32,13 @@ public class ApplyBehaviour : MonoBehaviour
 
     private async void CompileText()
     {
-        if(ms.Target == null)
+        if(ms.target == null)
         {
             Debug.Log("You should select a target before compiling script to attach to target!");
             return;
         }
 
-        var tb = ms.Target.GetComponent<TargetBehaviour>();
+        var tb = ms.target.GetComponent<TargetBehaviour>();
         if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
         {
             string ExtPath = "";
@@ -71,7 +71,7 @@ public class ApplyBehaviour : MonoBehaviour
         }
         else
         {
-            var target = this.ms.Target; 
+            var target = this.ms.target; 
             var functions = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;

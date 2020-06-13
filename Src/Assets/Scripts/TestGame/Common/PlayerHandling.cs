@@ -30,6 +30,7 @@ public class PlayerHandling : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("PLayer Handling1");
         this.active = true;
         this.ms = GameObject.Find("Main").GetComponent<Main>();
         this.speed = ms.playerSpeed;

@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// attached to ShowActionsButton
+/// </summary>
 public class ShowActionsBehaviour : MonoBehaviour
 {
     private GameObject actions;
@@ -24,13 +27,16 @@ public class ShowActionsBehaviour : MonoBehaviour
         this.DoClose();
     }
 
+    public void Open()
+    {
+        this.DoOpen();
+    }
+
     private void OnClick()
     {
         if (this.shouldShow) // Open
         {
-            this.showFiles.Close();
-            this.actions.SetActive(true);
-            this.shouldShow = false;
+            this.DoOpen();
         }
         else // Close
         {
@@ -43,5 +49,12 @@ public class ShowActionsBehaviour : MonoBehaviour
         this.actions.SetActive(false);
         this.shouldShow = true;
         this.colorPicker.SetActive(false);
+    }
+
+    private void DoOpen()
+    {
+        this.showFiles.Close();
+        this.actions.SetActive(true);
+        this.shouldShow = false;
     }
 }

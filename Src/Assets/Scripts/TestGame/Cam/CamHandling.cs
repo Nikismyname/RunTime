@@ -25,11 +25,10 @@ public class CamHandling : MonoBehaviour
 
     private InputFocusManager inputFocusManager;
 
-    private bool rotate;
+    private bool rotate = false;
 
     void Start()
     {
-        this.rotate = false;
         Cursor.lockState = CursorLockMode.None;
         var main = GameObject.Find("Main");
         this.inputFocusManager = main.GetComponent<InputFocusManager>();
@@ -70,18 +69,21 @@ public class CamHandling : MonoBehaviour
      */
     void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.F) && this.inputFocusManager.SafeToTrigger())
+        if (Input.GetMouseButtonDown(1) && this.inputFocusManager.SafeToTrigger())
         {
-            //Debug.Log("F Down");
+            if (this.rotate == false)
+            {
+                this.rotate = true;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(1) && this.inputFocusManager.SafeToTrigger())
+        {
             if (this.rotate == true)
             {
                 this.rotate = false;
                 Cursor.lockState = CursorLockMode.None;
-            }
-            else
-            {
-                this.rotate = true;
-                Cursor.lockState = CursorLockMode.Locked;
             }
         }
 

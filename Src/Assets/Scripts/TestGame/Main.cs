@@ -26,13 +26,14 @@ public class Main : MonoBehaviour
     [SerializeField] public float forceToVelocity = 0.05f;
 
     /// The currently selected Target
-    public GameObject Target { get; set; }
+    public GameObject target { get; set; }
     /// List of all Targets
     private List<GameObject> targets = new List<GameObject>();
     /// All attached monos per Target
     private Dictionary<GameObject, List<MainMonoWithName>> attachedMonos = new Dictionary<GameObject, List<MainMonoWithName>>();
     /// Reference to the script that manages action buttons 
     private ManageActionsButtons manageButtons;
+    private ShowActionsBehaviour actionMenuManager;
 
     void Awake()
     {
@@ -46,6 +47,8 @@ public class Main : MonoBehaviour
         ///Every two seconds check for destroyed monos and send message to <see cref="ManageActionsButtons"> 
         ///to remove them from the UI. 
         InvokeRepeating("PruneDestroyedMonoBehaviurs", 1, 2);
+
+        this.actionMenuManager = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
     }
     #endregion
 
@@ -81,17 +84,19 @@ public class Main : MonoBehaviour
     public void RegisterSelection(int id)
     {
         /// Finding the target.
-        this.Target = this.targets.SingleOrDefault(x => x.GetComponent<TargetBehaviour>().id == id);
+        this.target = this.targets.SingleOrDefault(x => x.GetComponent<TargetBehaviour>().id == id);
 
         /// Telling all the targets to change their color according to the the id of the selected target. 
         /// Previously selected target will change to default color, currently selected will hange to select color
-        foreach (var target in this.targets)
+        foreach (GameObject target in this.targets)
         {
             target.GetComponent<TargetBehaviour>().VisualiseSelection(id);
         }
 
         /// Informing the action button UI about the change of target, so it displays the UI for current target.
-        this.manageButtons.SetTarget(this.Target);
+        this.manageButtons.SetTarget(this.target);
+        ///Opening the action menue on selection!
+        this.actionMenuManager.Open();
     }
 
     /// <summary>
@@ -101,12 +106,12 @@ public class Main : MonoBehaviour
     /// <param name="id">The id of delected target</param>
     public void RegisterDeselection(int id)
     {
-        if (this.Target.GetComponent<TargetBehaviour>().id != id)
+        if (this.target.GetComponent<TargetBehaviour>().id != id)
         {
             Debug.Log("Deselection Error!");
         }
 
-        this.Target = null;
+        this.target = null;
     }
 
     /// <summary>
@@ -354,19 +359,19 @@ public class Main : MonoBehaviour
     #region CALL_FUNCTION
     public void CallFunction(string monoName, string methodName, ParameterNameWithSingleObjectValues[] parameters)
     {
-        if (this.Target == null)
+        if (this.target == null)
         {
             Debug.Log("Select a target before calling function!");
             return;
         }
 
-        if (!this.attachedMonos.ContainsKey(this.Target))
+        if (!this.attachedMonos.ContainsKey(this.target))
         {
             Debug.Log("The target has no behaviours attached!");
             return;
         }
 
-        var monos = this.attachedMonos[this.Target];
+        var monos = this.attachedMonos[this.target];
 
         var wantedMonos = monos.Where(x => x.Name == monoName).ToArray();
         if (wantedMonos.Length != 1)
@@ -568,7 +573,7 @@ public class Main : MonoBehaviour
         }
         else
         {
-            target = this.Target;
+            target = this.target;
         }
 
         if (target == null)
