@@ -1,38 +1,16 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ApplyBehaviour : MonoBehaviour
+public class CodeApplicator: MonoBehaviour
 {
-    private TMP_InputField textEditorInputField;
-    private Camera myCamera;
+    private InputField textEditorInputField;
     private Main ms;
-    private InputFocusManager inputFocusManager;
 
-    void Start()
+    public async void Apply()
     {
-        this.myCamera = Camera.main;
-
-        this.textEditorInputField = GameObject.Find("TextEditor").GetComponent<TMP_InputField>();
-        var main = GameObject.Find("Main");
-        this.ms = main.GetComponent<Main>();
-        this.inputFocusManager = main.GetComponent<InputFocusManager>();
-
-        var button = gameObject.GetComponent<Button>();
-        button.onClick.AddListener(CompileTextAndSendToTarget);
-    }
-
-    private void CompileTextAndSendToTarget()
-    {
-        Camera.main.backgroundColor = Color.cyan;
-        this.CompileText();
-    }
-
-    private async void CompileText()
-    {
-        if(ms.target == null)
+        if (ms.target == null)
         {
             Debug.Log("You should select a target before compiling script to attach to target!");
             return;
@@ -59,7 +37,7 @@ public class ApplyBehaviour : MonoBehaviour
             {
                 result = (await tb.Test(assBytes)).ToString();
             }
-            else if(tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
+            else if (tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
             {
                 tb.RegisterAI(assBytes);
                 result = "AI Loaded!";
@@ -67,11 +45,10 @@ public class ApplyBehaviour : MonoBehaviour
 
             Debug.Log("Test Result: " + result);
             Debug.Log("ExtPath " + ExtPath);
-            //Compilation.FinalTest(ExtPath); ///Works does not load assemblies to main;
         }
         else
         {
-            var target = this.ms.target; 
+            var target = this.ms.target;
             var functions = await Task.Run(() =>
             {
                 var text = textEditorInputField.text;
@@ -83,15 +60,6 @@ public class ApplyBehaviour : MonoBehaviour
 
             var script = this.ms.AttachRuntimeMono(target, functions);
         }
-
-        Camera.main.backgroundColor = Color.black;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.T) && this.inputFocusManager.SafeToTrigger())
-        {
-            this.CompileTextAndSendToTarget();
-        }
     }
 }
+

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class KeyboardInputManager: MonoBehaviour 
 {
@@ -6,6 +7,8 @@ public class KeyboardInputManager: MonoBehaviour
     private ReferenceBuffer referenceBuffer;
     private ShowAvailableCSFiles fileSwitcher;
     private ShowActionsBehaviour actionSwitcher;
+    private ShowCodeBehaviour showCode;
+    private GameObject scrollableInfoText;
 
     private void Start()
     {
@@ -14,6 +17,9 @@ public class KeyboardInputManager: MonoBehaviour
         this.referenceBuffer = main.GetComponent<ReferenceBuffer>();
         this.fileSwitcher = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>();
         this.actionSwitcher = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
+
+        this.showCode = GameObject.Find("ShowCodeButton").GetComponent<ShowCodeBehaviour>();
+        this.scrollableInfoText = GameObject.Find("ScrollableInfoText");
     }
 
     private void Update()
@@ -34,6 +40,16 @@ public class KeyboardInputManager: MonoBehaviour
         {
             this.fileSwitcher.Close();
             this.actionSwitcher.Close();
+            /// Restoring to last nonEscape save! 
+            this.showCode.ResoreToLast(); 
+            this.showCode.Close();
+            this.scrollableInfoText.SetActive(false);
+        }
+
+        /// Saving the state of the input field so that if escape is pressed after, we have the latest input! Because escape deletes all the current changes!
+        if(Input.GetKeyDown(KeyCode.Escape) == false)
+        {
+            this.showCode.SaveLast();
         }
     }
 }

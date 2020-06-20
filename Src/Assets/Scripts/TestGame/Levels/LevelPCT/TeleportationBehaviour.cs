@@ -11,26 +11,21 @@ public class TeleportationBehaviour: MonoBehaviour
 
     public void Home()
     {
-        sceneManager.Home(); 
+        sceneManager.Home();
     }
 
     public void WallJump()
     {
-        sceneManager.WallJump();
+        sceneManager.SpecificLevel(typeof(WallJumpMain));
     }
 
     public void Level_1()
     {
-        sceneManager.LoadLevel(1);
-    }
-
-    public void Level_2()
-    {
-        sceneManager.LoadLevel(2);
+        sceneManager.SpecificLevel(typeof(Level1Main));
     }
 
     public void Level_3()
     {
-        sceneManager.LoadLevel(3);
+        sceneManager.SpecificLevel(typeof(Level3Main));
     }
 }

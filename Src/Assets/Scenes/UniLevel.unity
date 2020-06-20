@@ -1481,7 +1481,7 @@ PrefabInstance:
         type: 3}
       propertyPath: levelMono
       value: 
-      objectReference: {fileID: 835836455}
+      objectReference: {fileID: 0}
     - target: {fileID: 2721907570920746124, guid: 5903b430212d72d4db05dd47b2dd44ac,
         type: 3}
       propertyPath: m_Name
@@ -1544,24 +1544,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5903b430212d72d4db05dd47b2dd44ac, type: 3}
---- !u!1 &835836454 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2721907570920746124, guid: 5903b430212d72d4db05dd47b2dd44ac,
-    type: 3}
-  m_PrefabInstance: {fileID: 835836453}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &835836455
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 835836454}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 020e8d7a40509f74a82bff56c9c55d1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1688670876
 GameObject:
   m_ObjectHideFlags: 0

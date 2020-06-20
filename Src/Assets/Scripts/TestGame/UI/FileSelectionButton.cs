@@ -1,10 +1,11 @@
 ﻿using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FileSelectionButton: MonoBehaviour
 {
-    private InputField inputField;
+    private TMP_InputField inputField;
     private Main ms;
 
     private string filePath;

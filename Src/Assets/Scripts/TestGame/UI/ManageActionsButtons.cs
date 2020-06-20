@@ -4,6 +4,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
+///Attached to ScrollableActions////ActionsContent
+
 /// <summary>
 ///    This script is attached to scrollable panel in the UI. 
 /// It recives information from the Main <see cref="Main"> about the 
@@ -43,6 +45,8 @@ public class ManageActionsButtons : MonoBehaviour
 
     private RectTransform parentRT;
 
+    private ShowActionsBehaviour visibilityManager; 
+
     void Start()
     {
         /// Creating the paraent object that will hold all UI Elements
@@ -79,6 +83,7 @@ public class ManageActionsButtons : MonoBehaviour
         this.currentTarget = null;
         this.previousTarget = null;
 
+        this.visibilityManager = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
     }
     #endregion
 
@@ -89,6 +94,22 @@ public class ManageActionsButtons : MonoBehaviour
     /// </summary>
     public void SetTarget(GameObject newTarget)
     {
+        /// Setting the data structire for this target's mono so we do not have to check later.
+        if (!this.monosPerObjectData.ContainsKey(newTarget))
+        {
+            this.monosPerObjectData[newTarget] = new List<UiMonoGroupInformation>();
+        }
+
+        /// Managing the visibility: if no items to display close the thing, else open it if closed!
+        if (this.monosPerObjectData[newTarget].Count > 0)
+        {
+            visibilityManager.Open();
+        }
+        else
+        {
+            visibilityManager.Close();
+        }
+
         /// If a the new target for some reason is the current target here, ignore.
         if (newTarget == this.currentTarget)
         {
@@ -103,17 +124,12 @@ public class ManageActionsButtons : MonoBehaviour
         /// In case a color picker is active at the time of switching, disable it. 
         this.colorPicker.SetActive(false);
 
-        /// Setting the data structire for this target's mono so we do not have to check later.
-        if (!this.monosPerObjectData.ContainsKey(currentTarget))
-        {
-            this.monosPerObjectData[currentTarget] = new List<UiMonoGroupInformation>();
-        }
-
-        /// Hide all the UI for the previous target.
+        /// Hide all the UI for the previous target!
         this.ClearUI(this.previousTarget);
-        
+        /// Display the actual interface!
         this.DisplayInterfaceForTarger(this.currentTarget);
     }
+ 
     #endregion
 
     #region REGISTER_OR_CHANGE_MONOS
@@ -618,6 +634,6 @@ public class ManageActionsButtons : MonoBehaviour
     }
     #endregion
 
-    #region END_BRACKET
+    #region }
 }
 #endregion

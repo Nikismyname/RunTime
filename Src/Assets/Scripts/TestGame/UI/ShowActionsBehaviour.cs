@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 
 /// <summary>
-/// attached to ShowActionsButton
+/// Aattached to ShowActionsButton
 /// </summary>
 public class ShowActionsBehaviour : MonoBehaviour
 {

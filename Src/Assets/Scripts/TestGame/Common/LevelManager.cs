@@ -6,7 +6,7 @@ public class LevelManager : MonoBehaviour
     private ILevelMain level;
     private GameObject successCanvas;
 
-    private void Start()
+    public void Setup()
     {
         if (!typeof(ILevelMain).IsAssignableFrom(levelMono.GetType()))
         {
@@ -18,11 +18,6 @@ public class LevelManager : MonoBehaviour
         this.successCanvas.SetActive(false);
 
         this.level = (ILevelMain)levelMono;
-    }
-
-    private void Update()
-    {
-        
     }
 
     public void Failure(string reason)

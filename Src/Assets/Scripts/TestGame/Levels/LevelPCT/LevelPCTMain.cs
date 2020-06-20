@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class LevelPCTMain : MonoBehaviour, ILevelMain
 {
-    public GameObject shipPrefab;
+    private GameObject shipPrefab;
     private GameObject player;
     private GameObject mainCamera;
     private Main ms;
@@ -13,17 +13,20 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
     {
         var main = GameObject.Find("Main");
         this.ms = main.GetComponent<Main>();
+        this.shipPrefab = ms.shipPrefab;
         var rb = main.GetComponent<ReferenceBuffer>();
         this.gl = new GenerateLevel(this.ms, rb);
 
         ///Generate the environment
         this.gl.CylinderBasePrefab(new Vector3(40, 1, 40), true);
+        ///...
 
-        ///PLAYER
+        /// Player!
         this.player = this.gl.Player(new Vector3(20, 0, 10), true, true, true);
         this.mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
+        ///...
 
         this.GenerateInGameInterface();
     }

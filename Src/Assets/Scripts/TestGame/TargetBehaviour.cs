@@ -156,15 +156,18 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler, ITeamBattleMo
     #region MAUSE_INPUT
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (this.selected == true)
+        if (Input.GetMouseButtonDown(0))
         {
-            this.ms.RegisterDeselection(this.id);
-            this.selected = false;
-            this.PaintUnselected();
-        }
-        else
-        {
-            ms.RegisterSelection(this.id);
+            if (this.selected == true)
+            {
+                this.ms.RegisterDeselection(this.id);
+                this.selected = false;
+                this.PaintUnselected();
+            }
+            else
+            {
+                ms.RegisterSelection(this.id);
+            }
         }
     }
     #endregion

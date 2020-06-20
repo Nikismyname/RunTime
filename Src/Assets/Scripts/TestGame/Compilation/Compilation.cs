@@ -393,11 +393,12 @@ public static class Compilation
         }
 
         ///Will be posible to extract more that one in the future
-        if (types.Length > 1)
-        {
-            Debug.Log("More than one type found in assembly!");
-            return null;
-        }
+        ///TODO: Uncomment that
+        //if (types.Length > 1)
+        //{
+        //    Debug.Log("More than one type found in assembly!");
+        //    return null;
+        //}
 
         var type = types[0];
 

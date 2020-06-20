@@ -1,60 +1,96 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.TestGame.Common.InitialCodes;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
-public class Level1Main: MonoBehaviour, ILevelMain
+public class Level1Main : MonoBehaviour, ILevelMain
 {
     private LevelManager lm;
-    private GameObject t, goal;
-    private Camera camera;
-    private Plane[] planes;
-    private Collider targetCollider;
+    private GameObject target, goal;
     private GenerateLevel gl;
     private Main ms;
+    private GameObject player;
+    private GameObject mainCamera;
+    private List<GameObject> toDestroy = new List<GameObject>();
 
     private void Start()
     {
+        /// References!
         var main = GameObject.Find("Main");
-        this.lm = main.GetComponent<LevelManager>(); 
+        this.lm = main.GetComponent<LevelManager>();
         this.ms = main.GetComponent<Main>();
         var rb = main.GetComponent<ReferenceBuffer>();
         this.gl = new GenerateLevel(ms, rb);
+        ///... 
 
+        /// Problem Text and Code!
         var infoText = rb.InfoTextObject;
         infoText.GetComponent<Text>().text = ProblemDesctiptions.Level1MoveUp;
+        rb.TextEditorInputField.text = InitialCodes.Level1;
+        ///...
 
-        this.t = gl.GenerateEntity(EntityType.Target, new Vector3(0, -5, 0), PrimitiveType.Cube, Color.gray,null,"Target");
-        this.goal = gl.GenerateEntity(EntityType.NonTarget, new Vector3(0, 5, 0), PrimitiveType.Cube, Color.blue,null, "Goal");
+        /// Floor!
+        GameObject baseCylindcer = this.gl.CylinderBasePrefab(new Vector3(40, 1, 40), true);
+        toDestroy.Add(baseCylindcer);
+        ///...
 
-        this.camera = Camera.main;
-        camera.transform.position = new Vector3(0, 0, -20);
-        camera.transform.eulerAngles = new Vector3(0,0,0);
+        /// Player and cam!
+        this.player = this.gl.Player(new Vector3(0, 0, 10), true, true, true);
+        this.toDestroy.Add(this.player);
+        this.mainCamera = GameObject.Find("MainCamera");
+        CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
+        camHandling.target = this.player.transform;
+        ///...
 
-        this.planes = GeometryUtility.CalculateFrustumPlanes(camera);
-        this.targetCollider = t.GetComponent<Collider>();
-        Debug.Log(targetCollider);
+        /// Generate entities!
+        this.target = gl.GenerateEntity(EntityType.Target, new Vector3(0, 0, 0), PrimitiveType.Cube, Color.gray, null, "Target");
+        this.toDestroy.Add(this.target);
+        this.goal = gl.GenerateEntity(EntityType.NonTarget, new Vector3(0, 8, 0), PrimitiveType.Cube, Color.blue, null, "Goal");
+        this.toDestroy.Add(this.goal);
+        ///...
     }
 
     private void Update()
     {
-        if (GeometryUtility.TestPlanesAABB(this.planes, this.targetCollider.bounds))
+
+        if (target == null) 
         {
-        }
-        else
+            return;
+        }  
+
+        if (this.target.transform.position.y > this.goal.transform.position.y)
         {
-            lm.Failure("Target out of camera view!");
+            this.lm.Success();
         }
 
-        if (this.t.transform.position.y > this.goal.transform.position.y)
+        if((this.target.transform.position - this.goal.transform.position).magnitude > 12)
         {
-            this.lm.Success(); 
+            this.lm.Failure("You suck!");
         }
     }
 
     public void ResetLevel()
     {
-        Destroy(this.t);
-        this.ms.UnregisterTarget(this.t);
-        this.t = this.gl.GenerateEntity(EntityType.Target, new Vector3(0, -5, 0), PrimitiveType.Cube, Color.gray, null, "Target");
-        this.targetCollider = this.t.GetComponent<Collider>();
+        this.ms.UnregisterTarget(this.target);
+        Destroy(this.target);
+        this.target = this.gl.GenerateEntity(EntityType.Target, new Vector3(0, 0, 0), PrimitiveType.Cube, Color.gray, null, "Target");
+    }
+
+    public void Destroy()
+    {
+        for (int i = 0; i < this.toDestroy.Count; i++)
+        {
+            Destroy(this.toDestroy[i]);
+        }
+
+        Destroy(this);
     }
 }
+
+//this.camera = Camera.main;
+//camera.transform.position = new Vector3(0, 0, -20);
+//camera.transform.eulerAngles = new Vector3(0,0,0);
+
+//this.planes = GeometryUtility.CalculateFrustumPlanes(camera);
+//this.targetCollider = target.GetComponent<Collider>();
+//Debug.Log(targetCollider);

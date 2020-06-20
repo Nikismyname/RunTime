@@ -17,6 +17,7 @@ public class Main : MonoBehaviour
     [SerializeField] public GameObject playerPrefab;
     [SerializeField] public GameObject playerKinematicPrefab;
     [SerializeField] public GameObject cylinderPrefab;
+    [SerializeField] public GameObject shipPrefab;
     [SerializeField] public float playerSpeed = 0.0005f;
     [SerializeField] public float NSSAllSpeedMultipyer = 0.5f;
     [SerializeField] public float NSSAllSlowConstantsMultiplyer = 0.8f;
@@ -33,7 +34,6 @@ public class Main : MonoBehaviour
     private Dictionary<GameObject, List<MainMonoWithName>> attachedMonos = new Dictionary<GameObject, List<MainMonoWithName>>();
     /// Reference to the script that manages action buttons 
     private ManageActionsButtons manageButtons;
-    private ShowActionsBehaviour actionMenuManager;
 
     void Awake()
     {
@@ -47,8 +47,6 @@ public class Main : MonoBehaviour
         ///Every two seconds check for destroyed monos and send message to <see cref="ManageActionsButtons"> 
         ///to remove them from the UI. 
         InvokeRepeating("PruneDestroyedMonoBehaviurs", 1, 2);
-
-        this.actionMenuManager = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
     }
     #endregion
 
@@ -95,8 +93,6 @@ public class Main : MonoBehaviour
 
         /// Informing the action button UI about the change of target, so it displays the UI for current target.
         this.manageButtons.SetTarget(this.target);
-        ///Opening the action menue on selection!
-        this.actionMenuManager.Open();
     }
 
     /// <summary>

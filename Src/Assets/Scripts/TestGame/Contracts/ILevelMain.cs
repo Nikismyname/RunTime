@@ -1,5 +1,9 @@
-﻿public interface ILevelMain
+﻿using UnityEngine;
+
+public interface ILevelMain
 {
-    void ResetLevel(); 
+    void ResetLevel();
+
+    //void Destroy();
 }
 
