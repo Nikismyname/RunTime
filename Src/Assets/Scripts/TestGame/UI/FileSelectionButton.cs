@@ -1,11 +1,10 @@
 ﻿using System.IO;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FileSelectionButton: MonoBehaviour
 {
-    private TMP_InputField inputField;
+    private ShowCodeBehaviour showCode;
     private Main ms;
 
     private string filePath;
@@ -16,7 +15,7 @@ public class FileSelectionButton: MonoBehaviour
         var rb = main.GetComponent<ReferenceBuffer>();
         this.ms = main.GetComponent<Main>();
 
-        this.inputField = rb.TextEditorInputField;
+        this.showCode = rb.ShowCode;
         
         var btn = gameObject.GetComponent<Button>();
         btn.onClick.AddListener(this.OnClick);
@@ -27,19 +26,11 @@ public class FileSelectionButton: MonoBehaviour
         this.filePath = path;
     }
 
-    ///TODO: the self attach functionality show not be here;
     private void OnClick()
     {
         var file = File.ReadAllText(this.filePath);
         var alteredFile = file;
-        this.inputField.text = alteredFile;
-
-        //var type = ms.Target?.GetComponent<TargetBehaviour>().type; 
-
-        //if (type != TargetType.Test && type != TargetType.BattleMovement && type != TargetType.BattleMoveSameDom)
-        //{
-        //    alteredFile = Compilation.AddSelfAttachToSource(file);
-        //}
+        this.showCode.SetText(alteredFile);
     }
 }
 

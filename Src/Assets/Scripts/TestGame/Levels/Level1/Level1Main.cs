@@ -26,7 +26,7 @@ public class Level1Main : MonoBehaviour, ILevelMain
         /// Problem Text and Code!
         var infoText = rb.InfoTextObject;
         infoText.GetComponent<Text>().text = ProblemDesctiptions.Level1MoveUp;
-        rb.TextEditorInputField.text = InitialCodes.Level1;
+        rb.ShowCode.SetText(InitialCodes.Level1);
         ///...
 
         /// Floor!

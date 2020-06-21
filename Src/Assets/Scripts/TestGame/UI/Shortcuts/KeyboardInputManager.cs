@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class KeyboardInputManager: MonoBehaviour 
 {
@@ -47,9 +46,11 @@ public class KeyboardInputManager: MonoBehaviour
         }
 
         /// Saving the state of the input field so that if escape is pressed after, we have the latest input! Because escape deletes all the current changes!
-        if(Input.GetKeyDown(KeyCode.Escape) == false)
+        if(Input.anyKeyDown && Input.GetKeyDown(KeyCode.Escape) == false)
         {
+            Debug.Log("Non Escape KeyDown");
             this.showCode.SaveLast();
+            this.showCode.UpdateCurrentFileWhenNotEsc();
         }
     }
 }

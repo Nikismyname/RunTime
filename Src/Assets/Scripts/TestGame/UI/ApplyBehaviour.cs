@@ -1,21 +1,20 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ApplyBehaviour : MonoBehaviour
 {
-    private TMP_InputField textEditorInputField;
+    private ShowCodeBehaviour showCode;
     private Camera myCamera;
     private Main ms;
     private InputFocusManager inputFocusManager;
 
     void Start()
     {
+        ReferenceBuffer rb = GameObject.Find("Main").GetComponent<ReferenceBuffer>(); 
         this.myCamera = Camera.main;
-
-        this.textEditorInputField = GameObject.Find("TextEditor").GetComponent<TMP_InputField>();
+        this.showCode = rb.ShowCode;
         var main = GameObject.Find("Main");
         this.ms = main.GetComponent<Main>();
         this.inputFocusManager = main.GetComponent<InputFocusManager>();
@@ -44,7 +43,7 @@ public class ApplyBehaviour : MonoBehaviour
             string ExtPath = "";
             var assBytes = await Task.Run(() =>
             {
-                var text = textEditorInputField.text;
+                var text = showCode.GetText();
                 var path = Compilation.GenerateAssemblyToFile(text);
                 ExtPath = path;
                 var bytes = File.ReadAllBytes(path);
@@ -74,7 +73,7 @@ public class ApplyBehaviour : MonoBehaviour
             var target = this.ms.target; 
             var functions = await Task.Run(() =>
             {
-                var text = textEditorInputField.text;
+                var text = showCode.GetText();
                 text = Compilation.AddSelfAttachToSource(text);
                 var ass = Compilation.GenerateAssemblyInMemory(text, false);
                 var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ReferenceBuffer : MonoBehaviour
 {
-    public TMP_InputField TextEditorInputField { get; set; }
+    public ShowCodeBehaviour ShowCode { get; set; }
     public ShowActionsBehaviour ShowActions { get; set; }
     public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
     public GameObject ColorPicker { get; set; }
@@ -13,7 +13,7 @@ public class ReferenceBuffer : MonoBehaviour
 
     private void Awake()
     {
-        this.TextEditorInputField = GameObject.Find("TextEditor").GetComponent<TMP_InputField>();
+        this.ShowCode = GameObject.Find("ShowCodeButton").GetComponent<ShowCodeBehaviour>();
         this.ColorPicker = GameObject.Find("ColorPicker");
         this.ColorPicker.SetActive(false);
         this.ShowActions = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();

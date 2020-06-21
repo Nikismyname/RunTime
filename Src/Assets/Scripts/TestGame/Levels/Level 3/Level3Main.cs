@@ -31,7 +31,7 @@ public class Level3Main : MonoBehaviour, ILevelMain
         /// Problem Text and Code!
         var infoText = rb.InfoTextObject;
         infoText.GetComponent<Text>().text = ProblemDesctiptions.level3;
-        rb.TextEditorInputField.text = InitialCodes.Level3;
+        rb.ShowCode.SetText(InitialCodes.Level3);
         ///...
 
         /// Value Initialization
