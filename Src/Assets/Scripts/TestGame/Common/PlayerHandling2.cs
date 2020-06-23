@@ -14,7 +14,7 @@ public class PlayerHandling2 : MonoBehaviour
     private Main ms;
     private float speed;
     private Rigidbody rb;
-    private float jumpHeight = 1200;
+    //private float jumpHeight = 1200;
     private float gravity = 100;
     private float noGravity = 0;
     private float jumpExtraGravity = 100f;
@@ -23,20 +23,14 @@ public class PlayerHandling2 : MonoBehaviour
     private bool grounded;
     private bool isJumpInProgress = false;
     private Vector3 previousVelocity;
-    private bool collidingWithGround = true;
-    private bool collidingWithWall = true;
+    //private bool collidingWithGround = true;
+    private bool collidingWithWall = false;
     private bool wallClimbingInProgress = false;
 
-    //private Vector3? climbJumpNormal;
-    //private GameObject lastTouchedWall;
-    //private GameObject lastJumpedOffWall;
-
-    /// <summary>
     /// Don't know about this too lazy to fix now 
-    /// </summary>
     private Vector3 lastWallCollisionNormal = Vector3.zero;
 
-    private float forceToVelocity = 0.05f;
+    //private float forceToVelocity = 0.05f;
 
     private Vector3 velocityBeforeCollision = Vector3.zero;
 
@@ -44,7 +38,7 @@ public class PlayerHandling2 : MonoBehaviour
 
     private int maxActionPoints = 3;
     private int actionPoints = 3;
-    private int jumpTokensRechargeSec = 10;
+    //private int jumpTokensRechargeSec = 10;
 
     private float? firstPressOfW = null;
     private float doublePressInterval = 0.5f;
@@ -199,6 +193,7 @@ public class PlayerHandling2 : MonoBehaviour
         this.active = true;
         this.gameObject.SetActive(true);
         this.gameObject.transform.position = newPosition;
+        this.grounded = false;
     }
     #endregion
 
@@ -535,7 +530,7 @@ public class PlayerHandling2 : MonoBehaviour
     {
         this.grounded = false;
         //this.lastOnGroundExit = DateTime.Now;
-        this.collidingWithGround = false;
+        //this.collidingWithGround = false;
     }
 
     private void JumpBounseFromWall(Vector3 normal, float yRotation)
@@ -588,7 +583,7 @@ public class PlayerHandling2 : MonoBehaviour
 
         this.grounded = true;
         this.isJumpInProgress = false;
-        this.collidingWithGround = true;
+        //this.collidingWithGround = true;
         this.wallClimbingInProgress = false;
         this.gravity = this.jumpExtraGravity;
     }

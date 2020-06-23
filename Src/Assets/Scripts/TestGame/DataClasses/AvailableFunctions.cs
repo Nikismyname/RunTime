@@ -47,6 +47,7 @@ public class UiMonoWithMethods
     public GameObject Object { get; set; }
     public string MonoName { get; set; }
     public UiMethodNameWithParameters[] Methods { get; set; }
+    public string Source { get; set; }
 }
 
 public class UiMethodNameWithParameters
@@ -71,5 +72,6 @@ public class UiMonoGroupInformation
     public bool Collapsed { get; set; }
     public float CollapsedHeight { get; set; }
     public float WholeHeight { get; set; }
+    public string  Source { get; set; }
 }
 ///...

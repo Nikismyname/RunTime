@@ -28,5 +28,16 @@
         "pass through the obstructions and walk to the other end!\n" +
         "You should submit plain class with a method with the given singnature: \n" +
         "public int[][] Solve(int y, int x,int startY,int startX,int endY, int endX, int[] obstructions)";
+
+    public const string Tutorial1StartMethod1 =
+        "Welcome, here in Unity we will mostly used MonoBehaviour classes to write our code. For the most part they are like any other class with few specifics." +
+        "For one they can anly exist as component of a GameObject and can not be initialized any other way"+
+        "Also there are a couple of special methods that MonoBehaviours implements and right now we will look at Start()"+
+        "A MonoBehaviour's Start() method is called then the object it is attached to is initialised. It is called only one!" + 
+        "For this task you can only write inside the Start() method (but you can use whatever other methods are implemented insede the start method!)" + 
+        "The goal of this challange is to make the target go throught all the 6 cubes";
+
+    public const string Tutorial1StartMethod2 =
+        "Again but harder";
 }
     

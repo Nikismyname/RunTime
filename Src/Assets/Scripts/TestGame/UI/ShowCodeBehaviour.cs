@@ -19,6 +19,7 @@ public class ShowCodeBehaviour : MonoBehaviour
     {
         this.textEditor = GameObject.Find("TextEditor");
         this.inputField = this.textEditor.GetComponent<TMP_InputField>();
+        this.inputField.text = InitialCodes.Blank;
         this.textEditor.SetActive(false);
         this.show = true;
         this.button = gameObject.GetComponent<Button>();

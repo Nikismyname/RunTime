@@ -1,14 +1,18 @@
 ﻿using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class CodeApplicator: MonoBehaviour
+public class CodeApplicator
 {
-    private InputField textEditorInputField;
     private Main ms;
 
-    public async void Apply()
+    public CodeApplicator()
+    {
+        this.ms = ReferenceBuffer.Instance.ms;
+    }
+
+    public async void ApplyToSelectedTarget(string text)
     {
         if (ms.target == null)
         {
@@ -19,15 +23,9 @@ public class CodeApplicator: MonoBehaviour
         var tb = ms.target.GetComponent<TargetBehaviour>();
         if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
         {
-            string ExtPath = "";
-            var assBytes = await Task.Run(() =>
+            byte[] assBytes = await Task.Run(() =>
             {
-                var text = textEditorInputField.text;
-                var path = Compilation.GenerateAssemblyToFile(text);
-                ExtPath = path;
-                var bytes = File.ReadAllBytes(path);
-                Debug.Log("Path: " + path);
-                File.Delete(path);
+                var bytes = OtherAppDomainCompile(text);
                 return bytes;
             });
 
@@ -44,22 +42,38 @@ public class CodeApplicator: MonoBehaviour
             }
 
             Debug.Log("Test Result: " + result);
-            Debug.Log("ExtPath " + ExtPath);
         }
         else
         {
             var target = this.ms.target;
+
             var functions = await Task.Run(() =>
             {
-                var text = textEditorInputField.text;
-                text = Compilation.AddSelfAttachToSource(text);
-                var ass = Compilation.GenerateAssemblyInMemory(text, false);
-                var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
+                var funcs = this.SameAppDomainCompile(text, true);
                 return funcs;
             });
 
-            var script = this.ms.AttachRuntimeMono(target, functions);
+            var script = this.ms.AttachRuntimeMono(target, functions, text);
         }
+    }
+
+    public CompMethodsInAssemblyType SameAppDomainCompile(string code, bool addSelfAttach = true)
+    {
+        if (addSelfAttach)
+        {
+            code = Compilation.AddSelfAttachToSource(code);
+        }
+        Assembly ass = Compilation.GenerateAssemblyInMemory(code, false);
+        CompMethodsInAssemblyType funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
+        return funcs;
+    }
+
+    public byte[] OtherAppDomainCompile(string code)
+    {
+        string path = Compilation.GenerateAssemblyToFile(code);
+        var bytes = File.ReadAllBytes(path);
+        File.Delete(path);
+        return bytes;
     }
 }
 

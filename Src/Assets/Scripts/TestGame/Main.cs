@@ -136,7 +136,7 @@ public class Main : MonoBehaviour
     /// <param name="target">Target to which to attach the runtime mono.</param>
     /// <param name="funcs">Mono information: name, methods and pramaters.</param>
     /// <returns></returns>
-    public MonoBehaviour AttachRuntimeMono(GameObject target, CompMethodsInAssemblyType funcs)
+    public MonoBehaviour AttachRuntimeMono(GameObject target, CompMethodsInAssemblyType funcs, string source)
     {
         /// Attaches the given mono and registeres in <see cref="attachedMonos">
         var monoData = this.AttachAndAddToDict(funcs, target, true, null);
@@ -144,7 +144,7 @@ public class Main : MonoBehaviour
         /// If a mono with the same name exists and the method singnature changed send it to the UI to redraw it.
         if (monoData.changesInMethodSignature)
         {
-            this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(monoData, target));
+            this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(monoData, target, source));
             monoData.changesInMethodSignature = false;
         }
 
@@ -157,7 +157,7 @@ public class Main : MonoBehaviour
     /// <param name="target">Target to which to attach the runtime mono.</param>
     /// <param name="funcs">Mono information: name, methods and pramaters.</param>
     /// <returns></returns>
-    public MonoBehaviour RegisterCompileTimeMono(GameObject target, CompMethodsInAssemblyType funcs, MonoBehaviour mono)
+    public MonoBehaviour AttachCompiletimeMono(GameObject target, CompMethodsInAssemblyType funcs, MonoBehaviour mono, string source)
     {
         /// Attaches the given mono and registeres in <see cref="attachedMonos">
         var monoData = this.AttachAndAddToDict(funcs, target, false, mono);
@@ -165,47 +165,11 @@ public class Main : MonoBehaviour
         /// If a mono with the same name exists and the method singnature changed send it to the UI to redraw it.
         if (monoData.changesInMethodSignature)
         {
-            this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(monoData, target));
+            this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(monoData, target, source));
             monoData.changesInMethodSignature = false;
         }
         return null; 
     }
-
-
-    //public MonoBehaviour AttachMono(
-    //    CompMethodsInAssemblyType funcs,
-    //    bool toTarget = true,
-    //    GameObject actTarget = null,
-    //    bool attach = true,
-    //    MonoBehaviour incMono = null)
-    //{
-    //    GameObject internalTarget = null;
-
-    //    if (toTarget == false)
-    //    {
-    //        if (actTarget == null)
-    //        {
-    //            Debug.Log("You chose to privade custom target but sent null as its value!");
-    //            Debug.Break();
-    //        }
-
-    //        internalTarget = actTarget;
-    //    }
-    //    else
-    //    {
-    //        internalTarget = this.Target;
-    //    }
-
-    //    var mono = this.AttachAndAddToDict(funcs, internalTarget, attach, incMono);
-
-    //    if (mono.changesInMethodSignature)
-    //    {
-    //        this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(mono, internalTarget));
-    //        mono.changesInMethodSignature = false;
-    //    }
-
-    //    return mono.Mono;
-    //}
 
     /// <summary>
     /// Does tho things: 
@@ -559,7 +523,7 @@ public class Main : MonoBehaviour
     #endregion
 
     #region UI_BUTTONS_DATA
-    public UiMonoWithMethods GenerateButtonInformation(MainMonoWithName mono, GameObject incTarget = null)
+    public UiMonoWithMethods GenerateButtonInformation(MainMonoWithName mono, GameObject incTarget = null, string source = "")
     {
         GameObject target = null;
 
@@ -587,6 +551,7 @@ public class Main : MonoBehaviour
                 Name = y.Name,
                 Parameters = y.Parameters,
             }).ToArray(),
+            Source = source,
         };
 
         return result;
@@ -651,15 +616,47 @@ public class Main : MonoBehaviour
     }
     #endregion
 
-    #region END_BRAKET
+    #region }
 }
 #endregion
 
 
-
-
-
 #region NOT_IN_USE
+//public MonoBehaviour AttachMono(
+//    CompMethodsInAssemblyType funcs,
+//    bool toTarget = true,
+//    GameObject actTarget = null,
+//    bool attach = true,
+//    MonoBehaviour incMono = null)
+//{
+//    GameObject internalTarget = null;
+
+//    if (toTarget == false)
+//    {
+//        if (actTarget == null)
+//        {
+//            Debug.Log("You chose to privade custom target but sent null as its value!");
+//            Debug.Break();
+//        }
+
+//        internalTarget = actTarget;
+//    }
+//    else
+//    {
+//        internalTarget = this.Target;
+//    }
+
+//    var mono = this.AttachAndAddToDict(funcs, internalTarget, attach, incMono);
+
+//    if (mono.changesInMethodSignature)
+//    {
+//        this.manageButtons.RegisterNewOrChangedMono(this.GenerateButtonInformation(mono, internalTarget));
+//        mono.changesInMethodSignature = false;
+//    }
+
+//    return mono.Mono;
+//}
+
 //private void ManualCheckingForSingleInputValues()
 //{
 ////INT

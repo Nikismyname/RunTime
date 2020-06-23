@@ -45,7 +45,7 @@ public class ManageActionsButtons : MonoBehaviour
 
     private RectTransform parentRT;
 
-    private ShowActionsBehaviour visibilityManager; 
+    private ShowActionsBehaviour visibilityManager;
 
     void Start()
     {
@@ -73,7 +73,7 @@ public class ManageActionsButtons : MonoBehaviour
         var main = GameObject.Find("Main");
         ///InputFocusManager is used to register inputs so when a shortcut is pressed
         ///during typing, it does not trigger the shortcut
-        this.inputFocusManager = main.GetComponent<InputFocusManager>(); 
+        this.inputFocusManager = main.GetComponent<InputFocusManager>();
         this.colorPicker = main.GetComponent<ReferenceBuffer>().ColorPicker;
         ///...
 
@@ -129,7 +129,7 @@ public class ManageActionsButtons : MonoBehaviour
         /// Display the actual interface!
         this.DisplayInterfaceForTarger(this.currentTarget);
     }
- 
+
     #endregion
 
     #region REGISTER_OR_CHANGE_MONOS
@@ -163,12 +163,11 @@ public class ManageActionsButtons : MonoBehaviour
             MonoName = monoData.MonoName,
             WholeHeight = createResult.FinalHeight,
             Methods = createResult.Parent,
-
             MonoButtonLabel = createResult.ButtonLabel,
             Collapsed = false,
             CollapsedHeight = createResult.CollapsedHeight,
-
             GrandParent = createResult.GrandParent,
+            Source = monoData.Source,
         };
 
         /// Setting up the mono name label to be able to callapse and expand the method 
@@ -178,7 +177,8 @@ public class ManageActionsButtons : MonoBehaviour
         listOfMonoData.Add(monoGroup);
 
         /// If the new UI ifromation is for current target - display the updated version 
-        if (this.currentTarget!= null && this.currentTarget == target) {
+        if (this.currentTarget != null && this.currentTarget == target)
+        {
             this.DisplayInterfaceForTarger(target);
         }
     }
@@ -320,20 +320,20 @@ public class ManageActionsButtons : MonoBehaviour
         /// Directly howds only the buttonLabel(the mono name) and the local parent
         /// the local parent holds everything else (method buttons and parameter inputs)
         /// clicking on the buttonLabel collapses the local parent
-        var localGrandParent = new GameObject(monoName + "GrandParent");
+        GameObject localGrandParent = new GameObject(monoName + "GrandParent");
         localGrandParent.transform.SetParent(this.parentTransform, false);
         localGrandParent.transform.position = this.parentTransform.position;
 
-        var localParent = new GameObject(monoName);
+        GameObject localParent = new GameObject(monoName);
         localParent.transform.SetParent(localGrandParent.transform, false);
         localParent.transform.position = localGrandParent.transform.position;
-        var localTransform = localParent.transform;
+        Transform localTransform = localParent.transform;
 
-        var localHeight = 0f;
+        float localHeight = 0f;
 
         ///assigning the label to the grandparent not the parent
-        var labelInfo = this.SpawnOneLable(new Vector2(this.marginX, localHeight), monoName, localGrandParent.transform, true, out GameObject intButtonLabel, true);
-        var lableButtonScript = labelInfo.labelButtonScript;
+        ActionUiLabelButtonWithHeight labelInfo = this.SpawnOneLable(new Vector2(this.marginX, localHeight), monoName, localGrandParent.transform, true, out GameObject intButtonLabel, true);
+        LabelButtonMonoName lableButtonScript = labelInfo.labelButtonScript;
 
         localHeight -= labelInfo.Height;
 
@@ -348,31 +348,29 @@ public class ManageActionsButtons : MonoBehaviour
             /// If we have unevent mothod count, we place the last button individualy to the left
             if (i == methods.Length - 1)
             {
-                var method = methods[i];
-                var pos = new Vector2(marginX, localHeight);
-                var beh = this.SpawnOneButton(pos, method.Name, monoName, localTransform);
+                UiMethodNameWithParameters method = methods[i];
+                Vector2 pos = new Vector2(marginX, localHeight);
+                MethodButtonBehaviour beh = this.SpawnOneButton(pos, method.Name, monoName, localTransform);
                 pos.y -= this.buttonY;
-                var height = this.SpawnAllInputs(pos, beh, method, localTransform);
-
+                float height = this.SpawnAllInputs(pos, beh, method, localTransform);
                 localHeight -= (height + this.buttonY + this.marginY);
-
                 methodButtonBehs.Add(beh);
             }
             /// Placing two buttons side by side.
             else
             {
-                var method1 = methods[i];
-                var method2 = methods[i + 1];
+                UiMethodNameWithParameters method1 = methods[i];
+                UiMethodNameWithParameters method2 = methods[i + 1];
 
-                var pos1 = new Vector2(marginX, localHeight);
-                var beh1 = this.SpawnOneButton(pos1, method1.Name, monoName, localTransform);
+                Vector2 pos1 = new Vector2(marginX, localHeight);
+                MethodButtonBehaviour beh1 = this.SpawnOneButton(pos1, method1.Name, monoName, localTransform);
                 pos1.y -= this.buttonY;
-                var height1 = this.SpawnAllInputs(pos1, beh1, method1, localTransform);
+                float height1 = this.SpawnAllInputs(pos1, beh1, method1, localTransform);
 
-                var pos2 = new Vector2(marginX * 2 + this.buttonX, localHeight);
-                var beh2 = this.SpawnOneButton(pos2, method2.Name, monoName, localTransform);
+                Vector2 pos2 = new Vector2(marginX * 2 + this.buttonX, localHeight);
+                MethodButtonBehaviour beh2 = this.SpawnOneButton(pos2, method2.Name, monoName, localTransform);
                 pos2.y -= this.buttonY;
-                var height2 = this.SpawnAllInputs(pos2, beh2, method2, localTransform);
+                float height2 = this.SpawnAllInputs(pos2, beh2, method2, localTransform);
 
                 localHeight -= (Mathf.Max(height1, height2) + buttonY + marginY);
 
@@ -382,9 +380,9 @@ public class ManageActionsButtons : MonoBehaviour
         }
 
         ///Collecting all the color scripts so we can close Color Picker on colapse
-        foreach (var methodScript in methodButtonBehs)
+        foreach (MethodButtonBehaviour methodScript in methodButtonBehs)
         {
-            foreach (var colorButtonScript in methodScript.ColorParamaters)
+            foreach (ParameterNameWithColorButtonScript colorButtonScript in methodScript.ColorParamaters)
             {
                 lableButtonScript.ColorSelectionButtons.Add(colorButtonScript.colorScript);
             }

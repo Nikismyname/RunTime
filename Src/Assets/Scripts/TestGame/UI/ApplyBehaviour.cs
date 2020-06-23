@@ -1,89 +1,17 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ApplyBehaviour : MonoBehaviour
 {
     private ShowCodeBehaviour showCode;
-    private Camera myCamera;
-    private Main ms;
     private InputFocusManager inputFocusManager;
 
     void Start()
     {
-        ReferenceBuffer rb = GameObject.Find("Main").GetComponent<ReferenceBuffer>(); 
-        this.myCamera = Camera.main;
-        this.showCode = rb.ShowCode;
-        var main = GameObject.Find("Main");
-        this.ms = main.GetComponent<Main>();
-        this.inputFocusManager = main.GetComponent<InputFocusManager>();
-
+        this.showCode = ReferenceBuffer.Instance.ShowCode;
+        this.inputFocusManager = ReferenceBuffer.Instance.focusManager;
         var button = gameObject.GetComponent<Button>();
         button.onClick.AddListener(CompileTextAndSendToTarget);
-    }
-
-    private void CompileTextAndSendToTarget()
-    {
-        Camera.main.backgroundColor = Color.cyan;
-        this.CompileText();
-    }
-
-    private async void CompileText()
-    {
-        if(ms.target == null)
-        {
-            Debug.Log("You should select a target before compiling script to attach to target!");
-            return;
-        }
-
-        var tb = ms.target.GetComponent<TargetBehaviour>();
-        if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
-        {
-            string ExtPath = "";
-            var assBytes = await Task.Run(() =>
-            {
-                var text = showCode.GetText();
-                var path = Compilation.GenerateAssemblyToFile(text);
-                ExtPath = path;
-                var bytes = File.ReadAllBytes(path);
-                Debug.Log("Path: " + path);
-                File.Delete(path);
-                return bytes;
-            });
-
-            string result = string.Empty;
-
-            if (tb.type == TargetType.Test)
-            {
-                result = (await tb.Test(assBytes)).ToString();
-            }
-            else if(tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
-            {
-                tb.RegisterAI(assBytes);
-                result = "AI Loaded!";
-            }
-
-            Debug.Log("Test Result: " + result);
-            Debug.Log("ExtPath " + ExtPath);
-            //Compilation.FinalTest(ExtPath); ///Works does not load assemblies to main;
-        }
-        else
-        {
-            var target = this.ms.target; 
-            var functions = await Task.Run(() =>
-            {
-                var text = showCode.GetText();
-                text = Compilation.AddSelfAttachToSource(text);
-                var ass = Compilation.GenerateAssemblyInMemory(text, false);
-                var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
-                return funcs;
-            });
-
-            var script = this.ms.AttachRuntimeMono(target, functions);
-        }
-
-        Camera.main.backgroundColor = Color.black;
     }
 
     private void Update()
@@ -93,4 +21,121 @@ public class ApplyBehaviour : MonoBehaviour
             this.CompileTextAndSendToTarget();
         }
     }
+
+    private void CompileTextAndSendToTarget()
+    {
+        Camera.main.backgroundColor = Color.cyan;
+        string text = showCode.GetText();
+        ReferenceBuffer.Instance.capp.ApplyToSelectedTarget(text);
+        Camera.main.backgroundColor = Color.black;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//private async void CompileText()
+//{
+//    if(ms.target == null)
+//    {
+//        Debug.Log("You should select a target before compiling script to attach to target!");
+//        return;
+//    }
+
+//    var tb = ms.target.GetComponent<TargetBehaviour>();
+//    if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
+//    {
+//        string ExtPath = "";
+//        var assBytes = await Task.Run(() =>
+//        {
+//            var text = showCode.GetText();
+//            var path = Compilation.GenerateAssemblyToFile(text);
+//            ExtPath = path;
+//            var bytes = File.ReadAllBytes(path);
+//            Debug.Log("Path: " + path);
+//            File.Delete(path);
+//            return bytes;
+//        });
+
+//        string result = string.Empty;
+
+//        if (tb.type == TargetType.Test)
+//        {
+//            result = (await tb.Test(assBytes)).ToString();
+//        }
+//        else if(tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
+//        {
+//            tb.RegisterAI(assBytes);
+//            result = "AI Loaded!";
+//        }
+
+//        Debug.Log("Test Result: " + result);
+//        Debug.Log("ExtPath " + ExtPath);
+//        //Compilation.FinalTest(ExtPath); ///Works does not load assemblies to main;
+//    }
+//    else
+//    {
+//        var target = this.ms.target;
+//        string text = showCode.GetText();
+//        text = Compilation.AddSelfAttachToSource(text);
+//        var functions = await Task.Run(() =>
+//        {
+//            Assembly ass = Compilation.GenerateAssemblyInMemory(text, false);
+//            var funcs = Compilation.GenerateAllMethodsFromAssembly(ass);
+//            return funcs;
+//        });
+
+//        var script = this.ms.AttachRuntimeMono(target, functions, text);
+//    }
+//}

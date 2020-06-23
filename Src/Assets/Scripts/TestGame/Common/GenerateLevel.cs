@@ -37,6 +37,27 @@ public class GenerateLevel
         return baseCilinder;
     }
 
+    /// <summary>
+    /// collider = true; scale = new Vector3(40, 1, 40)
+    /// </summary>
+    /// <returns></returns>
+    public GameObject CylinderBasePrefabStand1()
+    {
+        var prefab = this.ms.cylinderPrefab;
+        var baseCilinder = GameObject.Instantiate(prefab);
+
+        baseCilinder.name = "BaseCilinder";
+        if (true == true)
+        {
+            var currentCollider = baseCilinder.AddComponent<MeshCollider>();
+            currentCollider.convex = true;
+        }
+        baseCilinder.GetComponent<Renderer>().material.color = Colors.BaseColor;
+        baseCilinder.transform.localScale = new Vector3(40, 1, 40);
+        baseCilinder.transform.position = new Vector3(0, -new Vector3(40, 1, 40).y, 0);
+        return baseCilinder;
+    }
+
     #endregion
 
     #region ENTITY 
@@ -81,12 +102,14 @@ public class GenerateLevel
         entity.GetComponent<Renderer>().material.color = color.Value;
         entity.name = GOName;
 
-        foreach (var type in scriptTypes)
-        {
-            entity.AddComponent(type);
-        }
-
         return entity;
+    }
+
+    public void AddEditableScriptToEntity<Script>(GameObject entity, string source) where Script: MonoBehaviour
+    {
+        Script script = entity.AddComponent<Script>();
+        var funcs = Compilation.GenerateAllMethodsFromMonoType(script.GetType());
+        ms.AttachCompiletimeMono(entity, funcs, script, source);
     }
 
     public GameObject GenerateTestEntity(
@@ -138,7 +161,7 @@ public class GenerateLevel
                 {
                     var script = (MonoBehaviour)entity.GetComponent(scriptType);
                     var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
-                    this.ms.RegisterCompileTimeMono(entity, funcs, script);
+                    this.ms.AttachCompiletimeMono(entity, funcs, script, "");
                 }
             }
         }
@@ -195,7 +218,7 @@ public class GenerateLevel
                 {
                     var script = (MonoBehaviour)scriptsObject.GetComponent(scriptType);
                     var funcs = Compilation.GenerateAllMethodsFromMonoType(scriptType);
-                    this.ms.RegisterCompileTimeMono(scriptsObject, funcs, script);
+                    this.ms.AttachCompiletimeMono(scriptsObject, funcs, script, "");
                 }
             }
         }
@@ -233,19 +256,8 @@ public class GenerateLevel
         player.name = "Player";
         player.AddComponent<PlayerFailure>();
 
-        if (kinematic == false)
-        {
-            var ph = player.AddComponent<PlayerHandling>();
-            this.rb.RegisterPlayerHandling(ph);
-        }
-        else
-        {
-            ///TODO: What is player handling2???
-            ///two is the parcour stuff, fix the space ship to work with two or diferinciate on different ground than "kinematic"
-            //var ph = player.AddComponent<PlayerHandling2>();
-            var ph = player.AddComponent<PlayerHandling>();
-            this.rb.RegisterPlayerHandling(ph);
-        }
+        PlayerHandling2 ph = player.AddComponent<PlayerHandling2>();
+        this.rb.RegisterPlayerHandling(ph);
 
         if (isTarget)
         {
@@ -262,6 +274,33 @@ public class GenerateLevel
         position.y += 1;
 
         player.transform.position = position;
+        return player;
+    }
+
+    public GameObject PlayerWithCamStand1()
+    {
+        GameObject player;
+        Vector3 position = new Vector3(0, 0, 10);
+
+        player = GameObject.Instantiate(this.ms.playerKinematicPrefab);
+
+        player.name = "Player";
+        player.AddComponent<PlayerFailure>();
+
+        var ph = player.AddComponent<PlayerHandling2>();
+        this.rb.RegisterPlayerHandling(ph);
+
+        var tb = player.AddComponent<TargetBehaviour>();
+        //tb.SetUp(99, TargetType.Standard);
+        this.ms.RegisterTarget(player, TargetType.Standard);
+
+        position.y += 1;
+        player.transform.position = position;
+
+        GameObject mainCamera = GameObject.Find("MainCamera");
+        CamHandling camHandling = mainCamera.GetComponent<CamHandling>();
+        camHandling.target = player.transform;
+
         return player;
     }
 

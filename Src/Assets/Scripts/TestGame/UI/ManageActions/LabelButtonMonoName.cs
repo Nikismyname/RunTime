@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LabelButtonMonoName: MonoBehaviour
+public class LabelButtonMonoName : MonoBehaviour
 {
     private UiMonoGroupInformation monoGroup;
     private ManageActionsButtons manageButtons;
@@ -20,23 +20,31 @@ public class LabelButtonMonoName: MonoBehaviour
 
     private void OnClick()
     {
-        if (monoGroup.Collapsed) // Expand
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            monoGroup.Collapsed = false;
-            manageButtons.DisplayInterfaceForTarger(null, true);
+            ReferenceBuffer.Instance.ShowCode.SetText(this.monoGroup.Source);
         }
-        else // Colapse
+        else
         {
-            monoGroup.Collapsed = true;
-            manageButtons.DisplayInterfaceForTarger(null, true);
-            var activeColorButtons = this.ColorSelectionButtons.Where(x => x.Active == true).ToArray();
+            if (monoGroup.Collapsed) // Expand
+            {
+                monoGroup.Collapsed = false;
+                manageButtons.DisplayInterfaceForTarger(null, true);
+            }
+            else // Colapse
+            {
+                monoGroup.Collapsed = true;
+                manageButtons.DisplayInterfaceForTarger(null, true);
+                var activeColorButtons = this.ColorSelectionButtons.Where(x => x.Active == true).ToArray();
 
-            if(activeColorButtons.Length>0) { 
-                this.ColorPicker.SetActive(false);
-
-                foreach (var item in activeColorButtons)
+                if (activeColorButtons.Length > 0)
                 {
-                    item.SetInactive(-1);
+                    this.ColorPicker.SetActive(false);
+
+                    foreach (var item in activeColorButtons)
+                    {
+                        item.SetInactive(-1);
+                    }
                 }
             }
         }

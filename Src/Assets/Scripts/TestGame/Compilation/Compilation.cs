@@ -235,13 +235,13 @@ public static class Compilation
             GenerateInMemory = true,
         };
 
-        AddReferencesToCompilerParameters(compilerParameters);
+        //AddReferencesToCompilerParameters(compilerParameters);
 
         ///Add all assemblies form Current Domain?
-        //foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        //{
-        //    compileParameters.ReferencedAssemblies.Add(assembly.Location);
-        //}
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            compilerParameters.ReferencedAssemblies.Add(assembly.Location);
+        }
 
         var timer = new diagnostics.Stopwatch();
         timer.Start();

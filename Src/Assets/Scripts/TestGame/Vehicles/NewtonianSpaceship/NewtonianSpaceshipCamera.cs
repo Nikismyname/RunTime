@@ -57,7 +57,6 @@ public class NewtonianSpaceshipCamera : MonoBehaviour
         this.yDeg = Vector3.Angle(Vector3.up, transform.up);
 
         this.cursorLocked = true;
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     /*

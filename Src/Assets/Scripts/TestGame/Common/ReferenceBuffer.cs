@@ -1,18 +1,30 @@
-﻿using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ReferenceBuffer : MonoBehaviour
 {
+    public static ReferenceBuffer Instance { get; set; }
+
     public ShowCodeBehaviour ShowCode { get; set; }
     public ShowActionsBehaviour ShowActions { get; set; }
     public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
     public GameObject ColorPicker { get; set; }
-    public PlayerHandling PlayerHandling { get; set; }
+    public PlayerHandling2 PlayerHandling { get; set; }
     public GameObject InfoTextObject { get; set; }
     public GameObject InfoTextCanvasGroup { get; set; }
+    public InputFocusManager focusManager { get; set; }
+
+    public Main ms { get; set; }
+    public GenerateLevel gl { get; set; }
+    public GridManager gm { get; set; }
+    public LevelManager lm { get; set; }
+    public CodeApplicator capp { get; set; }
 
     private void Awake()
     {
+        Instance = this;
+
+        GameObject main = GameObject.Find("Main");
+
         this.ShowCode = GameObject.Find("ShowCodeButton").GetComponent<ShowCodeBehaviour>();
         this.ColorPicker = GameObject.Find("ColorPicker");
         this.ColorPicker.SetActive(false);
@@ -20,9 +32,16 @@ public class ReferenceBuffer : MonoBehaviour
         this.ShowAvailableCSFiles = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>();
         this.InfoTextObject = GameObject.Find("InfoText");
         this.InfoTextCanvasGroup = GameObject.Find("ScrollableInfoText");
+
+        this.ms = main.GetComponent<Main>();
+        this.gm = main.GetComponent<GridManager>();
+        this.gl = new GenerateLevel(this.ms, this, this.gm);
+        this.lm = main.GetComponent<LevelManager>();
+        this.capp = new CodeApplicator();
+        this.focusManager = main.GetComponent<InputFocusManager>();
     }
 
-    public void RegisterPlayerHandling (PlayerHandling playerHandling)
+    public void RegisterPlayerHandling (PlayerHandling2 playerHandling)
     {
         this.PlayerHandling = playerHandling; 
     }

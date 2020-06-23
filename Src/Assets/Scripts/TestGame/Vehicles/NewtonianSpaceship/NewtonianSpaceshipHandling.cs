@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#region INIT
+
+using UnityEngine;
 
 public class NewtonianSpaceshipHandling : MonoBehaviour
 {
@@ -24,7 +26,7 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
     private bool nutonianMode = false;
     private bool active = false;
 
-    private PlayerHandling playerHandling;
+    private PlayerHandling2 playerHandling;
     private float MaxEntranceDistance = float.MaxValue;
     private ReferenceBuffer referenceBuffer;
 
@@ -69,6 +71,8 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
         this.mainCamera = Camera.main.gameObject;
     }
 
+    #endregion
+
     public void Drive()
     {
         ///acquiring the player handling script to get distance as well as SetUp the player for flight
@@ -111,6 +115,8 @@ public class NewtonianSpaceshipHandling : MonoBehaviour
 
         ///Invoking the HasActivated event
         this.HasActivated?.Invoke();
+
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void Exit()

@@ -2,7 +2,6 @@
 
 public class CamHandling : MonoBehaviour
 {
-    //var for the size of the target sphere
     public Transform target;
     private Vector3 targetOffset = Vector3.zero;
     private float distance = 20.0f;
@@ -25,11 +24,14 @@ public class CamHandling : MonoBehaviour
 
     private InputFocusManager inputFocusManager;
 
-    private bool rotate = false;
+    private bool rotate;
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.None;
+        //Cursor.lockState = CursorLockMode.None;
+        var thing = Cursor.lockState;
+        this.rotate = false;
+
         var main = GameObject.Find("Main");
         this.inputFocusManager = main.GetComponent<InputFocusManager>();
         Init();

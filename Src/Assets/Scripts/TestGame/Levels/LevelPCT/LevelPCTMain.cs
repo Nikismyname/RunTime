@@ -22,16 +22,18 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
         ///...
 
         /// Player!
-        this.player = this.gl.Player(new Vector3(20, 0, 10), true, true, true);
+        this.player = this.gl.Player(new Vector3(0, 0, 0), true, true, true);
         this.mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
         ///...
 
-        this.GenerateInGameInterface();
+        GameObject.Find("ScrollableInfoText").SetActive(false);
+
+        this.GenerateEntites();
     }
 
-    private void GenerateInGameInterface()
+    private void GenerateEntites()
     {
         var nextLevel = this.gl.GenerateEntity(
             EntityType.NonTarget,
@@ -86,9 +88,7 @@ public class LevelPCTMain : MonoBehaviour, ILevelMain
             "TeleportationSphere",
             new Type[0]
         );
-        var teleportationScript = teleportationSphere.AddComponent<TeleportationBehaviour>();
-        var teleportationSphereFuncs = Compilation.GenerateAllMethodsFromMonoType(teleportationScript.GetType());
-        ms.RegisterCompileTimeMono(teleportationSphere, teleportationSphereFuncs, teleportationScript);
+        this.gl.AddEditableScriptToEntity<TeleportationBehaviour>(teleportationSphere, TeleportationBehaviour.Source);
     }
 
     public void ResetLevel()

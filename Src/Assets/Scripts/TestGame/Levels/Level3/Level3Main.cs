@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.TestGame.Common.InitialCodes;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 

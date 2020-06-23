@@ -6,9 +6,8 @@ using UnityEngine.SceneManagement;
 public class MySceneManager : MonoBehaviour
 {
     private int level = 0;
-    private Type[] levels = new Type[] { typeof(LevelPCTMain), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
+    private Type[] levels = new Type[] { typeof(LevelPCTMain), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
 
-    private readonly string TCPScene = "LevelPCT";
     private readonly string levelScene = "UniLevel";
 
     private void Awake()
@@ -24,9 +23,9 @@ public class MySceneManager : MonoBehaviour
 
     public void NextLevel()
     {
-        int levelCount = this.levels.Length; 
+        int levelCount = this.levels.Length;
 
-        if(this.level < levelCount - 1)
+        if (this.level < levelCount - 1)
         {
             this.level++;
             this.GoToLevelsScene(this.levelScene);
@@ -61,7 +60,7 @@ public class MySceneManager : MonoBehaviour
     {
         int levelCount = this.levels.Length;
 
-        if (newLevel >= 0 && newLevel < levelCount )
+        if (newLevel >= 0 && newLevel < levelCount)
         {
             this.level = newLevel;
             this.GoToLevelsScene(this.levelScene);
@@ -75,7 +74,7 @@ public class MySceneManager : MonoBehaviour
     public Type GetCurrentLevelType()
     {
         return this.levels[this.level];
-    } 
+    }
 
     public void Home()
     {
@@ -106,29 +105,22 @@ public class MySceneManager : MonoBehaviour
         }
     }
 
-    private void SetUpScene()
+    private void SetUpScene(Type type = null)
     {
         try
         {
             GameObject main = GameObject.Find("Main");
             LevelManager levelManager = main.GetComponent<LevelManager>();
-            ILevelMain levelMain = (ILevelMain)gameObject.AddComponent(this.GetCurrentLevelType());
-            levelManager.levelMono = (MonoBehaviour)levelMain;
-            levelManager.Setup();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning(ex.ToString());
-        }
-    }
+            ILevelMain levelMain;
+            if (type == null)
+            {
+                levelMain = (ILevelMain)main.AddComponent(this.GetCurrentLevelType());
+            }
+            else
+            {
+                levelMain = (ILevelMain)main.AddComponent(type);
+            }
 
-    private void SetUpScene(Type type)
-    {
-        try
-        {
-            GameObject main = GameObject.Find("Main");
-            LevelManager levelManager = main.GetComponent<LevelManager>();
-            ILevelMain levelMain = (ILevelMain)gameObject.AddComponent(type);
             levelManager.levelMono = (MonoBehaviour)levelMain;
             levelManager.Setup();
         }
