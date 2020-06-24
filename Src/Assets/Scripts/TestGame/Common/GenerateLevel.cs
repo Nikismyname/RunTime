@@ -105,11 +105,12 @@ public class GenerateLevel
         return entity;
     }
 
-    public void AddEditableScriptToEntity<Script>(GameObject entity, string source) where Script: MonoBehaviour
+    public Script AddEditableScriptToEntity<Script>(GameObject entity, string source) where Script: MonoBehaviour
     {
         Script script = entity.AddComponent<Script>();
         var funcs = Compilation.GenerateAllMethodsFromMonoType(script.GetType());
         ms.AttachCompiletimeMono(entity, funcs, script, source);
+        return script;
     }
 
     public GameObject GenerateTestEntity(

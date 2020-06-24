@@ -18,6 +18,7 @@ public class ReferenceBuffer : MonoBehaviour
     public GridManager gm { get; set; }
     public LevelManager lm { get; set; }
     public CodeApplicator capp { get; set; }
+    public MySceneManager MySceneManager { get; set; }
 
     private void Awake()
     {
@@ -39,6 +40,7 @@ public class ReferenceBuffer : MonoBehaviour
         this.lm = main.GetComponent<LevelManager>();
         this.capp = new CodeApplicator();
         this.focusManager = main.GetComponent<InputFocusManager>();
+        this.MySceneManager = GameObject.Find("SceneManager")?.GetComponent<MySceneManager>();
     }
 
     public void RegisterPlayerHandling (PlayerHandling2 playerHandling)

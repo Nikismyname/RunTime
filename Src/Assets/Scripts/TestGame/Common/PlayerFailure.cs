@@ -13,7 +13,7 @@ public class PlayerFailure: MonoBehaviour
     {
         if(transform.position.y< -5)
         {
-            Debug.Log("Player Script detected fall!");
+            //Debug.Log("Player Script detected fall!");
             lm.Failure("Fall");
         }
     }
