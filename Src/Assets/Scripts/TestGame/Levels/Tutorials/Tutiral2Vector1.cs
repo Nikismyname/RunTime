@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class Tutiral2Vector1 : MonoBehaviour, ILevelMain
+public class Tutiral2Vector1 : LevelBase
 {
     private GameObject target;
     private ReferenceBuffer rb;

@@ -22,11 +22,11 @@ public class ApplyBehaviour : MonoBehaviour
         }
     }
 
-    private void CompileTextAndSendToTarget()
+    private async void CompileTextAndSendToTarget()
     {
         Camera.main.backgroundColor = Color.cyan;
         string text = showCode.GetText();
-        ReferenceBuffer.Instance.capp.ApplyToSelectedTarget(text);
+        await ReferenceBuffer.Instance.capp.ApplyToSelectedTarget(text);
         Camera.main.backgroundColor = Color.black;
     }
 }

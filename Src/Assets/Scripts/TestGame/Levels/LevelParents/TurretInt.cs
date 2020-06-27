@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 
 public class TurretInt : MonoBehaviour
@@ -13,23 +12,27 @@ public class TurretInt : MonoBehaviour
 
     public async void ShootLoop()
     {
-        while (true)
+        while (this != null)
         {
             for (int i = 0; i < this.level.targets.Count; i++)
             {
-                if (this.level.targets[i] == null)
+                
+                if (this != null && this.level.targets[i] == null)
                 {
                     await Task.Delay(300);
                     continue;
                 }
                 else
                 {
-                    this.level.ShootBoolet(new GenericBoolet
+                    if (this != null)
                     {
-                        Body = null,
-                        InitialPosition = this.gameObject.transform.position,
-                        Velocity = this.CalculateVelocity(this.level.targets[i])
-                    });
+                        this.level.ShootBoolet(new GenericBoolet
+                        {
+                            Body = null,
+                            InitialPosition = this.gameObject.transform.position,
+                            Velocity = this.CalculateVelocity(this.level.targets[i].Body)
+                        });
+                    }
 
                     await Task.Delay(300);
                 }
@@ -57,25 +60,30 @@ public class TurretInt : MonoBehaviour
 
     public async void ShootLoop()
     {
-        while (true)
+        while (this != null)
         {
             for (int i = 0; i < this.level.targets.Count; i++)
             {
-                if (this.level.targets[i] == null)
+                
+                if (this != null && this.level.targets[i] == null)
                 {
+                    await Task.Delay(300);
                     continue;
                 }
                 else
                 {
-                    this.level.ShootBoolet(new GenericBoolet
+                    if (this != null)
                     {
-                        Body = null,
-                        InitialPosition = this.gameObject.transform.position,
-                        Velocity = this.CalculateVelocity(this.level.targets[i])
-                    });
-                }
+                        this.level.ShootBoolet(new GenericBoolet
+                        {
+                            Body = null,
+                            InitialPosition = this.gameObject.transform.position,
+                            Velocity = this.CalculateVelocity(this.level.targets[i].Body)
+                        });
+                    }
 
-                await Task.Delay(300);
+                    await Task.Delay(300);
+                }
             }
         }
     }
@@ -87,4 +95,3 @@ public class TurretInt : MonoBehaviour
 }
 ";
 }
-

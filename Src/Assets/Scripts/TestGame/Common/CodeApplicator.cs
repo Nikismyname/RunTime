@@ -12,7 +12,7 @@ public class CodeApplicator
         this.ms = ReferenceBuffer.Instance.ms;
     }
 
-    public async void ApplyToSelectedTarget(string text)
+    public async Task ApplyToSelectedTarget(string text)
     {
         if (ms.target == null)
         {

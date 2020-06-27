@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class Tutiral1StartMethod1 : MonoBehaviour, ILevelMain
+public class Tutiral1StartMethod1 : LevelBase
 {
     private GameObject target;
     private GameObject goal;
@@ -23,7 +23,7 @@ public class Tutiral1StartMethod1 : MonoBehaviour, ILevelMain
     {
         if((this.target.transform.position - this.goal.transform.position).magnitude < 1f)
         {
-            this.rb.lm.Success();
+            this.rb.LevelManager.Success();
         }
     }
 

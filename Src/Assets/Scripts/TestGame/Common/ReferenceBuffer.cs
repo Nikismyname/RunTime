@@ -4,11 +4,14 @@ public class ReferenceBuffer : MonoBehaviour
 {
     public static ReferenceBuffer Instance { get; set; }
 
+    public ILevelMain Level { get; set; }
+
     public ShowCodeBehaviour ShowCode { get; set; }
     public ShowActionsBehaviour ShowActions { get; set; }
     public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
     public GameObject ColorPicker { get; set; }
     public PlayerHandling2 PlayerHandling { get; set; }
+    public GameObject PlayerObject { get; set; }
     public GameObject InfoTextObject { get; set; }
     public GameObject InfoTextCanvasGroup { get; set; }
     public InputFocusManager focusManager { get; set; }
@@ -16,9 +19,10 @@ public class ReferenceBuffer : MonoBehaviour
     public Main ms { get; set; }
     public GenerateLevel gl { get; set; }
     public GridManager gm { get; set; }
-    public LevelManager lm { get; set; }
+    public LevelManager LevelManager { get; set; }
     public CodeApplicator capp { get; set; }
     public MySceneManager MySceneManager { get; set; }
+    public RBUiStateManager UIManager { get; set; }
 
     private void Awake()
     {
@@ -37,10 +41,11 @@ public class ReferenceBuffer : MonoBehaviour
         this.ms = main.GetComponent<Main>();
         this.gm = main.GetComponent<GridManager>();
         this.gl = new GenerateLevel(this.ms, this, this.gm);
-        this.lm = main.GetComponent<LevelManager>();
+        this.LevelManager = main.GetComponent<LevelManager>();
         this.capp = new CodeApplicator();
         this.focusManager = main.GetComponent<InputFocusManager>();
         this.MySceneManager = GameObject.Find("SceneManager")?.GetComponent<MySceneManager>();
+        this.UIManager = new RBUiStateManager(this);
     }
 
     public void RegisterPlayerHandling (PlayerHandling2 playerHandling)

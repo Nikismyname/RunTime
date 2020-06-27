@@ -1,10 +1,11 @@
 ﻿using Boo.Lang;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TurretLevel : MonoBehaviour, ILevelMain
+public class TurretLevel : LevelBase
 {
-    public List<GameObject> targets = new List<GameObject>();
+    public List<TurretTarget> targets = new List<TurretTarget>();
     private List<GenericBoolet> boolets = new List<GenericBoolet>();
     private GameObject turret;
     private TurretInt tt;
@@ -19,28 +20,37 @@ public class TurretLevel : MonoBehaviour, ILevelMain
         rb.ShowCode.SetText(InitialCodes.Tutorial1StartMethod2);
 
         targets.Add(
-        ReferenceBuffer.Instance.gl.GenerateEntity(
+        new TurretTarget()
+        {
+            Body = ReferenceBuffer.Instance.gl.GenerateEntity(
             EntityType.NonTarget,
             new Vector3(10, 10, 10),
             PrimitiveType.Sphere,
             Color.white,
-            null, "TurretTarget1"));
+            null, "TurretTarget1")
+        });
 
         targets.Add(
-        ReferenceBuffer.Instance.gl.GenerateEntity(
+        new TurretTarget()
+        {
+            Body = ReferenceBuffer.Instance.gl.GenerateEntity(
             EntityType.NonTarget,
             new Vector3(-10, 10, 10),
             PrimitiveType.Sphere,
             Color.white,
-            null, "TurretTarget2"));
+            null, "TurretTarget2")
+        });
 
         targets.Add(
-        ReferenceBuffer.Instance.gl.GenerateEntity(
+        new TurretTarget()
+        {
+            Body = ReferenceBuffer.Instance.gl.GenerateEntity(
             EntityType.NonTarget,
             new Vector3(10, 10, -10),
             PrimitiveType.Sphere,
             Color.white,
-            null, "TurretTarget3"));
+            null, "TurretTarget3")
+        });
 
         this.turret = ReferenceBuffer.Instance.gl.GenerateEntity(
            EntityType.Target,
@@ -51,19 +61,32 @@ public class TurretLevel : MonoBehaviour, ILevelMain
 
         this.tt = ReferenceBuffer.Instance.gl.AddEditableScriptToEntity<TurretInt>(this.turret, TurretInt.Source);
         this.tt.Setup(this);
-
         this.tt.ShootLoop();
     }
 
+    #region UPDATE
+
     private void Update()
     {
-        List<GenericBoolet> toRemove = new List<GenericBoolet>(); 
-        
+        this.MoveAndDestroyBasicBoolets();
+
+        this.TrackHits(); 
+
+        if(this.targets.All(x=>x.IsHit == true))
+        {
+            ReferenceBuffer.Instance.LevelManager.Success();
+        }
+    }
+
+    private void MoveAndDestroyBasicBoolets()
+    {
+        List<GenericBoolet> toRemove = new List<GenericBoolet>();
+
         foreach (var boolet in this.boolets)
         {
-            boolet.Body.transform.position += boolet.Velocity.normalized * Time.deltaTime * this.booletSpeed; 
+            boolet.Body.transform.position += boolet.Velocity.normalized * Time.deltaTime * this.booletSpeed;
 
-            if((boolet.Body.transform.position - boolet.InitialPosition).magnitude > 30)
+            if ((boolet.Body.transform.position - boolet.InitialPosition).magnitude > 30)
             {
                 toRemove.Add(boolet);
             }
@@ -78,6 +101,23 @@ public class TurretLevel : MonoBehaviour, ILevelMain
         }
     }
 
+    private void TrackHits()
+    {
+        foreach (var boolet in this.boolets)
+        {
+            foreach (var target in this.targets)
+            {
+                if ((boolet.Body.transform.position - target.Body.transform.position).magnitude < 1)
+                {
+                    target.IsHit = true;
+                    target.Body.SetCollor(Color.green);
+                }
+            }
+        }
+    }
+
+    #endregion
+
     public void ShootBoolet(GenericBoolet boolet)
     {
         GameObject body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -89,9 +129,35 @@ public class TurretLevel : MonoBehaviour, ILevelMain
         this.boolets.Add(boolet);
     }
 
-    public void ResetLevel()
+    public override void RegisterUpdatedMono(MainMonoWithName data)
     {
-        ReferenceBuffer.Instance.MySceneManager.SameLevel();
+        if (data.Name == "TurretInt")
+        {
+            var obj = data.Mono;
+            var setup = data.MyMethods.SingleOrDefault(x => x.Name == "Setup");
+            if (setup == null)
+            {
+                Debug.LogError("SETUP NULL!!!");
+                return;
+            }
+
+            var shootLoop = data.MyMethods.SingleOrDefault(x => x.Name == "ShootLoop");
+            if (setup == null)
+            {
+                Debug.LogError("SHOOT LOOP NULL!!!");
+                return;
+            }
+
+            setup.MethodInfo.Invoke(obj, new object[] { this });
+            shootLoop.MethodInfo.Invoke(obj, new object[] { });
+        }
     }
+}
+
+public class TurretTarget
+{
+    public GameObject Body { get; set; }
+
+    public bool IsHit { get; set; } = false;
 }
 

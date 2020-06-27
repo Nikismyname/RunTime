@@ -1,7 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Level4Main : MonoBehaviour, ILevelMain
+public class Level4Main : LevelBase
 {
     private GameObject player; 
 
@@ -25,11 +24,6 @@ public class Level4Main : MonoBehaviour, ILevelMain
         ms.RegisterTarget(solvingSphere, TargetType.Test, GridTestMap.Level4TestName);
         solvingSphere.name = "Solving Sphere";
         solvingSphere.transform.position = new Vector3(0, 10, 0);
-    }
-
-    public void ResetLevel()
-    {
-        this.player.transform.position = new Vector3(0, 1, 0);
     }
 }
 

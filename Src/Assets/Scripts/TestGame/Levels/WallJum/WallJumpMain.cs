@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class WallJumpMain : MonoBehaviour, ILevelMain
+public class WallJumpMain : LevelBase
 {
     public GameObject shipPrefab;
     private GameObject player;

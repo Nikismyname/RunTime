@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Tutiral1StartMethod2 : MonoBehaviour, ILevelMain
+public class Tutiral1StartMethod2 : LevelBase
 {
     private GameObject target;
     private List<GameObject> goals = new List<GameObject>();
@@ -38,7 +38,7 @@ public class Tutiral1StartMethod2 : MonoBehaviour, ILevelMain
 
         if(this.goals.Count == 0)
         {
-            this.rb.lm.Success(); 
+            this.rb.LevelManager.Success(); 
         }
 
         int count = this.goals.Count; 

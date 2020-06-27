@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Level3Main : MonoBehaviour, ILevelMain
+public class Level3Main : LevelBase
 {
     Main ms;
 

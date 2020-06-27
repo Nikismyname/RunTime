@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class GroupBattleMainDeterministic : MonoBehaviour, ILevelMain
+public class GroupBattleMainDeterministic : LevelBase
 {
     public float UnitSpeedMulty;
     public float ProjSpeedMulty;

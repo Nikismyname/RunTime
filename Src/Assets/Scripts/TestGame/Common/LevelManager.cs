@@ -28,7 +28,7 @@ public class LevelManager : MonoBehaviour
 
     public void Success()
     {
-        this.level.ResetLevel();
+        //this.level.ResetLevel();
         this.successCanvas.SetActive(true);
     }
 }

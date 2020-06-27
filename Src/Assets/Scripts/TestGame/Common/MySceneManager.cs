@@ -121,6 +121,8 @@ public class MySceneManager : MonoBehaviour
                 levelMain = (ILevelMain)main.AddComponent(type);
             }
 
+            ReferenceBuffer.Instance.Level = levelMain;
+
             levelManager.levelMono = (MonoBehaviour)levelMain;
             levelManager.Setup();
         }

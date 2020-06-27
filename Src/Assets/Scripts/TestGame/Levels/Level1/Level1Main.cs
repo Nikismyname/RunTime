@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class Level1Main : MonoBehaviour, ILevelMain
+public class Level1Main : LevelBase
 {
     private LevelManager lm;
     private GameObject target, goal;

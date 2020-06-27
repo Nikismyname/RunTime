@@ -10,19 +10,30 @@ public class LabelButtonMonoName : MonoBehaviour
     public List<ColorSelectionButton> ColorSelectionButtons { get; set; } = new List<ColorSelectionButton>();
     private GameObject ColorPicker;
 
+    private Button btn;
+
     private void Start()
     {
-        var btn = gameObject.GetComponent<Button>();
-        btn.onClick.AddListener(this.OnClick);
-
+        this.btn = gameObject.GetComponent<Button>();
+        this.btn.onClick.AddListener(this.OnClick);
         this.ColorPicker = GameObject.Find("Main").GetComponent<ReferenceBuffer>().ColorPicker;
+
+        ColorBlock colors = this.btn.colors;
+        colors.normalColor = Color.black;
+        colors.highlightedColor = Color.black; 
+        colors.pressedColor = Color.white;
+        colors.selectedColor = Color.black;
+        colors.colorMultiplier = 3;
+        this.btn.colors = colors;
     }
 
     private void OnClick()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (!Input.GetKey(KeyCode.LeftShift))
         {
             ReferenceBuffer.Instance.ShowCode.SetText(this.monoGroup.Source);
+            ReferenceBuffer.Instance.UIManager.CloseActionsMenu();
+            //ReferenceBuffer.Instance.UIManager.OpenCodeEditor();
         }
         else
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class LevelPCTMain : MonoBehaviour, ILevelMain
+public class LevelPCTMain : LevelBase
 {
     private GameObject shipPrefab;
     private GameObject player;

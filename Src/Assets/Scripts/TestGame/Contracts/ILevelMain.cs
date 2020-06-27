@@ -4,6 +4,6 @@ public interface ILevelMain
 {
     void ResetLevel();
 
-    //void Destroy();
+    void RegisterUpdatedMono(MainMonoWithName data);
 }
 

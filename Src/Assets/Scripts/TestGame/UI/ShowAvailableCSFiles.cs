@@ -26,13 +26,16 @@ public class ShowAvailableCSFiles : MonoBehaviour
         this.DoClose();
     }
 
+    public void Open()
+    {
+        this.DoOpen();
+    }
+
     private void OnClick()
     {
         if (shouldShow) // Open
         {
-            this.showActions.Close();
-            this.fileSelectionPanel.SetActive(true); 
-            this.shouldShow = false;
+            this.DoOpen();
         }
         else // Close
         {
@@ -44,5 +47,12 @@ public class ShowAvailableCSFiles : MonoBehaviour
     {
         this.fileSelectionPanel.SetActive(false);
         this.shouldShow = true;
+    }
+
+    private void DoOpen()
+    {
+        this.showActions.Close();
+        this.fileSelectionPanel.SetActive(true);
+        this.shouldShow = false;
     }
 }

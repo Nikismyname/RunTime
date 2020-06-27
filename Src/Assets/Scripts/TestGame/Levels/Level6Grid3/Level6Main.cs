@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Level6Main : MonoBehaviour, ILevelMain
+public class Level6Main : LevelBase
 {
     private GameObject player; 
 

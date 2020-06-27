@@ -272,7 +272,13 @@ public class Main : MonoBehaviour
         }
 
         /// Adding it to the collection for the given target.
-        monoList.Add(newMonoData); 
+        monoList.Add(newMonoData);
+
+        ///TODO: Document this
+        if (attach == true)
+        {
+            ReferenceBuffer.Instance.Level.RegisterUpdatedMono(newMonoData);
+        }
 
         return newMonoData;
     }

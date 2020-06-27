@@ -275,6 +275,9 @@ public class GenerateLevel
         position.y += 1;
 
         player.transform.position = position;
+
+        ReferenceBuffer.Instance.PlayerObject = player;
+
         return player;
     }
 
@@ -301,6 +304,8 @@ public class GenerateLevel
         GameObject mainCamera = GameObject.Find("MainCamera");
         CamHandling camHandling = mainCamera.GetComponent<CamHandling>();
         camHandling.target = player.transform;
+
+        ReferenceBuffer.Instance.PlayerObject = player;
 
         return player;
     }
