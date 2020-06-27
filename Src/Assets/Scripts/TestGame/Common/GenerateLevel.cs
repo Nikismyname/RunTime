@@ -94,6 +94,11 @@ public class GenerateLevel
             this.ms.RegisterTarget(entity, TargetType.Standard);
         }
 
+        if(enType == EntityType.Context)
+        {
+            entity.AddComponent<ContextBehaviour>();
+        }
+
         entity.transform.localScale = scale.Value;
 
         var y = entity.GetComponent<MeshRenderer>().bounds.size.y;

@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class MySceneManager : MonoBehaviour
 {
     private int level = 0;
-    private Type[] levels = new Type[] {typeof(TurretLevel) , typeof(LevelPCTMain), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
+    private Type[] levels = new Type[] {typeof(Tutiral3GOManip1), typeof(LevelPCTMain), typeof(TurretLevel), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
 
     private readonly string levelScene = "UniLevel";
 

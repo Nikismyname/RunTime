@@ -23,6 +23,7 @@ public class ReferenceBuffer : MonoBehaviour
     public CodeApplicator capp { get; set; }
     public MySceneManager MySceneManager { get; set; }
     public RBUiStateManager UIManager { get; set; }
+    public UniUIManager UniUIManager { get; set; }
 
     private void Awake()
     {
@@ -46,10 +47,11 @@ public class ReferenceBuffer : MonoBehaviour
         this.focusManager = main.GetComponent<InputFocusManager>();
         this.MySceneManager = GameObject.Find("SceneManager")?.GetComponent<MySceneManager>();
         this.UIManager = new RBUiStateManager(this);
+        this.UniUIManager = main.GetComponent<UniUIManager>();
     }
 
-    public void RegisterPlayerHandling (PlayerHandling2 playerHandling)
+    public void RegisterPlayerHandling(PlayerHandling2 playerHandling)
     {
-        this.PlayerHandling = playerHandling; 
+        this.PlayerHandling = playerHandling;
     }
 }

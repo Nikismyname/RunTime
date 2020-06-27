@@ -89,6 +89,8 @@ public class LevelPCTMain : LevelBase
             new Type[0]
         );
         this.gl.AddEditableScriptToEntity<TeleportationBehaviour>(teleportationSphere, TeleportationBehaviour.Source);
+        teleportationSphere.SetContextText("some context\nfor you");
+        ship.SetContextText("How much context\ndo you freaking need???");
     }
 
     public void ResetLevel()

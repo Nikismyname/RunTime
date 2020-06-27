@@ -17,17 +17,13 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler, ITeamBattleMo
     private Color originalColor;
     private Color selectionColor = Color.green;
     private List<CancellationTokenSource> cancelationSources = new List<CancellationTokenSource>();
-
     private bool isVehicle = false;
     private bool vehicleIsActive = false;
     private NewtonianSpaceShipInterface vehicleMono = null;
-
     public TargetType type;
     string testName;
     private bool solved = false;
-
     private int counter;
-
     public delegate void AIAttachedDel();
     public event AIAttachedDel AIAttachedEvent;
 
@@ -68,6 +64,7 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler, ITeamBattleMo
         this.type = type;
         this.testName = testName;
     }
+
     #endregion
 
     #region TEST
@@ -333,6 +330,6 @@ public class TargetBehaviour : MonoBehaviour, IPointerDownHandler, ITeamBattleMo
     ///...
     #endregion
 
-    #region END_BRACKET
+    #region }
 }
 #endregion

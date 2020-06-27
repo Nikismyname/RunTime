@@ -13,7 +13,7 @@ public class ShowCodeBehaviour : MonoBehaviour
     private TMP_InputField inputField;
     private Button button;
     private string lastText = string.Empty;
-    private string lastCurrent = string.Empty;
+    private string lastCurrent = "ASDiopnaoipsudfhnpiuosaDNFOPIUASJN89-0321YHRJ8- 2013JR-908213JMCR J=I82NM03R0=8IJ";
 
     void Start()
     {
