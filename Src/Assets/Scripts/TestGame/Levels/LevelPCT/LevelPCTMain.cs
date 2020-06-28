@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 public class LevelPCTMain : LevelBase
@@ -8,6 +9,7 @@ public class LevelPCTMain : LevelBase
     private GameObject mainCamera;
     private Main ms;
     private GenerateLevel gl;
+    private GameObject targetSphere;
 
     private void Start()
     {
@@ -28,9 +30,12 @@ public class LevelPCTMain : LevelBase
         camHandling.target = this.player.transform;
         ///...
 
-        GameObject.Find("ScrollableInfoText").SetActive(false);
+        //GameObject.Find("ScrollableInfoText").SetActive(false);
 
         this.GenerateEntites();
+
+        string text = File.ReadAllText(@"C:\Users\ASUS G751JY\source\repos\11111 Unity\UserCode\UserLevel\UserLevelMain.cs");
+        _ = ReferenceBuffer.Instance.capp.ApplyToSelectedTarget(text, this.targetSphere);
     }
 
     private void GenerateEntites()
@@ -43,7 +48,7 @@ public class LevelPCTMain : LevelBase
             "NextLevelSphere",
             new Type[] { typeof(NextLevelSphere) });
 
-        var targetSphere = this.gl.GenerateEntity(
+        this.targetSphere = this.gl.GenerateEntity(
             EntityType.Target,
             new Vector3(0, 2, 0),
             PrimitiveType.Sphere,
@@ -89,12 +94,5 @@ public class LevelPCTMain : LevelBase
             new Type[0]
         );
         this.gl.AddEditableScriptToEntity<TeleportationBehaviour>(teleportationSphere, TeleportationBehaviour.Source);
-        teleportationSphere.SetContextText("some context\nfor you");
-        ship.SetContextText("How much context\ndo you freaking need???");
-    }
-
-    public void ResetLevel()
-    {
-        this.player.transform.position = new Vector3(0, 1, 0);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -12,48 +13,63 @@ public class CodeApplicator
         this.ms = ReferenceBuffer.Instance.ms;
     }
 
-    public async Task ApplyToSelectedTarget(string text)
+    public async Task ApplyToSelectedTarget(string text, GameObject target = null)
     {
-        if (ms.target == null)
+        try
         {
-            Debug.Log("You should select a target before compiling script to attach to target!");
-            return;
-        }
-
-        var tb = ms.target.GetComponent<TargetBehaviour>();
-        if (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
-        {
-            byte[] assBytes = await Task.Run(() =>
+            if (ms.target == null && target == null)
             {
-                var bytes = OtherAppDomainCompile(text);
-                return bytes;
-            });
-
-            string result = string.Empty;
-
-            if (tb.type == TargetType.Test)
-            {
-                result = (await tb.Test(assBytes)).ToString();
-            }
-            else if (tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
-            {
-                tb.RegisterAI(assBytes);
-                result = "AI Loaded!";
+                Debug.Log("You should select a target before compiling script to attach to target!");
+                return;
             }
 
-            Debug.Log("Test Result: " + result);
-        }
-        else
-        {
-            var target = this.ms.target;
-
-            var functions = await Task.Run(() =>
+            TargetBehaviour tb = null; 
+            if (ms.target != null)
             {
-                var funcs = this.SameAppDomainCompile(text, true);
-                return funcs;
-            });
+                tb = ms.target.GetComponent<TargetBehaviour>();
+            }
 
-            var script = this.ms.AttachRuntimeMono(target, functions, text);
+            if (tb != null && (tb.type == TargetType.Test || tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom))
+            {
+                byte[] assBytes = await Task.Run(() =>
+                {
+                    var bytes = OtherAppDomainCompile(text);
+                    return bytes;
+                });
+
+                string result = string.Empty;
+
+                if (tb.type == TargetType.Test)
+                {
+                    result = (await tb.Test(assBytes)).ToString();
+                }
+                else if (tb.type == TargetType.BattleMovement || tb.type == TargetType.BattleMoveSameDom)
+                {
+                    tb.RegisterAI(assBytes);
+                    result = "AI Loaded!";
+                }
+
+                Debug.Log("Test Result: " + result);
+            }
+            else
+            {
+                if (target == null)
+                {
+                    target = this.ms.target;
+                }
+
+                var functions = await Task.Run(() =>
+                {
+                    var funcs = this.SameAppDomainCompile(text, true);
+                    return funcs;
+                });
+
+                var script = this.ms.AttachRuntimeMono(target, functions, text);
+            }
+        }
+        catch(Exception ex)
+        {
+            Debug.LogError(ex.ToString());
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿#region INIT
 
 using System;
+using System.Data;
 using UnityEngine;
 
 public class GenerateLevel
@@ -56,6 +57,33 @@ public class GenerateLevel
         baseCilinder.transform.localScale = new Vector3(40, 1, 40);
         baseCilinder.transform.position = new Vector3(0, -new Vector3(40, 1, 40).y, 0);
         return baseCilinder;
+    }
+
+    #endregion
+
+    #region TASK DESCRIPTION
+
+    public GameObject CreateTaskDescription(string description, Color? color = null, Vector3? position = null, Vector3 ? scale = null)
+    {
+        if(color == null)
+        {
+            color = Color.cyan; 
+        }
+
+        if(position == null)
+        {
+            position = new Vector3 (0,10,0);
+        }
+
+        if (scale == null)
+        {
+            scale = new Vector3(1,2,1);
+        }
+
+        var descOblong = rb.gl.GenerateEntity(EntityType.Context, position.Value, PrimitiveType.Sphere, color, scale, "Decription Oblong");
+        descOblong.SetContextText(description);
+
+        return descOblong; 
     }
 
     #endregion

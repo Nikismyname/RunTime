@@ -31,7 +31,7 @@ public class ShowCodeBehaviour : MonoBehaviour
         watcher.EnableRaisingEvents = true;
         watcher.Changed += new FileSystemEventHandler((source, e) =>
         {
-            Debug.LogWarning("Updating InGame");
+            //Debug.LogWarning("Updating InGame");
             string text = File.ReadAllText(app_settings.currentPath);
             this.lastCurrent = text;
             this.inputField.text = File.ReadAllText(app_settings.currentPath);
@@ -40,6 +40,12 @@ public class ShowCodeBehaviour : MonoBehaviour
 
     private void OnClick()
     {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            this.SetText(ReferenceBuffer.Instance.Level.SolutionCode);
+            return;
+        }
+
         if (show)
         {
             this.Open();
@@ -80,7 +86,7 @@ public class ShowCodeBehaviour : MonoBehaviour
     {
         if (this.lastCurrent != this.inputField.text)
         {
-            Debug.Log("Updating Current");
+            //Debug.Log("Updating Current");
             File.WriteAllText(app_settings.currentPath, this.inputField.text);
             this.lastCurrent = this.inputField.text;
         }

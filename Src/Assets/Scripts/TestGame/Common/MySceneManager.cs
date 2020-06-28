@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class MySceneManager : MonoBehaviour
 {
     private int level = 0;
-    private Type[] levels = new Type[] {typeof(Tutiral3GOManip1), typeof(LevelPCTMain), typeof(TurretLevel), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
+    private Type[] levels = new Type[] { typeof(LevelPCTMain), typeof (Tutiral3GOManip2), typeof(Tutiral3GOManip1), typeof(TurretLevel), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
 
     private readonly string levelScene = "UniLevel";
 
@@ -111,14 +111,14 @@ public class MySceneManager : MonoBehaviour
         {
             GameObject main = GameObject.Find("Main");
             LevelManager levelManager = main.GetComponent<LevelManager>();
-            ILevelMain levelMain;
+            LevelBase levelMain;
             if (type == null)
             {
-                levelMain = (ILevelMain)main.AddComponent(this.GetCurrentLevelType());
+                levelMain = (LevelBase)main.AddComponent(this.GetCurrentLevelType());
             }
             else
             {
-                levelMain = (ILevelMain)main.AddComponent(type);
+                levelMain = (LevelBase)main.AddComponent(type);
             }
 
             ReferenceBuffer.Instance.Level = levelMain;

@@ -5397,7 +5397,7 @@ PrefabInstance:
     - target: {fileID: 5639305997455226014, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 892.90784
       objectReference: {fileID: 0}
     - target: {fileID: 7632396369289991044, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}
@@ -5507,22 +5507,27 @@ PrefabInstance:
     - target: {fileID: 7632412959968941606, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 0.48393327
       objectReference: {fileID: 0}
     - target: {fileID: 7632412959968941606, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7632412959968941606, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 0.99999994
       objectReference: {fileID: 0}
     - target: {fileID: 7705784705054953452, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}
       propertyPath: m_Name
       value: ScrollableInfoText
+      objectReference: {fileID: 0}
+    - target: {fileID: 7705784705054953452, guid: c1685fc90421c47459d70634f7dee1d4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7737478962618502944, guid: c1685fc90421c47459d70634f7dee1d4,
         type: 3}

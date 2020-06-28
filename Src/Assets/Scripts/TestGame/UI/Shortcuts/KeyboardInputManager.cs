@@ -42,7 +42,7 @@ public class KeyboardInputManager: MonoBehaviour
             /// Restoring to last nonEscape save! 
             this.showCode.ResoreToLast(); 
             this.showCode.Close();
-            this.scrollableInfoText.SetActive(false);
+            //this.scrollableInfoText.SetActive(false);
         }
 
         /// Saving the state of the input field so that if escape is pressed after, we have the latest input! Because escape deletes all the current changes!

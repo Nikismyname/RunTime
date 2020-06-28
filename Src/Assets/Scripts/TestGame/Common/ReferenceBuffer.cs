@@ -4,7 +4,7 @@ public class ReferenceBuffer : MonoBehaviour
 {
     public static ReferenceBuffer Instance { get; set; }
 
-    public ILevelMain Level { get; set; }
+    public LevelBase Level { get; set; }
 
     public ShowCodeBehaviour ShowCode { get; set; }
     public ShowActionsBehaviour ShowActions { get; set; }

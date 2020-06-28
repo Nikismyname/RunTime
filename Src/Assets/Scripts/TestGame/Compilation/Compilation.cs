@@ -564,8 +564,17 @@ public static {name} Attach(GameObject obj)
     return obj.AddComponent<{name}>();
 }}";
 
-        ///we insert the snipet at the very end of tha class
-        lines.Insert(lines.Count - 1, toInsrt);
+        string[] classDecLines = lines.Where(x => x.StartsWith("public class") || x.StartsWith("private class") || x.StartsWith("class")).ToArray();
+
+        if (classDecLines.Length == 1)
+        {
+            lines.Insert(lines.Count - 1, toInsrt);
+        }
+        else
+        {
+            int ind = Array.IndexOf(lines.ToArray(), classDecLines[1]) -1;
+            lines.Insert(ind, toInsrt);
+        }
 
         ///joining the whole text together
         var result = string.Join("\n", lines);
