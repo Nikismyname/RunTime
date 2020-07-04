@@ -5,6 +5,9 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 
+/// <summary>
+/// The one currently in use!
+/// </summary>
 public class CodeDOMGraph : MonoBehaviour // works in editor
 {
     GameObject target;
