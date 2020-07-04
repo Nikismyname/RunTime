@@ -23,7 +23,7 @@ public static class CreatePrimitiveInterface
         var dataModifierScript = createdPrimitive.AddComponent<PrimitiveObjectDataModifier>();
         dataModifierScript.SetUp(data);
 
-        var ms = GameObject.Find("Main").GetComponent<Main>();
+        var ms = GameObject.Find("Main").GetComponent<TargetManagerBehaviour>();
 
         createdPrimitive.AddComponent<TargetBehaviour>();
         ms.RegisterTarget(createdPrimitive, TargetType.Standard);

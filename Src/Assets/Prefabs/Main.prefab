@@ -10,11 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2721907570920746126}
   - component: {fileID: 2721907570920746127}
-  - component: {fileID: 4183845765934613018}
   - component: {fileID: 2721907570920746120}
   - component: {fileID: 2721907570920746121}
   - component: {fileID: 5464203982389377365}
-  - component: {fileID: 8661745626292596676}
+  - component: {fileID: 4183845765934613018}
   - component: {fileID: 5900633616398148596}
   m_Layer: 0
   m_Name: Main
@@ -64,18 +63,6 @@ MonoBehaviour:
   extraGravity: 100
   jumpForce: 1200
   forceToVelocity: 0.03
---- !u!114 &4183845765934613018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2721907570920746124}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab850930a9fb57644b51e28168b90bd0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2721907570920746120
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0833b655135e1144db4d615dedb0e511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8661745626292596676
+--- !u!114 &4183845765934613018
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,7 +109,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2721907570920746124}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e4f6c706ce505c439f2051f8446a2de, type: 3}
+  m_Script: {fileID: 11500000, guid: ab850930a9fb57644b51e28168b90bd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &5900633616398148596
