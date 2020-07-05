@@ -61,7 +61,7 @@ public class TargetManagerBehaviour : MonoBehaviour
 
         var wantedMono = wantedMonos[0];
 
-        var wantedMethods = wantedMono.MyMethods.Where(x => x.Name == methodName).ToArray();
+        var wantedMethods = wantedMono.Methods.Where(x => x.Name == methodName).ToArray();
 
         if (wantedMethods.Length != 1)
         {

@@ -129,19 +129,19 @@ public class TurretLevel : LevelBase
         this.boolets.Add(boolet);
     }
 
-    public override void RegisterUpdatedMono(MainMonoWithName data)
+    public override void RegisterUpdatedMono(TargetManagerMonoWithNameAndMethods data)
     {
         if (data.Name == "TurretInt")
         {
             var obj = data.Mono;
-            var setup = data.MyMethods.SingleOrDefault(x => x.Name == "Setup");
+            var setup = data.Methods.SingleOrDefault(x => x.Name == "Setup");
             if (setup == null)
             {
                 Debug.LogError("SETUP NULL!!!");
                 return;
             }
 
-            var shootLoop = data.MyMethods.SingleOrDefault(x => x.Name == "ShootLoop");
+            var shootLoop = data.Methods.SingleOrDefault(x => x.Name == "ShootLoop");
             if (setup == null)
             {
                 Debug.LogError("SHOOT LOOP NULL!!!");

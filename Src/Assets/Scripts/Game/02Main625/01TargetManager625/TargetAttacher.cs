@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class TargetAttacher
 {
     /// All attached monos per Target
-    private Dictionary<GameObject, List<MainMonoWithName>> attachedMonos = new Dictionary<GameObject, List<MainMonoWithName>>();
+    private Dictionary<GameObject, List<TargetManagerMonoWithNameAndMethods>> attachedMonos = new Dictionary<GameObject, List<TargetManagerMonoWithNameAndMethods>>();
 
     private GameObject target;
 
@@ -26,7 +25,7 @@ public class TargetAttacher
     public MonoBehaviour AttachRuntimeMono(GameObject target, CompMethodsInAssemblyType funcs, string source)
     {
         /// Attaches the given mono and registeres in attachedMonos
-        var monoData = this.AttachAndAddToDict(funcs, target, true, null);
+        var monoData = this.AttachAndAddToDict(funcs, target, null);
 
         /// If a mono with the same name exists and the method singnature changed send it to the UI to redraw it.
         if (monoData.changesInMethodSignature)
@@ -47,7 +46,7 @@ public class TargetAttacher
     public MonoBehaviour AttachCompiletimeMono(GameObject target, CompMethodsInAssemblyType funcs, MonoBehaviour mono, string source)
     {
         /// Attaches the given mono and registeres in attachedMonos
-        var monoData = this.AttachAndAddToDict(funcs, target, false, mono);
+        var monoData = this.AttachAndAddToDict(funcs, target, mono);
 
         /// If a mono with the same name exists and the method singnature changed send it to the UI to redraw it.
         if (monoData.changesInMethodSignature)
@@ -60,7 +59,10 @@ public class TargetAttacher
 
     #endregion
 
+    private void AttachMono()
+    {
 
+    }
 
     /// <summary>
     /// Does two things: 
@@ -68,70 +70,43 @@ public class TargetAttacher
     ///     If attach is false, means that the script is already attached and it only regerteres it in the same collection.
     /// Also if there is a mono with that name already, it remeves the old one and registeres the new one. 
     /// </summary>
-    private MainMonoWithName AttachAndAddToDict(
+    /// <param name="funcs"></param>
+    /// <param name="target"></param>
+    /// <param name="attach"></param>
+    /// <param name="alreadyAttachedMono"> If null we need to attach what is passed. If not null - this is the mono that is already attached!</param>
+    /// <returns></returns>
+    private TargetManagerMonoWithNameAndMethods AttachAndAddToDict(
         CompMethodsInAssemblyType funcs,
-        GameObject intTarget,
-        bool attach,
-        MonoBehaviour incMono)
+        GameObject target,
+        MonoBehaviour alreadyAttachedMono)
     {
-        this.CreateDataIfNotExist(intTarget);
+        this.CreateMonoDataIfNoneExists(target);
 
-        this.DestroyIfMonoWithSameNameAttached(intTarget, funcs, out int newVersion, out List<MainMethodInfoWithName> previousMethods, out List<MainMonoWithName> monoList, out bool preExistionMono); 
+        /// Getting exsiting monos for target.
+        List<TargetManagerMonoWithNameAndMethods> existingMonosForTarget = this.attachedMonos[target];
 
-        /// Managing the mono, if we provide one that is already attached we do not need to attach but still register.
-        MonoBehaviour script = null;
-        if (attach == false)
-        {
-            if (incMono == null)
-            {
-                Debug.Log("No Attach but the sent script is null!");
-            }
+        TargetManagerMonoWithNameAndMethods preexistingMono = GetPreexistingMonoWithSameName(target, funcs, existingMonosForTarget);
 
-            script = incMono;
-        }
-        else
-        {
-            script = funcs.Attach(intTarget);
-        }
+        this.DestroyIfMonoWithSameNameAttached(preexistingMono, target, funcs, existingMonosForTarget);
 
-        var newMonoData = new MainMonoWithName(funcs.TypeName, script);
-        newMonoData.MyMethods = funcs.MethodInfos.Select(x => new MainMethodInfoWithName
+        MonoBehaviour attachedMono = alreadyAttachedMono == null ? funcs.Attach(target) : alreadyAttachedMono;
+
+        TargetManagerMonoWithNameAndMethods newMonoData = new TargetManagerMonoWithNameAndMethods(funcs.TypeName, attachedMono);
+
+        newMonoData.Methods = funcs.MethodInfos.Select(x => new TargetManagerMethodInfoWithName
         {
             MethodInfo = x.Value.MethodInfo,
             Parameters = x.Value.Parameters,
             Name = x.Value.MethodInfo.Name,
         }).ToList();
 
-        newMonoData.Version = newVersion;
-        if (preExistionMono == false)
-        {
-            /// Since it is just created, the signature has changed. 
-            newMonoData.changesInMethodSignature = true;
-        }
-        else
-        {
-            if (previousMethods == null)
-            {
-                Debug.Log("Failed at collecting the previous signature");
-                Debug.Break();
-                return null;
-            }
-
-            /// Comparing the two methods' signitures.
-            if (this.TwoMehtodCollHaveSameSignatures(previousMethods, newMonoData.MyMethods))
-            {
-                newMonoData.changesInMethodSignature = false;
-            }
-            else
-            {
-                newMonoData.changesInMethodSignature = true;
-            }
-        }
+        newMonoData.changesInMethodSignature = this.AreThereChangesInSignature(newMonoData, preexistingMono);
 
         /// Adding it to the collection for the given target.
-        monoList.Add(newMonoData);
+        existingMonosForTarget.Add(newMonoData);
 
-        if (attach == true)
+        /// Passing the 
+        if (alreadyAttachedMono == null)
         {
             ReferenceBuffer.Instance.Level.RegisterUpdatedMono(newMonoData);
         }
@@ -139,71 +114,74 @@ public class TargetAttacher
         return newMonoData;
     }
 
-    #region CREATE_INITIAL_DATA
-    public void CreateDataIfNotExist(GameObject intTarget)
+    private bool AreThereChangesInSignature(TargetManagerMonoWithNameAndMethods newMonoData, TargetManagerMonoWithNameAndMethods preexistingMono)
+    {
+        ///If this is the first attach 
+        if (preexistingMono == null || preexistingMono.Methods == null)
+        {
+            return true;
+        }
+
+        if (!this.TwoMehtodCollHaveSameSignatures(preexistingMono.Methods, newMonoData.Methods))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void CreateMonoDataIfNoneExists(GameObject target)
     {
         /// If data for the target does not exist yet, create it.
-        if (!attachedMonos.ContainsKey(intTarget))
+        if (!attachedMonos.ContainsKey(target))
         {
-            this.attachedMonos[intTarget] = new List<MainMonoWithName>();
+            this.attachedMonos[target] = new List<TargetManagerMonoWithNameAndMethods>();
         }
     }
-    #endregion
 
     #region PART ONE
 
-    private void DestroyIfMonoWithSameNameAttached(GameObject intTarget, CompMethodsInAssemblyType funcs, out int version, out List<MainMethodInfoWithName> prevMethods, out List<MainMonoWithName> mList, out bool preExistMono)
+    private void DestroyIfMonoWithSameNameAttached(TargetManagerMonoWithNameAndMethods preexistingMono, GameObject target, CompMethodsInAssemblyType funcs, List<TargetManagerMonoWithNameAndMethods> existingMonosForTarget)
     {
-        version = default;
-        prevMethods = default;
-        mList = default;
-        preExistMono = default;
+        /// If a mono with the same name is attched, we destroy the old one!
+        if (preexistingMono != null)
+        {
+            Component monoToDestroy = target.GetComponent(preexistingMono.Mono.GetType());
+            GameObject.Destroy(monoToDestroy);
+            existingMonosForTarget.Remove(existingMonosForTarget.SingleOrDefault(x => x.Name == funcs.TypeName));
+            Debug.Log("Old Script is overriden");
+        }
+    }
 
-        /// Getting exsiting monos for target.
-        List<MainMonoWithName> monoList = this.attachedMonos[intTarget];
+    private TargetManagerMonoWithNameAndMethods GetPreexistingMonoWithSameName(GameObject target, CompMethodsInAssemblyType funcs, List<TargetManagerMonoWithNameAndMethods> existingMonosForTarget)
+    {
+        /// Cheking if there is more than one script with given name already registered which should never happen.
+        TargetManagerMonoWithNameAndMethods[] existingMonos = existingMonosForTarget.Where(x => x.Name == funcs.TypeName).ToArray();
 
-        /// Cheking if there is more than one script with given name already registered
-        /// which should never happen.
-        MainMonoWithName[] existingMonos = monoList.Where(x => x.Name == funcs.TypeName).ToArray();
         if (existingMonos.Length > 1)
         {
             Debug.Log($"There are more that 1 scripts with name {funcs.TypeName} already attached!");
             Debug.Break();
-            return;
+            return null;
         }
 
-        var newVersion = 0;
-        List<MainMethodInfoWithName> previousMethods = null;
-        var preExistionMono = false;
-
-        /// If a mono with the same name is attched, we destroy the old one!
-        if (existingMonos.Length == 1)
+        if (existingMonos.Length == 0)
         {
-            preExistionMono = true;
-            var preexistingMonoWithName = existingMonos[0];
-            ///Updating the version.
-            newVersion = preexistingMonoWithName.Version + 1;
-            previousMethods = preexistingMonoWithName.MyMethods;
-
-            var monoToDestroy = intTarget.GetComponent(preexistingMonoWithName.Mono.GetType());
-            GameObject.Destroy(monoToDestroy);
-            monoList.Remove(monoList.SingleOrDefault(x => x.Name == funcs.TypeName));
-            Debug.Log("Old Script is overriden");
+            return null;
         }
 
-        version = newVersion;
-        prevMethods = previousMethods;
-        mList = monoList;
-        preExistMono = preExistionMono; 
+        ///We have exactly one
+        TargetManagerMonoWithNameAndMethods previousMono = existingMonos[0];
+        return previousMono;
     }
 
     #endregion 
 
-    public Dictionary<GameObject, List<MainMonoWithName>> AttachedMonos => this.attachedMonos;
+    public Dictionary<GameObject, List<TargetManagerMonoWithNameAndMethods>> AttachedMonos => this.attachedMonos;
 
     #region HELPERS
 
-    private bool TwoMehtodCollHaveSameSignatures(List<MainMethodInfoWithName> lOne, List<MainMethodInfoWithName> lTwo)
+    private bool TwoMehtodCollHaveSameSignatures(List<TargetManagerMethodInfoWithName> lOne, List<TargetManagerMethodInfoWithName> lTwo)
     {
         if (lOne.Count != lTwo.Count)
         {
@@ -240,7 +218,7 @@ public class TargetAttacher
         return true;
     }
 
-    private UiMonoWithMethods GenerateButtonInformation(MainMonoWithName mono, GameObject incTarget = null, string source = "")
+    private UiMonoWithMethods GenerateButtonInformation(TargetManagerMonoWithNameAndMethods mono, GameObject incTarget = null, string source = "")
     {
         GameObject target = null;
 
@@ -263,7 +241,7 @@ public class TargetAttacher
         {
             MonoName = mono.Name,
             Object = target,
-            Methods = mono.MyMethods.Select(y => new UiMethodNameWithParameters
+            Methods = mono.Methods.Select(y => new UiMethodNameWithParameters
             {
                 Name = y.Name,
                 Parameters = y.Parameters,

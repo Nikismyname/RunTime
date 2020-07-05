@@ -2,7 +2,7 @@
 
 public class LevelBase : MonoBehaviour, ILevelMain
 {
-    public virtual void RegisterUpdatedMono(MainMonoWithName data)
+    public virtual void RegisterUpdatedMono(TargetManagerMonoWithNameAndMethods data)
     {
     }
 

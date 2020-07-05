@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-///> Those Classes Store The Information In The Main
-public class MainMonoWithName
+/// <summary>
+/// Those Clases Are Sent To The TargetManager!
+/// </summary>
+/// TODO: Why do we store them different in the TM and ProcUI
+public class TargetManagerMonoWithNameAndMethods
 {
-    public MainMonoWithName() { }
+    public TargetManagerMonoWithNameAndMethods() { }
 
-    public MainMonoWithName(string name, MonoBehaviour mono)
+    public TargetManagerMonoWithNameAndMethods(string name, MonoBehaviour mono)
     {
         this.Name = name;
         this.Mono = mono;
-        this.MyMethods = new List<MainMethodInfoWithName>();
+        this.Methods = new List<TargetManagerMethodInfoWithName>();
     }
 
     public string Name { get; set; }
@@ -20,14 +23,17 @@ public class MainMonoWithName
     public int Version { get; set; }
     public bool changesInMethodSignature { get; set; }
 
-    public List<MainMethodInfoWithName> MyMethods { get; set; }
+    public List<TargetManagerMethodInfoWithName> Methods { get; set; }
 }
 
-public class MainMethodInfoWithName
+/// <summary>
+/// /// Those Clases Are Sent To The TargetManager!
+/// </summary>
+public class TargetManagerMethodInfoWithName
 {
-    public MainMethodInfoWithName() { }
+    public TargetManagerMethodInfoWithName() { }
 
-    public MainMethodInfoWithName(string name, MethodInfo methodInfo, UiParameterWithType[] parameters)
+    public TargetManagerMethodInfoWithName(string name, MethodInfo methodInfo, UiParameterWithType[] parameters)
     {
         this.Name = name;
         this.MethodInfo = methodInfo;
@@ -38,10 +44,13 @@ public class MainMethodInfoWithName
     public MethodInfo MethodInfo { get; set; }
     public UiParameterWithType[] Parameters { get; set; }
 }
-///...
 
-///> Those Clases Are Sent To The Buttons!
 
+
+
+/// <summary>
+/// Those Clases Are Sent To The ProcUI!
+/// </summary>
 public class UiMonoWithMethods
 {
     public GameObject Object { get; set; }
@@ -50,18 +59,27 @@ public class UiMonoWithMethods
     public string Source { get; set; }
 }
 
+/// <summary>
+/// Those Clases Are Sent To The ProcUI!
+/// </summary>
 public class UiMethodNameWithParameters
 {
     public string Name { get; set; }
     public UiParameterWithType[] Parameters { get; set; }
 }
 
+/// <summary>
+/// Those Clases Are Sent To The ProcUI!
+/// </summary>
 public class UiParameterWithType
 {
     public string Name { get; set; }
     public Type Type { get; set; }
 }
 
+/// <summary>
+/// Those Clases Are Sent To The ProcUI!
+/// </summary>
 public class UiMonoGroupInformation
 {
     public string MonoName { get; set; }
