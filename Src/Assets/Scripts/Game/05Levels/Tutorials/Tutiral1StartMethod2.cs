@@ -48,7 +48,7 @@ public class Tutiral1StartMethod2 : LevelBase
             GameObject currGoal = this.goals[i];
             if((currGoal.transform.position - this.target.transform.position).magnitude <= 1f)
             {
-                currGoal.SetCollor(Color.red);
+                currGoal.SetColor(Color.red);
                 this.goals.Remove(currGoal);
             }
         }

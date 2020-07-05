@@ -59,11 +59,6 @@ public class TargetAttacher
 
     #endregion
 
-    private void AttachMono()
-    {
-
-    }
-
     /// <summary>
     /// Does two things: 
     ///     If attach is true, it attaches the mono to the target and registeres it in attachedMonos

@@ -89,7 +89,7 @@ public class Level3Main : LevelBase
                 {
                     this.gatheredTheSphere = true;
                     this.toTransport.SetActive(false);
-                    this.target.SetCollor(Color.cyan);
+                    this.target.SetColor(Color.cyan);
                 }
             }
         }

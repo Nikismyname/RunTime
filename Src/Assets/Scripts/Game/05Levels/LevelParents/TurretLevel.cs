@@ -110,7 +110,7 @@ public class TurretLevel : LevelBase
                 if ((boolet.Body.transform.position - target.Body.transform.position).magnitude < 1)
                 {
                     target.IsHit = true;
-                    target.Body.SetCollor(Color.green);
+                    target.Body.SetColor(Color.green);
                 }
             }
         }
@@ -122,7 +122,7 @@ public class TurretLevel : LevelBase
     {
         GameObject body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         body.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-        body.SetCollor(Color.red);
+        body.SetColor(Color.red);
         body.transform.position = boolet.InitialPosition;
         boolet.Body = body;
 

@@ -6,6 +6,57 @@ public class ExpressionTrees : MonoBehaviour
 {
     private void Start()
     {
+        this.LambdaExpression<int, int>( null,
+            new Node<int>()
+            {
+                Value = 12,
+            },
+            new Node<int>()
+            {
+                Value = 13,
+            }
+        );
+    }
+
+    public void BinaryExpression<T1, T2>(BinaryExpressionRoot root, Node<T1> one, Node<T2> two)
+    {
+        BinaryExpression exp = Expression.MakeBinary(ExpressionType.Add, Expression.Constant(42, typeof(int)), Expression.Constant(12, typeof(int))); 
+        //Funk<int, int, int> some = exp.
+    }
+
+    public void LambdaExpression<T1, T2>(BinaryExpressionRoot root, Node<T1> nOne, Node<T2> nTwo)
+    {
+        MemberExpression one = Expression.Property(Expression.Constant(nOne, typeof(Node<T1>)), nameof(Node<T1>.Value));
+        MemberExpression two = Expression.Property(Expression.Constant(nTwo, typeof(Node<T2>)), nameof(Node<T2>.Value));
+
+        var some = Expression.Lambda(Expression.Add(one, two));
+
+        Func<int> oneThreeHill = (Func<int>)some.Compile();
+        Debug.Log(oneThreeHill());
+    }
+
+    public class BinaryExpressionRoot
+    {
+
+    }
+
+    public class Node<T>
+    {
+        public NodeType Type { get; set; }
+
+        public T Value { get; set; }
+
+        public double Multy { get; set; }
+    }
+
+    public enum NodeType
+    {
+        Const,
+        Variable,
+    }
+
+    public void Block()
+    {
         // Creating a parameter expression.  
         ParameterExpression value = Expression.Parameter(typeof(int), "value");
 
