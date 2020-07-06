@@ -3,14 +3,10 @@
 public class InGameUI : MonoBehaviour
 {
     private Camera myCamera;
-    
+
     private void Start()
     {
-        float halfSize = 10f;
-        float thickness = 0.3f;
-        Vector3 center = new Vector3(0,0,0);
-        this.DrawBox(halfSize, thickness, center);
-
+        this.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
         GameObject node = GameObject.CreatePrimitive(PrimitiveType.Cube);
         node.AddComponent<Node2>();
         node.name = "node";
@@ -23,12 +19,12 @@ public class InGameUI : MonoBehaviour
     {
         GameObject parent = new GameObject("LineParent");
         GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        parent.transform.position = new Vector3(0,-1,0);
+        parent.transform.position = new Vector3(0, -1, 0);
         line.transform.parent = parent.transform;
 
         parent.transform.position = from;
         parent.transform.LookAt(to);
-        parent.transform.Rotate(new Vector3(1,0,0), 90);
+        parent.transform.Rotate(new Vector3(1, 0, 0), 90);
         line.GetComponent<Renderer>().material.color = color;
         line.SetShader();
         parent.SetScale(new Vector3(thickness, (from - to).magnitude / 2, thickness));
