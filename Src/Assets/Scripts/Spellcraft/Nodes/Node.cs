@@ -89,8 +89,26 @@ public class Node : MonoBehaviour
             {
                 if (currentPositionYPrev != null && currentPositionYPrev != Input.mousePosition.y)
                 {
-                    
+                    Vector3 tempy = gameObject.transform.position;
+
+                    float offset = (currentPositionYPrev.Value - Input.mousePosition.y) * Time.deltaTime * 3f;
+
+                    if (some.axis.Contains('x') == false)
+                    {
+                        tempy.x += offset;
+                    }
+                    if (some.axis.Contains('y') == false)
+                    {
+                        tempy.y += offset;
+                    }
+                    if (some.axis.Contains('z') == false)
+                    {
+                        tempy.z += offset;
+                    }
+
+                    gameObject.transform.position = tempy;
                 }
+
                 currentPositionYPrev = Input.mousePosition.y;
             }
             else ///Plane movement

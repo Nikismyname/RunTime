@@ -4,7 +4,7 @@ public class SpellcraftCam : MonoBehaviour
 {
     public Transform target;
     private Vector3 targetOffset = Vector3.zero;
-    private float distance = 20.0f;
+    private float distance = 35.0f;
     private float maxDistance = 50;
     private float minDistance = .6f;
     private float xSpeed = 200.0f;
@@ -41,7 +41,7 @@ public class SpellcraftCam : MonoBehaviour
             target = go.transform;
         }
 
-        distance = Vector3.Distance(transform.position, target.position);
+        //distance = Vector3.Distance(transform.position, target.position);
         currentDistance = distance;
         desiredDistance = distance;
 
