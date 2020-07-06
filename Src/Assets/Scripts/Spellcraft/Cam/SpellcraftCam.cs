@@ -85,14 +85,14 @@ public class SpellcraftCam : MonoBehaviour
             target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
         }
 
-        xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
-        yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
-
-        desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
-        currentRotation = transform.rotation;
-
         if (this.rotate)
         {
+            xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
+            yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+
+            desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
+            currentRotation = transform.rotation;
+
             rotation = Quaternion.Lerp(currentRotation, desiredRotation, 1);
             transform.rotation = rotation;
         }

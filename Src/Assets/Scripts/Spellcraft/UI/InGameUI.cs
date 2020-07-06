@@ -7,12 +7,22 @@ public class InGameUI : MonoBehaviour
     private void Start()
     {
         this.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
-        GameObject node = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        node.AddComponent<Node2>();
-        node.name = "node";
+        
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
         SpellcraftCam camHand = this.myCamera.gameObject.AddComponent<SpellcraftCam>();
         camHand.target = new GameObject("Center").transform;
+
+        LineDrawer drawer = gameObject.GetComponent<LineDrawer>();
+
+        GameObject node = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        node.AddComponent<Node>();
+        node.name = "node";
+
+        GameObject node2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        node2.AddComponent<Node>();
+        node2.name = "node";
+
+        drawer.RegisterLine(node.transform, node2.transform, 0.2f, Color.cyan);
     }
 
     private GameObject DrawInGameLine(Vector3 from, Vector3 to, Color color, float thickness)
