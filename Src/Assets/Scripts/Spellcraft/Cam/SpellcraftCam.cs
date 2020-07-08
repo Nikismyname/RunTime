@@ -2,7 +2,8 @@
 
 public class SpellcraftCam : MonoBehaviour
 {
-    public Transform target;
+    private Transform target;
+    private GameObject mainTarget;
     private Vector3 targetOffset = Vector3.zero;
     private float distance = 35.0f;
     private float maxDistance = 50;
@@ -11,7 +12,7 @@ public class SpellcraftCam : MonoBehaviour
     private float ySpeed = 200.0f;
     private int zoomRate = 40;
     private float panSpeed = 0.3f;
-    private float zoomDampening = 5.0f;
+    private float zoomDampening = 10f;
     private float xDeg = 0.0f;
     private float yDeg = 0.0f;
     private float currentDistance;
@@ -22,9 +23,15 @@ public class SpellcraftCam : MonoBehaviour
     private Vector3 position;
     private bool rotate;
 
+    private float lastLongDist;
+    private float lastShortDist;
+    private float shortDist;
+
     void Start()
     {
         Init();
+
+        
     }
 
     void OnEnable()
@@ -32,48 +39,58 @@ public class SpellcraftCam : MonoBehaviour
         Init();
     }
 
+    public void SetTarget(GameObject obj)
+    {
+        this.mainTarget = obj;
+        this.target = obj.transform;
+    }
+
     public void Init()
     {
-        if (!target)
-        {
-            GameObject go = new GameObject("Cam Target");
-            go.transform.position = transform.position + (transform.forward * distance);
-            target = go.transform;
-        }
+        this.shortDist = 3f;
+        this.lastShortDist = this.shortDist;
+        this.lastLongDist = this.distance;
 
-        //distance = Vector3.Distance(transform.position, target.position);
-        currentDistance = distance;
-        desiredDistance = distance;
+        this.currentDistance = this.distance;
+        this.desiredDistance = this.distance;
 
-        position = transform.position;
-        rotation = transform.rotation;
-        currentRotation = transform.rotation;
-        desiredRotation = transform.rotation;
+        this.position = this.transform.position;
+        this.rotation = this.transform.rotation;
+        this.currentRotation = this.transform.rotation;
+        this.desiredRotation = this.transform.rotation;
 
-        xDeg = Vector3.Angle(Vector3.right, transform.right);
-        yDeg = Vector3.Angle(Vector3.up, transform.up);
+        this.xDeg = Vector3.Angle(Vector3.right, this.transform.right);
+        this.yDeg = Vector3.Angle(Vector3.up, this.transform.up);
+    }
+
+    public void GetMouseButtonDownOne()
+    {
+        this.rotate = true;
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    public void GetMouseButtonUpOne()
+    {
+        this.rotate = false;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    public void TriggerZoom(GameObject obj)
+    {
+        this.lastLongDist = this.desiredDistance;
+        this.target = obj.transform;
+        this.desiredDistance = this.lastShortDist;
+    }
+
+    public void UntriggerZoom()
+    {
+        this.lastShortDist = this.desiredDistance;
+        this.target = this.mainTarget.transform;
+        this.desiredDistance = this.lastLongDist;
     }
 
     void LateUpdate()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (this.rotate == false)
-            {
-                this.rotate = true;
-                Cursor.lockState = CursorLockMode.Locked;
-            }
-        }
-
-        if (Input.GetMouseButtonUp(1))
-        {
-            if (this.rotate == true)
-            {
-                this.rotate = false;
-                Cursor.lockState = CursorLockMode.None;
-            }
-        }
-
         if (Input.GetMouseButton(2) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.LeftControl))
         {
             desiredDistance -= Input.GetAxis("Mouse Y") * Time.deltaTime * zoomRate * 0.125f * Mathf.Abs(desiredDistance);
@@ -105,14 +122,5 @@ public class SpellcraftCam : MonoBehaviour
         transform.position = position;
 
         Input.mousePosition.Set(0, 0, 0);
-    }
-
-    private static float ClampAngle(float angle, float min, float max)
-    {
-        if (angle < -360)
-            angle += 360;
-        if (angle > 360)
-            angle -= 360;
-        return Mathf.Clamp(angle, min, max);
     }
 }

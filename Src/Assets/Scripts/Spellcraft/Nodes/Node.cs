@@ -1,25 +1,34 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class Node : MonoBehaviour
 {
+    public int ID;
+    private InGameUI inGameUI;
+    private bool isRotating = false;
     private Camera myCamera;
+    private SpellcraftCam camBehaviour; 
     private Vector3 worldOffset;
     private Plane interactionPlane;
     private float? currentPositionYPrev = null;
     private GameObject[] shadows = new GameObject[6];
-    private NormalToAxis[] normals = new NormalToAxis[6];
+    private PlanesWithMovingAxis[] normals = new PlanesWithMovingAxis[6];
+    private bool dragged = false;
 
     private void Start()
     {
-        this.normals[0] = new NormalToAxis(new Vector3(1, 0, 0), "yz");
-        this.normals[1] = new NormalToAxis(new Vector3(-1, 0, 0), "yz");
-        this.normals[2] = new NormalToAxis(new Vector3(0, 1, 0), "xz");
-        this.normals[3] = new NormalToAxis(new Vector3(0, -1, 0), "xz");
-        this.normals[4] = new NormalToAxis(new Vector3(0, 0, 1), "xy");
-        this.normals[5] = new NormalToAxis(new Vector3(0, 0, -1), "xy");
+        this.normals[0] = new PlanesWithMovingAxis(new Vector3(1, 0, 0), "yz");
+        this.normals[1] = new PlanesWithMovingAxis(new Vector3(-1, 0, 0), "yz");
+        this.normals[2] = new PlanesWithMovingAxis(new Vector3(0, 1, 0), "xz");
+        this.normals[3] = new PlanesWithMovingAxis(new Vector3(0, -1, 0), "xz");
+        this.normals[4] = new PlanesWithMovingAxis(new Vector3(0, 0, 1), "xy");
+        this.normals[5] = new PlanesWithMovingAxis(new Vector3(0, 0, -1), "xy");
+
+        this.interactionPlane = new Plane(normals[0].normal, this.gameObject.transform.position);
 
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
+        this.camBehaviour = this.myCamera.gameObject.GetComponent<SpellcraftCam>();
 
         GameObject bottom = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bottom.transform.localScale = new Vector3(1, 0.1f, 1);
@@ -52,21 +61,28 @@ public class Node : MonoBehaviour
         shadows[5] = away;
     }
 
-    void OnMouseDown()
+    public void Setup(InGameUI ui)
     {
+        this.inGameUI = ui;
+    }
+
+    async void OnMouseDown()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            this.camBehaviour.TriggerZoom(this.gameObject);
+            return;
+        }
+        
         if (Physics.Raycast(this.myCamera.ScreenPointToRay(Input.mousePosition), out RaycastHit raycastHit))
         {
             Vector3 hitPoint = raycastHit.point;
-            Vector3 objectPoint = raycastHit.transform.position;
+            Vector3 objectPoint = this.gameObject.transform.position;
             this.worldOffset = objectPoint - hitPoint;
-
-            this.interactionPlane = new Plane(this.myCamera.transform.forward, hitPoint);
             this.currentPositionYPrev = null;
-
-            foreach (var item in this.shadows)
-            {
-                item.SetActive(true);
-            }
+            this.SetShadowsActive(true);
+            this.inGameUI.SetDragged(this);
+            this.dragged = true;
         }
         else
         {
@@ -74,16 +90,34 @@ public class Node : MonoBehaviour
         }
     }
 
+    private void OnMouseUp()
+    {
+        this.SetShadowsActive(false);
+    }
+
     void OnMouseDrag()
     {
-        Ray ray = this.myCamera.ScreenPointToRay(Input.mousePosition);
-        var some = GetAppropriateAxis(); 
-        Plane some1 = new Plane(some.normal, gameObject.transform.position);
-
-        if (some1.Raycast(ray, out float enter))
+        if (this.isRotating || this.dragged == false)
         {
-            Vector3 hitPoint = ray.GetPoint(enter);
+            return;
+        }
+
+        Ray mouseRay = this.myCamera.ScreenPointToRay(Input.mousePosition);
+
+        PlanesWithMovingAxis closestPlain = this.GetAppropriateAxis();
+
+        if(closestPlain.normal != this.interactionPlane.normal)
+        {
+           this.interactionPlane = new Plane(closestPlain.normal, gameObject.transform.position); 
+        }
+
+        if (this.interactionPlane.Raycast(mouseRay, out float enter))
+        {
+            Vector3 hitPoint = mouseRay.GetPoint(enter);
             Vector3 newLocation = hitPoint + this.worldOffset;
+
+            hitPoint.DrawCrossUpdate(Color.red);
+            newLocation.DrawCrossUpdate(Color.green);
 
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -93,15 +127,15 @@ public class Node : MonoBehaviour
 
                     float offset = (currentPositionYPrev.Value - Input.mousePosition.y) * Time.deltaTime * 3f;
 
-                    if (some.axis.Contains('x') == false)
+                    if (closestPlain.axis.Contains('x') == false)
                     {
                         tempy.x += offset;
                     }
-                    if (some.axis.Contains('y') == false)
+                    if (closestPlain.axis.Contains('y') == false)
                     {
                         tempy.y += offset;
                     }
-                    if (some.axis.Contains('z') == false)
+                    if (closestPlain.axis.Contains('z') == false)
                     {
                         tempy.z += offset;
                     }
@@ -115,15 +149,15 @@ public class Node : MonoBehaviour
             {
                 Vector3 tempy = gameObject.transform.position;
 
-                if (some.axis.Contains('x'))
+                if (closestPlain.axis.Contains('x'))
                 {
                     tempy.x = newLocation.x;
                 }
-                if (some.axis.Contains('y'))
+                if (closestPlain.axis.Contains('y'))
                 {
                     tempy.y = newLocation.y;
                 }
-                if (some.axis.Contains('z'))
+                if (closestPlain.axis.Contains('z'))
                 {
                     tempy.z = newLocation.z;
                 }
@@ -152,25 +186,35 @@ public class Node : MonoBehaviour
         }
     }
 
-    private void OnMouseUp()
+    private PlanesWithMovingAxis GetAppropriateAxis()
     {
-        foreach (var item in this.shadows)
-        {
-            item.SetActive(false);
-        }
-    }
-    private NormalToAxis GetAppropriateAxis()
-    {
-        NormalToAxis[] mostFittingNormals = this.normals.Where(x => Vector3.Angle(x.normal, this.myCamera.transform.forward) == this.normals.Min(y => Vector3.Angle(y.normal, this.myCamera.transform.forward))).ToArray();
+        PlanesWithMovingAxis[] mostFittingNormals = this.normals.Where(x => Vector3.Angle(x.normal, this.myCamera.transform.forward) == this.normals.Min(y => Vector3.Angle(y.normal, this.myCamera.transform.forward))).ToArray();
         return mostFittingNormals[0];
     }
 
-    private class NormalToAxis
+    private void SetShadowsActive(bool active)
+    {
+        foreach (var item in this.shadows)
+        {
+            item.SetActive(active);
+        }
+    }
+
+    public void SetRotating(bool isRotating)
+    {
+        this.isRotating = isRotating;
+        if(this.isRotating == true)
+        {
+            this.dragged = false;
+        }
+    }
+
+    private class PlanesWithMovingAxis
     {
         public Vector3 normal { get; set; }
-        public string  axis { get; set; }
+        public string axis { get; set; }
 
-        public NormalToAxis(Vector3 normal, string axis)
+        public PlanesWithMovingAxis(Vector3 normal, string axis)
         {
             this.normal = normal;
             this.axis = axis;

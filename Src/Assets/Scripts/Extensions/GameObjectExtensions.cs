@@ -137,4 +137,14 @@ public static class GameObjectExtensions
             Debug.LogError("You DUM DUM!");
         }
     }
+
+    public static void RotateAroundUnitSphere(this GameObject go, Vector3 axis, float angle)
+    {
+        Transform parent = go.transform.parent;
+        GameObject rotator = new GameObject("Rotator");
+        go.transform.parent = rotator.transform;
+        rotator.transform.Rotate(axis, angle);
+        go.transform.parent = parent;
+        GameObject.Destroy(rotator);
+    }
 }
