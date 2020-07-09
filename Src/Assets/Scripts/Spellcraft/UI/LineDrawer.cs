@@ -1,4 +1,5 @@
 ﻿using Boo.Lang;
+using System;
 using UnityEngine;
 
 public class LineDrawer : MonoBehaviour
@@ -8,6 +9,60 @@ public class LineDrawer : MonoBehaviour
     public void RegisterLine(Transform transOne, Transform transTwo, float thickness, Color color)
     {
         this.lines.Add(new Line(transOne, transTwo, thickness, color));
+    }
+
+    public void RegisterCurve(Transform transOne, Transform transTwo, Vector3 center, float scale, Color color, int level, float radius = 0.5f)
+    {
+        Vector3 one = transOne.position - center;
+        Vector3 two = transTwo.position - center;
+
+        one = one * 1.2f;
+        two = two * 1.2f;
+
+        float angleFromCenter = Vector3.Angle(one, two);
+        float distance = 2 * Mathf.PI * radius * (angleFromCenter / 360);
+
+        int count = (int)Math.Floor(distance / 0.1f);
+
+        GameObject previousSphere = null;
+
+        for (int i = 0; i < count + 1; i++)
+        {
+            Vector3 newPos = Vector3.Slerp(one, two, (float)(i)/count);
+            GameObject sphere = this.CreateSphere(newPos, Color.cyan, 0.1f);
+
+            if(previousSphere != null)
+            {
+                this.CreateCurveCylinder(sphere.transform.position, previousSphere.transform.position, color, scale);
+            }
+
+            previousSphere = sphere;
+        } 
+    } 
+
+    private GameObject CreateSphere(Vector3 pos, Color color, float scale)
+    {
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        go.SetColor(color);
+        go.SetShader();
+        go.transform.position = pos;
+        go.SetScale(new Vector3(scale, scale, scale));
+        return go;
+    }
+
+    private GameObject CreateCurveCylinder(Vector3 one, Vector3 two, Color color, float scale)
+    {
+        var parent = new GameObject("LineParent");
+        GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        parent.transform.position = new Vector3(0, -1, 0);
+        line.transform.parent = parent.transform;
+        parent.transform.position = one;
+        parent.transform.LookAt(two);
+        parent.transform.Rotate(new Vector3(1, 0, 0), 90);
+        line.GetComponent<Renderer>().material.color = color;
+        line.SetShader();
+        parent.SetScale(new Vector3(scale,(one - two).magnitude/2, scale));
+        return null;
     }
 
     private void Update()

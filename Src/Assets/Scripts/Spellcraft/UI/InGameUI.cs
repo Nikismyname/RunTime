@@ -1,6 +1,5 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
@@ -9,15 +8,16 @@ public class InGameUI : MonoBehaviour
     private Node dragged = null;
     LineDrawer drawer;
     Defunclator classVisualisation;
-    GameObject worldSpaceCanvas;
-    //Text worldSpaceText;
+    GameObject text1;
     TMP_Text worldSpaceText;
+    GameObject menu1;
 
     private void Start()
     {
-        this.worldSpaceCanvas = GameObject.Find("WorldSpaceCanvas");
+        this.text1 = GameObject.Find("WSCText1");
+        this.menu1 = GameObject.Find("WSCMenu1");
         //this.worldSpaceText = this.worldSpaceCanvas.transform.Find("Text").GetComponent<Text>();
-        this.worldSpaceText = this.worldSpaceCanvas.transform.Find("Text").GetComponent<TMP_Text>();
+        this.worldSpaceText = this.text1.transform.Find("Text").GetComponent<TMP_Text>();
 
         this.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
@@ -30,6 +30,21 @@ public class InGameUI : MonoBehaviour
         this.classVisualisation.GenAll(this.classVisualisation.GenerateNodeData<Some>());
     }
 
+    private PropertyNode lastClicked = null; 
+
+    public void RegisterPropClick(PropertyNode node)
+    {
+        if(this.lastClicked == null)
+        {
+            this.lastClicked = node;
+        }
+        else
+        {
+            this.drawer.RegisterCurve(this.lastClicked.gameObject.transform, node.gameObject.transform, node.gameObject.transform.parent.transform.position, 0.1f, Color.cyan, 1);
+            this.lastClicked = null;
+        }
+    }
+
     public void SetWorldCanvasText(string text)
     {
         this.worldSpaceText.text = text; 
@@ -37,7 +52,7 @@ public class InGameUI : MonoBehaviour
 
     public void SetWorldCanvasPosition(Vector3 position)
     {
-        RectTransform rt = this.worldSpaceCanvas.GetComponent<RectTransform>();
+        RectTransform rt = this.text1.GetComponent<RectTransform>();
         rt.position = position;
         rt.LookAt(rt.transform.position + this.myCamera.transform.forward);
     }

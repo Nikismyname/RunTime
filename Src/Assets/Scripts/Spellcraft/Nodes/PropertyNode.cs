@@ -19,7 +19,7 @@ public class PropertyNode :MonoBehaviour
         string message = $"Name: {this.name}, Type: {this.type.Name}";
         this.UI.SetWorldCanvasPosition(this.gameObject.transform.parent.transform.position+ new Vector3(0,1,0));
         this.UI.SetWorldCanvasText(message);
-        Debug.Log("HERE");
+        this.UI.RegisterPropClick(this);
     }
 }
 
