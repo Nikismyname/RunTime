@@ -54,7 +54,7 @@ public class Defunclator
         return null;
     }
 
-    public void GenAll(ClassNode node)
+    public void GenerateClassVisualisation(ClassNode node, Vector3 position)
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         basy.SetColor(Color.red);
@@ -65,6 +65,10 @@ public class Defunclator
         this.GeneratePropertyPips(node, basy);
 
         this.GenerateMethodPips(node, basy);
+
+        basy.transform.position = position;
+
+        basy.transform.Rotate(new Vector3(1,0,0), 180f); 
     }
 
     public void GeneratePropertyPips(ClassNode node, GameObject baseSphere)
@@ -93,18 +97,20 @@ public class Defunclator
         {
             float initialOffset = 50f; 
             var method = node.Methods[j];
-            GameObject retunrnPip = CreatePip(baseSphere, method.ReturnType, method.Name, Color.white);
-            retunrnPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), initialOffset);
+            GameObject methodPip = CreatePip(baseSphere, Color.white);
+            ParameterInfo[] parameterInfos = method.GetParameters();
+            methodPip.AddComponent<MethodNode>().Setup(method, parameterInfos, node.Object, this.UI);
+
+            methodPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), initialOffset);
             float oneDivAround = 360f / node.Methods.Length;
             float wantedAngleAround = (float)j * oneDivAround;
-            retunrnPip.RotateAroundUnitSphere(new Vector3(0, 1, 0), wantedAngleAround);
-
-            ParameterInfo[] parameterInfos = method.GetParameters();
+            methodPip.RotateAroundUnitSphere(new Vector3(0, 1, 0), wantedAngleAround);
 
             for (int i = 0; i < parameterInfos.Length; i++)
             {
                 ParameterInfo param = parameterInfos[i];
-                GameObject paramaterPip = CreatePip(baseSphere, param.ParameterType, param.Name, Color.black);
+                GameObject paramaterPip = CreatePip(baseSphere, Color.black);
+                paramaterPip.AddComponent<ParameterNode>().Setup(param, node.Object, this.UI);
                 float wantedAngleDown = initialOffset + (i + 1) * 20f;
                 paramaterPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), wantedAngleDown);
                 paramaterPip.RotateAroundUnitSphere(new Vector3(0, 1, 0), wantedAngleAround);
@@ -112,7 +118,7 @@ public class Defunclator
         }
     }
 
-    private GameObject CreatePip(GameObject parent, Type propertyType, string name, Color color, float scale = 0.1f)
+    private GameObject CreatePip(GameObject parent, Color color, float scale = 0.1f)
     {
         GameObject pip = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         pip.transform.localScale = new Vector3(scale, scale, scale);
@@ -120,7 +126,6 @@ public class Defunclator
         pip.transform.parent = parent.transform;
         pip.SetColor(color);
         pip.SetShader();
-        pip.AddComponent<PropertyNode>().Setup(name, propertyType, this.UI);
         return pip;
     }
 

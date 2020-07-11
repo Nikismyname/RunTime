@@ -1,18 +1,27 @@
 ﻿using Boo.Lang;
 using System;
+using UnityEditor;
 using UnityEngine;
 
 public class LineDrawer : MonoBehaviour
 {
     private List<Line> lines = new List<Line>();
+    private InGameUI UI;
+
+    private void Start()
+    {
+        this.UI = GameObject.Find("Main").GetComponent<InGameUI>();
+    }
 
     public void RegisterLine(Transform transOne, Transform transTwo, float thickness, Color color)
     {
         this.lines.Add(new Line(transOne, transTwo, thickness, color));
     }
 
-    public void RegisterCurve(Transform transOne, Transform transTwo, Vector3 center, float scale, Color color, int level, float radius = 0.5f)
+    public void RegisterCurve(Transform transOne, Transform transTwo, Vector3 center, float scale, Color color, int level, Transform parent = null, float radius = 0.5f)
     {
+        parent = parent == null ? transOne.parent.transform : parent; 
+
         Vector3 one = transOne.position - center;
         Vector3 two = transTwo.position - center;
 
@@ -24,44 +33,50 @@ public class LineDrawer : MonoBehaviour
 
         int count = (int)Math.Floor(distance / 0.1f);
 
-        GameObject previousSphere = null;
+        Vector3? previousPosition = null;
 
         for (int i = 0; i < count + 1; i++)
         {
-            Vector3 newPos = Vector3.Slerp(one, two, (float)(i)/count);
-            GameObject sphere = this.CreateSphere(newPos, Color.cyan, 0.1f);
+            Vector3 newPos = Vector3.Slerp(one, two, (float)(i) / count);
+            //GameObject sphere = this.CreateCurveSphere(newPos, Color.cyan, 0.1f, parent);
 
-            if(previousSphere != null)
+            if (previousPosition != null)
             {
-                this.CreateCurveCylinder(sphere.transform.position, previousSphere.transform.position, color, scale);
+                this.CreateCurveCylinder(newPos, previousPosition.Value, color, scale, parent);
             }
 
-            previousSphere = sphere;
-        } 
-    } 
+            previousPosition = newPos;
+        }
+    }
 
-    private GameObject CreateSphere(Vector3 pos, Color color, float scale)
+    private GameObject CreateCurveSphere(Vector3 pos, Color color, float scale, Transform parent)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        go.SetColor(color);
-        go.SetShader();
+        go.GetComponent<Renderer>().material = this.UI.transperantMat;
+        Color col = new Color(color.r, color.g, color.g, 0.0f);
+        go.SetColor(col);
         go.transform.position = pos;
         go.SetScale(new Vector3(scale, scale, scale));
+        go.SetActive(false);
+        go.transform.parent = parent;
         return go;
     }
 
-    private GameObject CreateCurveCylinder(Vector3 one, Vector3 two, Color color, float scale)
+    private GameObject CreateCurveCylinder(Vector3 one, Vector3 two, Color color, float scale, Transform parent)
     {
-        var parent = new GameObject("LineParent");
+        var cylinderParent = new GameObject("LineParent");
         GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        parent.transform.position = new Vector3(0, -1, 0);
-        line.transform.parent = parent.transform;
-        parent.transform.position = one;
-        parent.transform.LookAt(two);
-        parent.transform.Rotate(new Vector3(1, 0, 0), 90);
+        cylinderParent.transform.position = new Vector3(0, -1, 0);
+        line.transform.parent = cylinderParent.transform;
+        cylinderParent.transform.position = one;
+        cylinderParent.transform.LookAt(two);
+        cylinderParent.transform.Rotate(new Vector3(1, 0, 0), 90);
         line.GetComponent<Renderer>().material.color = color;
-        line.SetShader();
-        parent.SetScale(new Vector3(scale,(one - two).magnitude/2, scale));
+        line.GetComponent<Renderer>().material = this.UI.transperantMat;
+        Color col = new Color(color.r, color.g, color.g, 0.2f);
+        line.SetColor(col);
+        cylinderParent.SetScale(new Vector3(scale, (one - two).magnitude / 2, scale));
+        cylinderParent.transform.parent = parent.transform;
         return null;
     }
 
@@ -129,7 +144,7 @@ public class LineDrawer : MonoBehaviour
 
         public void Update()
         {
-            if((transOne.position != transOneLast || transTwo.position != transTwoLast)&& this.shouldTrack)
+            if ((transOne.position != transOneLast || transTwo.position != transTwoLast) && this.shouldTrack)
             {
                 this.parent.transform.position = this.transOne.position;
                 this.parent.transform.LookAt(this.transTwo.position);
@@ -158,7 +173,7 @@ public class LineDrawer : MonoBehaviour
 
         public void StartTracking()
         {
-            this.shouldTrack = false; 
+            this.shouldTrack = false;
         }
     }
 

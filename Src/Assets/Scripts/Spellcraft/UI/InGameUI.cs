@@ -1,22 +1,28 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
+    public Material transperantMat;
+    public GameObject worldSpaceCanvasPrefab;
+
     private Camera myCamera;
     private SpellcraftCam camHanding;
     private Node dragged = null;
-    LineDrawer drawer;
-    Defunclator classVisualisation;
-    GameObject text1;
-    TMP_Text worldSpaceText;
-    GameObject menu1;
+    private LineDrawer drawer;
+    private Defunclator classVisualisation;
+    private GameObject text1;
+    private TMP_Text worldSpaceText;
+    private GameObject menu1;
+    private GameObject result;
+    private ConnectionsTracker tracker = new ConnectionsTracker();
+    private ConstantElements[] constants;
 
     private void Start()
     {
         this.text1 = GameObject.Find("WSCText1");
         this.menu1 = GameObject.Find("WSCMenu1");
-        //this.worldSpaceText = this.worldSpaceCanvas.transform.Find("Text").GetComponent<Text>();
         this.worldSpaceText = this.text1.transform.Find("Text").GetComponent<TMP_Text>();
 
         this.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
@@ -26,28 +32,113 @@ public class InGameUI : MonoBehaviour
         this.drawer = gameObject.GetComponent<LineDrawer>();
         this.classVisualisation = new Defunclator(this);
 
-        //ClassTest();
-        this.classVisualisation.GenAll(this.classVisualisation.GenerateNodeData<Some>());
+        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Math>(), new Vector3(-4, 0, 0));
+        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Math>(), new Vector3(+4, 0, 0));
+
+
+        this.constants = new ConstantElements[]
+        {
+            this.CreateConstantCanvas(12),
+            this.CreateConstantCanvas(13),
+            this.CreateConstantCanvas(14),
+            this.CreateConstantCanvas(15),
+        };
+
+        this.result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        this.result.transform.position = new Vector3(0, -15, 0);
+        this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
     }
 
-    private PropertyNode lastClicked = null; 
-
-    public void RegisterPropClick(PropertyNode node)
+    public void RegisterConstantClick(ConstantNode node)
     {
-        if(this.lastClicked == null)
+        if (this.lastClickedParameter != null)
         {
-            this.lastClicked = node;
+            this.tracker.TrackParameterAssignConstant(this.lastClickedParameter, node);
+
+            this.ConstantsHide();
+
+            return;
+        }
+
+        if (this.lastClickedProperty != null)
+        {
+            ///TODO:
+        }
+    }
+
+    public void RegisterResultClick(ResultNode resultNode)
+    {
+        if (this.lastClickedMethod == null)
+        {
+            return;
+        }
+
+        this.tracker.TrackResultAssignMethodCall(this.lastClickedMethod);
+
+        this.DrawConnection(this.result, this.lastClickedMethod.gameObject);
+
+        this.lastClickedMethod = null;
+    }
+
+    private PropertyNode lastClickedProperty;
+
+    public void RegisterPropertyClick(PropertyNode node)
+    {
+        this.lastClickedProperty = node;
+        /// DO IT!
+    }
+
+    private ParameterNode lastClickedParameter = null;
+
+    public void RegisterParameterClick(ParameterNode node)
+    {
+        this.lastClickedParameter = node;
+
+        this.ConstantsDisplay(node.transform.position);
+
+        if (this.lastClickedMethod == null)
+        {
+            return;
+        }
+
+        this.DrawConnection(node.gameObject, this.lastClickedMethod.gameObject);
+
+        this.lastClickedParameter = null;
+        this.lastClickedMethod = null;
+    }
+
+    private MethodNode lastClickedMethod = null;
+
+    public void RegisterMethodClick(MethodNode node)
+    {
+        this.lastClickedMethod = node;
+
+        if (this.lastClickedParameter == null)
+        {
+            return;
+        }
+
+        this.DrawConnection(node.gameObject, this.lastClickedParameter.gameObject);
+
+        this.lastClickedParameter = null;
+        this.lastClickedMethod = null;
+    }
+
+    private void DrawConnection(GameObject one, GameObject two)
+    {
+        if (one.transform.parent == two.transform.parent)
+        {
+            this.drawer.RegisterCurve(one.transform, two.transform, two.transform.parent.transform.position, 0.1f, Color.cyan, 1);
         }
         else
         {
-            this.drawer.RegisterCurve(this.lastClicked.gameObject.transform, node.gameObject.transform, node.gameObject.transform.parent.transform.position, 0.1f, Color.cyan, 1);
-            this.lastClicked = null;
+            this.drawer.RegisterLine(one.transform, two.transform, 0.1f, Color.green);
         }
     }
 
     public void SetWorldCanvasText(string text)
     {
-        this.worldSpaceText.text = text; 
+        this.worldSpaceText.text = text;
     }
 
     public void SetWorldCanvasPosition(Vector3 position)
@@ -55,6 +146,32 @@ public class InGameUI : MonoBehaviour
         RectTransform rt = this.text1.GetComponent<RectTransform>();
         rt.position = position;
         rt.LookAt(rt.transform.position + this.myCamera.transform.forward);
+    }
+
+    public void ConstantsDisplay(Vector3 pos)
+    {
+        for (int i = 0; i < this.constants.Length; i++)
+        {
+            ConstantElements c = this.constants[i];
+
+            if(c.Used == true)
+            {
+                return;
+            }
+
+            c.GameObject.SetActive(true);
+            c.RectTransform.position = pos + new Vector3(1.5f,i,0); 
+            c.RectTransform.LookAt(c.RectTransform.transform.position + this.myCamera.transform.forward);
+        }
+    }
+
+    public void ConstantsHide()
+    {
+        for (int i = 0; i < this.constants.Length; i++)
+        {
+            ConstantElements c = this.constants[i];
+            c.GameObject.SetActive(false);
+        }
     }
 
     private void ClassTest()
@@ -66,13 +183,13 @@ public class InGameUI : MonoBehaviour
     {
         public int one { get; set; }
 
-        public string  two { get; set; }
+        public string two { get; set; }
 
         public int three { get; set; }
 
         public string four { get; set; }
 
-        public int SomeOne(int one, int two , int three, int four)
+        public int SomeOne(int one, int two, int three, int four)
         {
             return 0;
         }
@@ -90,6 +207,28 @@ public class InGameUI : MonoBehaviour
         public int SomeFour(int one, int two, int three, int four, int five)
         {
             return 0;
+        }
+    }
+
+    public class Math
+    {
+        public int Sum(int one, int two)
+        {
+            return one + two;
+        }
+        public int Subract(int one, int two)
+        {
+            return one - two;
+        }
+
+        public int Multiply(int one, int two)
+        {
+            return one * two;
+        }
+
+        public int Divide(int one, int two)
+        {
+            return one / two;
         }
     }
 
@@ -165,6 +304,54 @@ public class InGameUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             this.camHanding.UntriggerZoom();
+        }
+    }
+
+    private ConstantElements CreateConstantCanvas(int value)
+    {
+        GameObject obj = GameObject.Instantiate(this.worldSpaceCanvasPrefab);
+
+        Canvas can = obj.GetComponent<Canvas>();
+
+        can.worldCamera = this.myCamera;
+
+        GameObject buttonGo = obj.transform.Find("Button").gameObject;
+
+        GameObject textGO = buttonGo.transform.Find("Text").gameObject;
+
+        TMP_Text text = textGO.GetComponent<TMP_Text>();
+
+        text.text = value.ToString();
+
+        ConstantNode nodeBe = buttonGo.AddComponent<ConstantNode>();
+
+        nodeBe.Setup(value, this);
+
+        RectTransform rt = obj.GetComponent<RectTransform>();
+
+        ConstantElements result = new ConstantElements(obj, text, nodeBe, rt);
+
+        return result;
+    }
+
+    public class ConstantElements
+    {
+        public GameObject GameObject { get; set; }
+
+        public TMP_Text text { get; set; }
+
+        public ConstantNode Node { get; set; }
+
+        public RectTransform RectTransform { get; set; } 
+
+        public bool Used { get; set; } = false;
+
+        public ConstantElements(GameObject canvas, TMP_Text text, ConstantNode node,RectTransform rectTransform)
+        {
+            this.RectTransform = rectTransform;
+            this.GameObject = canvas;
+            this.text = text;
+            this.Node = node;
         }
     }
 }

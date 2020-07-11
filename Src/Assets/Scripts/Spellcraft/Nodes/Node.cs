@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    public int ID;
     private InGameUI inGameUI;
     private bool isRotating = false;
     private Camera myCamera;

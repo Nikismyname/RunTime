@@ -244,6 +244,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd39a1ab35491fb4d873a03dc6859d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  transperantMat: {fileID: 2100000, guid: 98359c64e6e6f86438f6cf4659ccc60e, type: 2}
+  worldSpaceCanvasPrefab: {fileID: 5971037252774526402, guid: 47854aa70a7a27949a0bfd55ef3133e3,
+    type: 3}
 --- !u!114 &1284086909
 MonoBehaviour:
   m_ObjectHideFlags: 0
