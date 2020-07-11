@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class ConnectionsTracker
 {
@@ -33,6 +35,47 @@ public class ConnectionsTracker
     //{
 
     //}
+
+    public void PrintResult()
+    {
+        //foreach (var conn in this.paraConstConnections)
+        //{
+        //var par = conn.Parameter;
+        //object val = conn.Constant.GetVal();
+
+        //par.ParameterInfo.  par.Object;
+        //}
+
+        if(resultMethodCall == null)
+        {
+            Debug.Log("Result Not Connected!");
+            return;
+        }
+
+        List<object> values = new List<object>(); 
+
+        foreach (var item in this.resultMethodCall.MyParamaters)
+        {
+            var some = this.paraConstConnections.Where(x=> x.Parameter.ParameterInfo == item).ToArray();
+            if (some.Length == 0)
+            {
+                Debug.Log("Param matching wrong!! no const!!");
+            }
+            if (some.Length > 1)
+            {
+                Debug.Log("Param matching wrong!! many const!!");
+            }
+
+            values.Add(some[0].Constant.GetVal());
+        }
+
+        object obj = this.resultMethodCall.Object;
+        object[] par = values.ToArray();
+
+        object result = this.resultMethodCall.MethodInfo.Invoke(obj, par);
+
+        Debug.Log("SUCCESS " + result.ToString());
+    }
 }
 
 public class InputVariable

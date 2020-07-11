@@ -14,10 +14,15 @@ public class ConstantNode : MonoBehaviour
         gameObject.GetComponent<Button>().onClick.AddListener(this.OnClick);
     }
 
-    public void OnClick()
+    private void OnClick()
     {
         Debug.Log("HERE " + this.value.ToString());
         this.UI.RegisterConstantClick(this);
+    }
+
+    public object GetVal()
+    {
+        return this.value;
     }
 }
 

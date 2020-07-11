@@ -25,8 +25,7 @@ public class Defunclator
         //MethodInfo[] methods = type.GetMethods();
         MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(x => !x.Name.StartsWith("set_") && !x.Name.StartsWith("get_")).ToArray();
         Debug.Log(string.Join(", ", methods.Select(x=>x.Name).ToArray()));
-
-        return new ClassNode(props, methods, type);
+        return new ClassNode(type, props, methods, new T());
     }
 
     public GameObject BuildUI(ClassNode node)
@@ -141,11 +140,12 @@ public class Defunclator
 
 public class ClassNode
 {
-    public ClassNode(PropertyInfo[] properties, MethodInfo[] methods, Type Type)
+    public ClassNode(Type type, PropertyInfo[] properties, MethodInfo[] methods, object @object)
     {
-        this.Properties = properties;
-        this.Methods = methods;
-        this.Type = Type;
+        Type = type;
+        Properties = properties;
+        Methods = methods;
+        Object = @object;
     }
 
     public Type Type { get; set; }

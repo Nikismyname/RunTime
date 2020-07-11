@@ -32,8 +32,10 @@ public class InGameUI : MonoBehaviour
         this.drawer = gameObject.GetComponent<LineDrawer>();
         this.classVisualisation = new Defunclator(this);
 
-        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Math>(), new Vector3(-4, 0, 0));
-        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Math>(), new Vector3(+4, 0, 0));
+        //this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Math>(), new Vector3(-4, 0, 0));
+        //this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Math>(), new Vector3(+4, 0, 0));
+        
+        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, 0, 0));
 
 
         this.constants = new ConstantElements[]
@@ -49,6 +51,38 @@ public class InGameUI : MonoBehaviour
         this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            this.tracker.PrintResult();
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            this.dragged?.SetRotating(true);
+            this.camHanding.GetMouseButtonDownOne();
+        }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            this.camHanding.GetMouseButtonUpOne();
+
+            if (this.dragged != null)
+            {
+                Vector3 thing = this.myCamera.WorldToScreenPoint(dragged.gameObject.transform.position);
+
+            }
+
+            this.dragged?.SetRotating(false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            this.camHanding.UntriggerZoom();
+        }
+    }
+
     public void RegisterConstantClick(ConstantNode node)
     {
         if (this.lastClickedParameter != null)
@@ -56,6 +90,8 @@ public class InGameUI : MonoBehaviour
             this.tracker.TrackParameterAssignConstant(this.lastClickedParameter, node);
 
             this.ConstantsHide();
+
+            this.lastClickedParameter.RegisterAssignment();
 
             return;
         }
@@ -93,6 +129,8 @@ public class InGameUI : MonoBehaviour
     public void RegisterParameterClick(ParameterNode node)
     {
         this.lastClickedParameter = node;
+
+        this.lastClickedParameter.RegisterSelection();
 
         this.ConstantsDisplay(node.transform.position);
 
@@ -174,42 +212,6 @@ public class InGameUI : MonoBehaviour
         }
     }
 
-    private void ClassTest()
-    {
-        this.classVisualisation.BuildUI(this.classVisualisation.GenerateNodeData<Some>());
-    }
-
-    public class Some
-    {
-        public int one { get; set; }
-
-        public string two { get; set; }
-
-        public int three { get; set; }
-
-        public string four { get; set; }
-
-        public int SomeOne(int one, int two, int three, int four)
-        {
-            return 0;
-        }
-
-        public int SomeTwo(int one, int two, int three, int four)
-        {
-            return 0;
-        }
-
-        public int SomeThree(int one, int two, int three, int four)
-        {
-            return 0;
-        }
-
-        public int SomeFour(int one, int two, int three, int four, int five)
-        {
-            return 0;
-        }
-    }
-
     public class Math
     {
         public int Sum(int one, int two)
@@ -229,6 +231,14 @@ public class InGameUI : MonoBehaviour
         public int Divide(int one, int two)
         {
             return one / two;
+        }
+    }
+
+    public class Test
+    {
+        public int Sum(int one, int two)
+        {
+            return one + two;
         }
     }
 
@@ -278,33 +288,6 @@ public class InGameUI : MonoBehaviour
         this.DrawInGameLine(center + new Vector3(halfSize, -halfSize, halfSize), center + new Vector3(halfSize, -halfSize, -halfSize), Color.black, thickness);
         this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, halfSize), center + new Vector3(-halfSize, halfSize, halfSize), Color.black, thickness);
         this.DrawInGameLine(center + new Vector3(-halfSize, halfSize, -halfSize), center + new Vector3(halfSize, halfSize, -halfSize), Color.black, thickness);
-    }
-
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(1))
-        {
-            this.dragged?.SetRotating(true);
-            this.camHanding.GetMouseButtonDownOne();
-        }
-
-        if (Input.GetMouseButtonUp(1))
-        {
-            this.camHanding.GetMouseButtonUpOne();
-
-            if (this.dragged != null)
-            {
-                Vector3 thing = this.myCamera.WorldToScreenPoint(dragged.gameObject.transform.position);
-
-            }
-
-            this.dragged?.SetRotating(false);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            this.camHanding.UntriggerZoom();
-        }
     }
 
     private ConstantElements CreateConstantCanvas(int value)
