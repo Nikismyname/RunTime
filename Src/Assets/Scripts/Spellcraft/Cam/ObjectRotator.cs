@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SpellcraftCam : MonoBehaviour
+public class ObjectRotator : MonoBehaviour
 {
     private Transform target;
     private GameObject mainTarget;
@@ -21,20 +21,29 @@ public class SpellcraftCam : MonoBehaviour
     private Quaternion desiredRotation;
     private Quaternion rotation;
     private Vector3 position;
-    private bool rotate;
 
     private float lastLongDist;
     private float lastShortDist;
     private float shortDist;
 
+    private SpellcraftCam spellCamera;
+
     void Start()
     {
+        this.spellCamera = GameObject.Find("Camera").GetComponent<SpellcraftCam>();
+
         Init();
     }
 
     void OnEnable()
     {
         Init();
+    }
+
+    public void SetTarget(GameObject obj)
+    {
+        this.mainTarget = obj;
+        this.target = obj.transform;
     }
 
     public void Init()
@@ -55,18 +64,6 @@ public class SpellcraftCam : MonoBehaviour
         this.yDeg = Vector3.Angle(Vector3.up, this.transform.up);
     }
 
-    public void GetMouseButtonDownOne()
-    {
-        this.rotate = true;
-        Cursor.lockState = CursorLockMode.Locked;
-    }
-
-    public void GetMouseButtonUpOne()
-    {
-        this.rotate = false;
-        Cursor.lockState = CursorLockMode.None;
-    }
-
     public void TriggerZoom(GameObject obj)
     {
         this.lastLongDist = this.desiredDistance;
@@ -83,11 +80,6 @@ public class SpellcraftCam : MonoBehaviour
 
     void LateUpdate()
     {
-        if(Input.GetKey(KeyCode.LeftShift) && this.rotate == true)
-        {
-            return;
-        }
-
         //if (Input.GetMouseButton(2) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.LeftControl))
         //{
         //    desiredDistance -= Input.GetAxis("Mouse Y") * Time.deltaTime * zoomRate * 0.125f * Mathf.Abs(desiredDistance);
@@ -99,43 +91,23 @@ public class SpellcraftCam : MonoBehaviour
         //    target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
         //}
 
-        if (this.rotate)
+        if (Input.GetKey(KeyCode.LeftShift) && this.spellCamera.IsRotating())
         {
             xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
             yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
-
             desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
             currentRotation = transform.rotation;
-
             rotation = Quaternion.Lerp(currentRotation, desiredRotation, 1);
-
             transform.rotation = rotation;
+
+            this.target = this.spellCamera.GetTarget();
+            desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
+            desiredDistance = Mathf.Clamp(desiredDistance, minDistance, maxDistance);
+            currentDistance = Mathf.Lerp(currentDistance, desiredDistance, Time.deltaTime * zoomDampening);
+            position = target.position - (rotation * Vector3.forward * currentDistance + targetOffset);
+            transform.position = position;
+
+            this.target.LookAt(this.transform.position);
         }
-
-        desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
-        desiredDistance = Mathf.Clamp(desiredDistance, minDistance, maxDistance);
-        currentDistance = Mathf.Lerp(currentDistance, desiredDistance, Time.deltaTime * zoomDampening);
-
-        position = target.position - (rotation * Vector3.forward * currentDistance + targetOffset);
-
-        transform.position = position;
-
-        Input.mousePosition.Set(0, 0, 0);
-    }
-
-    public void SetTarget(GameObject obj)
-    {
-        this.mainTarget = obj;
-        this.target = obj.transform;
-    }
-
-    public Transform GetTarget()
-    {
-        return this.target; 
-    }
-
-    public bool IsRotating()
-    {
-        return this.rotate;
     }
 }

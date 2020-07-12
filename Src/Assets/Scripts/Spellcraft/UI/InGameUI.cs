@@ -1,12 +1,14 @@
-﻿using TMPro;
+﻿#region INIT
+
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
     public Material transperantMat;
-    public GameObject worldSpaceCanvasPrefab;
+    public ZoomMode zoomMode = ZoomMode.OuterZoom; 
 
+    public GameObject worldSpaceCanvasPrefab;
     private Camera myCamera;
     private SpellcraftCam camHanding;
     private Node dragged = null;
@@ -18,9 +20,13 @@ public class InGameUI : MonoBehaviour
     private GameObject result;
     private ConnectionsTracker tracker = new ConnectionsTracker();
     private ConstantElements[] constants;
-
+    private GameObject rotatorGO;
+    private ObjectRotator objRotator;
     private void Start()
     {
+        this.rotatorGO = new GameObject("Rotator");
+        this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>(); 
+
         this.text1 = GameObject.Find("WSCText1");
         this.menu1 = GameObject.Find("WSCMenu1");
         this.worldSpaceText = this.text1.transform.Find("Text").GetComponent<TMP_Text>();
@@ -51,6 +57,8 @@ public class InGameUI : MonoBehaviour
         this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
     }
 
+    #endregion
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F))
@@ -58,6 +66,22 @@ public class InGameUI : MonoBehaviour
             this.tracker.PrintResult();
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            this.camHanding.UntriggerZoom();
+            this.zoomMode = ZoomMode.OuterZoom;
+        }
+
+        this.DragControllsOnUpdate();
+    }
+
+    public void SetDragged(Node dragged)
+    {
+        this.dragged = dragged;
+    }
+
+    public void DragControllsOnUpdate()
+    {
         if (Input.GetMouseButtonDown(1))
         {
             this.dragged?.SetRotating(true);
@@ -75,11 +99,6 @@ public class InGameUI : MonoBehaviour
             }
 
             this.dragged?.SetRotating(false);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            this.camHanding.UntriggerZoom();
         }
     }
 
@@ -251,11 +270,6 @@ public class InGameUI : MonoBehaviour
         node2.AddComponent<Node>().Setup(this);
         node2.name = "node";
         this.drawer.RegisterLine(node.transform, node2.transform, 0.2f, Color.cyan);
-    }
-
-    public void SetDragged(Node dragged)
-    {
-        this.dragged = dragged;
     }
 
     private GameObject DrawInGameLine(Vector3 from, Vector3 to, Color color, float thickness)

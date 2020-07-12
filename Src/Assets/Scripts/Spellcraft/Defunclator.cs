@@ -24,7 +24,7 @@ public class Defunclator
         PropertyInfo[] props = type.GetProperties();
         //MethodInfo[] methods = type.GetMethods();
         MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(x => !x.Name.StartsWith("set_") && !x.Name.StartsWith("get_")).ToArray();
-        Debug.Log(string.Join(", ", methods.Select(x=>x.Name).ToArray()));
+        //Debug.Log(string.Join(", ", methods.Select(x=>x.Name).ToArray()));
         return new ClassNode(type, props, methods, new T());
     }
 

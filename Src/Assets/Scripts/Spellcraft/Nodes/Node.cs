@@ -1,13 +1,14 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿#region INIT
+
+using System.Linq;
 using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    private InGameUI inGameUI;
+    private InGameUI UI;
     private bool isRotating = false;
     private Camera myCamera;
-    private SpellcraftCam camBehaviour; 
+    private SpellcraftCam camBehaviour;
     private Vector3 worldOffset;
     private Plane interactionPlane;
     private float? currentPositionYPrev = null;
@@ -62,17 +63,27 @@ public class Node : MonoBehaviour
 
     public void Setup(InGameUI ui)
     {
-        this.inGameUI = ui;
+        this.UI = ui;
     }
 
-    async void OnMouseDown()
+    #endregion
+
+    #region MOUSE
+
+    void OnMouseDown()
     {
+        if (this.isRotating || this.UI.zoomMode == ZoomMode.ClassNodeZoom)
+        {
+            return;
+        }
+
         if (Input.GetKey(KeyCode.LeftShift))
         {
             this.camBehaviour.TriggerZoom(this.gameObject);
+            this.UI.zoomMode = ZoomMode.ClassNodeZoom;
             return;
         }
-        
+
         if (Physics.Raycast(this.myCamera.ScreenPointToRay(Input.mousePosition), out RaycastHit raycastHit))
         {
             Vector3 hitPoint = raycastHit.point;
@@ -80,7 +91,7 @@ public class Node : MonoBehaviour
             this.worldOffset = objectPoint - hitPoint;
             this.currentPositionYPrev = null;
             this.SetShadowsActive(true);
-            this.inGameUI.SetDragged(this);
+            this.UI.SetDragged(this);
             this.dragged = true;
         }
         else
@@ -96,7 +107,7 @@ public class Node : MonoBehaviour
 
     void OnMouseDrag()
     {
-        if (this.isRotating || this.dragged == false)
+        if (this.isRotating || this.dragged == false || this.UI.zoomMode == ZoomMode.ClassNodeZoom)
         {
             return;
         }
@@ -105,9 +116,9 @@ public class Node : MonoBehaviour
 
         PlanesWithMovingAxis closestPlain = this.GetAppropriateAxis();
 
-        if(closestPlain.normal != this.interactionPlane.normal)
+        if (closestPlain.normal != this.interactionPlane.normal)
         {
-           this.interactionPlane = new Plane(closestPlain.normal, gameObject.transform.position); 
+            this.interactionPlane = new Plane(closestPlain.normal, gameObject.transform.position);
         }
 
         if (this.interactionPlane.Raycast(mouseRay, out float enter))
@@ -185,27 +196,14 @@ public class Node : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region HELPERS
+
     private PlanesWithMovingAxis GetAppropriateAxis()
     {
         PlanesWithMovingAxis[] mostFittingNormals = this.normals.Where(x => Vector3.Angle(x.normal, this.myCamera.transform.forward) == this.normals.Min(y => Vector3.Angle(y.normal, this.myCamera.transform.forward))).ToArray();
         return mostFittingNormals[0];
-    }
-
-    private void SetShadowsActive(bool active)
-    {
-        foreach (var item in this.shadows)
-        {
-            item.SetActive(active);
-        }
-    }
-
-    public void SetRotating(bool isRotating)
-    {
-        this.isRotating = isRotating;
-        if(this.isRotating == true)
-        {
-            this.dragged = false;
-        }
     }
 
     private class PlanesWithMovingAxis
@@ -219,5 +217,31 @@ public class Node : MonoBehaviour
             this.axis = axis;
         }
     }
+
+    #endregion
+
+    #region PUBLIC_INTERFACE
+
+    private void SetShadowsActive(bool active)
+    {
+        foreach (var item in this.shadows)
+        {
+            item.SetActive(active);
+        }
+    }
+
+    public void SetRotating(bool isRotating)
+    {
+        this.isRotating = isRotating;
+        if (this.isRotating == true)
+        {
+            this.dragged = false;
+        }
+    }
+
+    #endregion;
+
+#region }
 }
+#endregion
 
