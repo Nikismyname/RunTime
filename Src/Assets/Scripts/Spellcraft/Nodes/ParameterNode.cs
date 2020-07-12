@@ -1,15 +1,14 @@
-﻿using System.Reflection;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ParameterNode :MonoBehaviour
 {
     private WorldSpaceUI UI;
     public object Object { get; set; }
-    public ParameterInfo ParameterInfo { get; set; }
+    public MyParameterInfo ParameterInfo { get; set; }
 
     private bool assigned = false;
 
-    public void Setup(ParameterInfo PropertyInfo, object ClassObject,WorldSpaceUI UI)
+    public void Setup(MyParameterInfo PropertyInfo, object ClassObject,WorldSpaceUI UI)
     {
         this.ParameterInfo = PropertyInfo; 
         this.Object = ClassObject;
@@ -19,8 +18,8 @@ public class ParameterNode :MonoBehaviour
 
     private void OnMouseDown()
     {
-        string message = $"Name: {this.ParameterInfo.Name}, Type: {this.ParameterInfo.ParameterType.Name}";
-        this.UI.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position+ new Vector3(0,1,0));
+        string message = $"Name: {this.ParameterInfo.Info.Name}, Type: {this.ParameterInfo.Info.ParameterType.Name}";
+        this.UI.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0,1,0));
         this.UI.SetTextWorldCanvasText(message);
         this.UI.RegisterParameterClick(this);
     }

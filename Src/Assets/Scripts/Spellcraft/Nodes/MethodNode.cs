@@ -8,9 +8,9 @@ public class MethodNode : MonoBehaviour
     private Type type;
     public object Object { get; set; }
     public MethodInfo MethodInfo { get; set; }
-    public ParameterInfo[] MyParamaters { get; set; }
+    public MyParameterInfo[] MyParamaters { get; set; }
 
-    public void Setup(MethodInfo methodInfo, ParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI)
+    public void Setup(MethodInfo methodInfo, MyParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI)
     {
         this.MethodInfo = methodInfo;
         this.MyParamaters = myParamaters;

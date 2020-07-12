@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Boo.Lang;
+using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class Defunclator
     private float methodSphere = 0.2f;
     private float propertySphere = 0.3f;
     private WorldSpaceUI UI;
+
+    private int currParamId = 0;
 
     public Defunclator(WorldSpaceUI ui)
     {
@@ -97,23 +100,26 @@ public class Defunclator
             float initialOffset = 50f; 
             var method = node.Methods[j];
             GameObject methodPip = CreatePip(baseSphere, Color.white);
-            ParameterInfo[] parameterInfos = method.GetParameters();
-            methodPip.AddComponent<MethodNode>().Setup(method, parameterInfos, node.Object, this.UI);
+            ParameterInfo[] rawParamInfos = method.GetParameters().ToArray();
 
             methodPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), initialOffset);
             float oneDivAround = 360f / node.Methods.Length;
             float wantedAngleAround = (float)j * oneDivAround;
             methodPip.RotateAroundUnitSphere(new Vector3(0, 1, 0), wantedAngleAround);
 
-            for (int i = 0; i < parameterInfos.Length; i++)
+            List<MyParameterInfo> myParamaterInfos = new List<MyParameterInfo>();
+            for (int i = 0; i < rawParamInfos.Length; i++)
             {
-                ParameterInfo param = parameterInfos[i];
+                MyParameterInfo param = new MyParameterInfo(this.currParamId++, rawParamInfos[i]);
+                myParamaterInfos.Add(param);
                 GameObject paramaterPip = CreatePip(baseSphere, Color.black);
                 paramaterPip.AddComponent<ParameterNode>().Setup(param, node.Object, this.UI);
                 float wantedAngleDown = initialOffset + (i + 1) * 20f;
                 paramaterPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), wantedAngleDown);
                 paramaterPip.RotateAroundUnitSphere(new Vector3(0, 1, 0), wantedAngleAround);
             }
+
+            methodPip.AddComponent<MethodNode>().Setup(method, myParamaterInfos.ToArray(), node.Object, this.UI);
         }
     }
 

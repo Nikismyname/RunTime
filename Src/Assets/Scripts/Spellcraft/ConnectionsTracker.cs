@@ -17,7 +17,7 @@ public class ConnectionsTracker
     ParameterNode[] parameterNodes;
 
     List<ParameterConstant> paraConstConnections = new List<ParameterConstant>();
-
+    List<ParameterMethod> paraMethConnections = new List<ParameterMethod>();
     #endregion
 
     #region TRACKING
@@ -40,6 +40,24 @@ public class ConnectionsTracker
         }
     }
 
+    public void TrackParameterAssignMethod(ParameterNode node, MethodNode method)
+    {
+        var existing = paraMethConnections.SingleOrDefault(x => x.Parameter == node);
+
+        if (existing != null)
+        {
+            /// Assigning new constant to paramater, marking the previous constant as not used!
+            //existing.Constant.SetUsed(false, null);
+
+            existing.Method = method;
+            Debug.Log("replaced method");
+        }
+        else
+        {
+            this.paraMethConnections.Add(new ParameterMethod(node, method));
+        }
+    }
+
     public void TrackResultAssignMethodCall(MethodNode node)
     {
         this.resultMethodCall = node;
@@ -51,39 +69,60 @@ public class ConnectionsTracker
 
     public void PrintResult()
     {
-        if (resultMethodCall == null)
+        if (this.resultMethodCall == null)
         {
             Debug.Log("Result Not Connected!");
             return;
         }
 
-        List<object> values = new List<object>();
-
-        foreach (var item in this.resultMethodCall.MyParamaters)
-        {
-            var some = this.paraConstConnections.Where(x => x.Parameter.ParameterInfo == item).ToArray();
-            if (some.Length == 0)
-            {
-                Debug.Log("Param matching wrong!! no const!!");
-            }
-            if (some.Length > 1)
-            {
-                Debug.Log("Param matching wrong!! many const!!");
-            }
-
-            values.Add(some[0].Constant.GetVal());
-        }
-
-        object obj = this.resultMethodCall.Object;
-        object[] par = values.ToArray();
-
-        object result = this.resultMethodCall.MethodInfo.Invoke(obj, par);
+        object result = this.PrintResultRec(this.resultMethodCall);
 
         Debug.Log("SUCCESS " + result.ToString());
     }
 
-    #endregion
+    private object PrintResultRec(MethodNode node)
+    {
+        List<object> values = new List<object>();
 
+        foreach (var paramater in node.MyParamaters)
+        {
+            var constant = this.paraConstConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
+            if (constant.Length > 1)
+            {
+                Debug.Log("MORE THANT ONE CONSTANT!!!!");
+                Debug.Break();
+            }
+
+            if (constant.Length == 1)
+            {
+                values.Add(constant[0].Constant.GetVal());
+                continue;
+            }
+
+            var method = this.paraMethConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
+            if (method.Length > 1)
+            {
+                Debug.Log("MORE THANT ONE CONSTANT!!!!");
+                Debug.Break();
+            }
+
+            if (method.Length == 0)
+            {
+                Debug.Log("Property not assigned to!!!");
+                Debug.Break();
+            }
+
+            values.Add(PrintResultRec(method[0].Method));
+        }
+
+        object obj = node.Object;
+        object[] par = values.ToArray();
+        object result = node.MethodInfo.Invoke(obj, par);
+
+        return result;
+    }
+
+    #endregion
 }
 
 #region DATA_CLASSES
@@ -101,7 +140,6 @@ public class ResultConstant : InputVariable { }
 
 public class ResultVariable : InputVariable { }
 
-
 public class ParameterConstant
 {
     public ParameterNode Parameter { get; set; }
@@ -112,6 +150,19 @@ public class ParameterConstant
     {
         Parameter = parameter;
         Constant = constant;
+    }
+}
+
+public class ParameterMethod
+{
+    public ParameterNode Parameter { get; set; }
+
+    public MethodNode Method { get; set; }
+
+    public ParameterMethod(ParameterNode parameter, MethodNode method)
+    {
+        Parameter = parameter;
+        Method = method;
     }
 }
 

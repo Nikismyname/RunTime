@@ -1,6 +1,7 @@
 ﻿#region INIT
 
 using System.Linq;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,7 +45,8 @@ public class WorldSpaceUI : MonoBehaviour
         this.drawer = gameObject.GetComponent<LineDrawer>();
         this.classVisualisation = new Defunclator(this);
 
-        this.JustAddMethod();
+        //this.JustAddMethod();
+        this.JustTwoAddMethod();
     }
 
     #endregion
@@ -55,6 +57,27 @@ public class WorldSpaceUI : MonoBehaviour
     {
         ///CLASS NODES
         this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, 0, 0));
+
+        ///CONSTANTS
+        this.constants = new ConstantElements[]
+        {
+            this.CreateConstantCanvas(12, this.constantsParent),
+            this.CreateConstantCanvas(13, this.constantsParent),
+            this.CreateConstantCanvas(14, this.constantsParent),
+            this.CreateConstantCanvas(15, this.constantsParent),
+        };
+
+        ///RESULT NODE
+        this.result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        this.result.transform.position = new Vector3(0, -15, 0);
+        this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
+    }
+
+    public void JustTwoAddMethod()
+    {
+        ///CLASS NODES
+        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, +5, 0));
+        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, -5, 0));
 
         ///CONSTANTS
         this.constants = new ConstantElements[]
@@ -111,6 +134,13 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            this.lastClickedMethod = null;
+            this.lastClickedParameter = null;
+            this.lastClickedProperty = null;
+        }
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             this.tracker.PrintResult();
@@ -158,7 +188,7 @@ public class WorldSpaceUI : MonoBehaviour
 
     #region CONSTANTS
 
-    public void ConstantsDisplay(Vector3 pos, ParameterNode node)
+    public async void ConstantsDisplay(Vector3 pos, ParameterNode node)
     {
         int columnCount = 2;
         float buttonX = 1.5f;
@@ -185,7 +215,7 @@ public class WorldSpaceUI : MonoBehaviour
 
                 ConstantElements c = this.constants[index];
 
-                c.GameObject.SetActive(true);
+                c.ParentObject.SetActive(false);
 
                 float yy = y * buttonY - wholeY / 2 + buttonY / 2;
                 float xx = x * buttonX - wholeX / 2 + buttonX / 2;
@@ -203,6 +233,14 @@ public class WorldSpaceUI : MonoBehaviour
         this.constantsParent.position = pos + offset;
 
         this.constantsShowing = true;
+
+        /// Enabaling the constant canvases after some time so one does not get automatically clicked
+        await Task.Delay(100);
+
+        foreach (var item in this.constants)
+        {
+            item.ParentObject.SetActive(true);
+        }
     }
 
     public void ConstantsHide()
@@ -210,7 +248,7 @@ public class WorldSpaceUI : MonoBehaviour
         for (int i = 0; i < this.constants.Length; i++)
         {
             ConstantElements c = this.constants[i];
-            c.GameObject.SetActive(false);
+            c.ParentObject.SetActive(false);
         }
 
         this.constantsShowing = false;
@@ -253,7 +291,7 @@ public class WorldSpaceUI : MonoBehaviour
 
     public class ConstantElements
     {
-        public GameObject GameObject { get; set; }
+        public GameObject ParentObject { get; set; }
 
         public TMP_Text text { get; set; }
 
@@ -268,7 +306,7 @@ public class WorldSpaceUI : MonoBehaviour
         public ConstantElements(GameObject canvas, TMP_Text text, ConstantNode node, RectTransform rectTransform, Button button)
         {
             this.RectTransform = rectTransform;
-            this.GameObject = canvas;
+            this.ParentObject = canvas;
             this.text = text;
             this.Node = node;
             this.Button = button;
@@ -415,9 +453,12 @@ public class WorldSpaceUI : MonoBehaviour
             return;
         }
 
+        this.tracker.TrackParameterAssignMethod(node, this.lastClickedMethod);
+
         this.DrawConnection(node.gameObject, this.lastClickedMethod.gameObject);
 
         this.lastClickedParameter = null;
+
         this.lastClickedMethod = null;
     }
 
