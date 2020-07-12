@@ -1,7 +1,6 @@
 ﻿#region INIT
 
 using System.Linq;
-using System.Xml;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +25,7 @@ public class WorldSpaceUI : MonoBehaviour
     private ObjectRotator objRotator;
     private Transform constantsParent;
     private float constantsScale = 0.3f;
+    private bool constantsShowing = false;
 
     private void Start()
     {
@@ -118,8 +118,15 @@ public class WorldSpaceUI : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            this.camHanding.UntriggerZoom();
-            this.zoomMode = ZoomMode.OuterZoom;
+            if (this.constantsShowing)
+            {
+                this.ConstantsHide();
+            }
+            else
+            {
+                this.camHanding.UntriggerZoom();
+                this.zoomMode = ZoomMode.OuterZoom;
+            }
         }
 
         this.DragControllsOnUpdate();
@@ -151,7 +158,7 @@ public class WorldSpaceUI : MonoBehaviour
 
     #region CONSTANTS
 
-    public void ConstantsDisplay(Vector3 pos)
+    public void ConstantsDisplay(Vector3 pos, ParameterNode node)
     {
         int columnCount = 2;
         float buttonX = 1.5f;
@@ -185,10 +192,7 @@ public class WorldSpaceUI : MonoBehaviour
 
                 c.RectTransform.localPosition = new Vector3(xx, yy, 0);
 
-                if (c.Used)
-                {
-                    c.Button.GetComponent<Image>().color = Color.gray;
-                }
+                c.Node.FixColorBeforeShow(node);
             }
         }
 
@@ -197,6 +201,8 @@ public class WorldSpaceUI : MonoBehaviour
         Vector3 offset = (this.myCamera.transform.position - pos).normalized;
 
         this.constantsParent.position = pos + offset;
+
+        this.constantsShowing = true;
     }
 
     public void ConstantsHide()
@@ -206,6 +212,8 @@ public class WorldSpaceUI : MonoBehaviour
             ConstantElements c = this.constants[i];
             c.GameObject.SetActive(false);
         }
+
+        this.constantsShowing = false;
     }
 
     private ConstantElements CreateConstantCanvas(int value, Transform parent)
@@ -228,8 +236,6 @@ public class WorldSpaceUI : MonoBehaviour
 
         ConstantNode nodeBe = buttonGo.AddComponent<ConstantNode>();
 
-        nodeBe.Setup(value, this);
-
         RectTransform rt = obj.GetComponent<RectTransform>();
 
         ConstantElements result = new ConstantElements(obj, text, nodeBe, rt, button);
@@ -239,6 +245,8 @@ public class WorldSpaceUI : MonoBehaviour
         ///element scaling!
         rt.localScale *= this.constantsScale;
         ///
+
+        nodeBe.Setup(value, this, result);
 
         return result;
     }
@@ -344,15 +352,22 @@ public class WorldSpaceUI : MonoBehaviour
     {
         if (this.lastClickedParameter != null)
         {
+            if (node.elements.Used)
+            {
+                Debug.Log("constant already used");
+                return;
+            }
+
             this.tracker.TrackParameterAssignConstant(this.lastClickedParameter, node);
 
             this.ConstantsHide();
 
             this.lastClickedParameter.RegisterAssignment();
 
-            var n = this.constants.Single(x => x.Node == node);
+            ConstantElements n = this.constants.Single(x => x.Node == node);
 
             n.Used = true;
+            n.Node.SetUsed(true, this.lastClickedParameter);
 
             return;
         }
@@ -393,7 +408,7 @@ public class WorldSpaceUI : MonoBehaviour
 
         this.lastClickedParameter.RegisterSelection();
 
-        this.ConstantsDisplay(node.transform.position);
+        this.ConstantsDisplay(node.transform.position, node);
 
         if (this.lastClickedMethod == null)
         {

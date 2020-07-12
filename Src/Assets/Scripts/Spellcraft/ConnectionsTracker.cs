@@ -28,8 +28,11 @@ public class ConnectionsTracker
 
         if (existing != null)
         {
+            /// Assigning new constant to paramater, marking the previous constant as not used!
+            existing.Constant.SetUsed(false, null);
+
             existing.Constant = constant;
-            Debug.Log("Replaced Constatnt!");
+            Debug.Log("replaced constatnt");
         }
         else
         {
