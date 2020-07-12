@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class ResultNode : MonoBehaviour
 {
-    private InGameUI UI;
+    private WorldSpaceUI UI;
     Type type; 
 
-    public void Setup(Type type , InGameUI UI)
+    public void Setup(Type type , WorldSpaceUI UI)
     {
         this.type = type; 
         this.UI = UI;

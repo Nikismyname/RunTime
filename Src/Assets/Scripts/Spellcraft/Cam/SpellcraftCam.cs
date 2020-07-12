@@ -88,17 +88,6 @@ public class SpellcraftCam : MonoBehaviour
             return;
         }
 
-        //if (Input.GetMouseButton(2) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKey(KeyCode.LeftControl))
-        //{
-        //    desiredDistance -= Input.GetAxis("Mouse Y") * Time.deltaTime * zoomRate * 0.125f * Mathf.Abs(desiredDistance);
-        //}
-        //else if (Input.GetMouseButton(2))
-        //{
-        //    target.rotation = transform.rotation;
-        //    target.Translate(Vector3.right * -Input.GetAxis("Mouse X") * panSpeed);
-        //    target.Translate(transform.up * -Input.GetAxis("Mouse Y") * panSpeed, Space.World);
-        //}
-
         if (this.rotate)
         {
             xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;

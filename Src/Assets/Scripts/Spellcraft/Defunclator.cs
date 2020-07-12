@@ -10,9 +10,9 @@ public class Defunclator
     private float methodCube = 0.3f;
     private float methodSphere = 0.2f;
     private float propertySphere = 0.3f;
-    private InGameUI UI;
+    private WorldSpaceUI UI;
 
-    public Defunclator(InGameUI ui)
+    public Defunclator(WorldSpaceUI ui)
     {
         this.UI = ui;
     }

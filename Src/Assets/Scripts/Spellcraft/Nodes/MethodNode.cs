@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class MethodNode : MonoBehaviour
 {
-    private InGameUI UI;
+    private WorldSpaceUI UI;
     private Type type;
     public object Object { get; set; }
     public MethodInfo MethodInfo { get; set; }
     public ParameterInfo[] MyParamaters { get; set; }
 
-    public void Setup(MethodInfo methodInfo, ParameterInfo[] myParamaters, object classObject, InGameUI UI)
+    public void Setup(MethodInfo methodInfo, ParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI)
     {
         this.MethodInfo = methodInfo;
         this.MyParamaters = myParamaters;
@@ -23,8 +23,8 @@ public class MethodNode : MonoBehaviour
     private void OnMouseDown()
     {
         string message = $"Name: Some, Type: {this.type.Name}";
-        this.UI.SetWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0, 1, 0));
-        this.UI.SetWorldCanvasText(message);
+        this.UI.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0, 1, 0));
+        this.UI.SetTextWorldCanvasText(message);
         this.UI.RegisterMethodClick(this);
     }
 }

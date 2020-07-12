@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class ParameterNode :MonoBehaviour
 {
-    private InGameUI UI;
+    private WorldSpaceUI UI;
     public object Object { get; set; }
     public ParameterInfo ParameterInfo { get; set; }
 
     private bool assigned = false;
 
-    public void Setup(ParameterInfo PropertyInfo, object ClassObject,InGameUI UI)
+    public void Setup(ParameterInfo PropertyInfo, object ClassObject,WorldSpaceUI UI)
     {
         this.ParameterInfo = PropertyInfo; 
         this.Object = ClassObject;
@@ -20,8 +20,8 @@ public class ParameterNode :MonoBehaviour
     private void OnMouseDown()
     {
         string message = $"Name: {this.ParameterInfo.Name}, Type: {this.ParameterInfo.ParameterType.Name}";
-        this.UI.SetWorldCanvasPosition(this.gameObject.transform.parent.transform.position+ new Vector3(0,1,0));
-        this.UI.SetWorldCanvasText(message);
+        this.UI.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position+ new Vector3(0,1,0));
+        this.UI.SetTextWorldCanvasText(message);
         this.UI.RegisterParameterClick(this);
     }
 
@@ -37,7 +37,7 @@ public class ParameterNode :MonoBehaviour
 
     public void RegisterAssignment()
     {
-        this.gameObject.SetColor(Color.white);
+        this.gameObject.SetColor(Color.blue);
         this.assigned = true;
     }
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region INIT
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,17 +10,31 @@ public class ConnectionsTracker
     InputVariable[] inputVariables;
     ConstantNode[] inputConstants;
     ResultConstant result;
-    MethodNode resultMethodCall; 
+    MethodNode resultMethodCall;
 
     PropertyNode[] propertyNodes;
     MethodNode[] methodNodes;
     ParameterNode[] parameterNodes;
 
-    List<ParameterConstant> paraConstConnections = new List<ParameterConstant>(); 
+    List<ParameterConstant> paraConstConnections = new List<ParameterConstant>();
+
+    #endregion
+
+    #region TRACKING
 
     public void TrackParameterAssignConstant(ParameterNode node, ConstantNode constant)
     {
-        this.paraConstConnections.Add(new ParameterConstant(node, constant));
+        var existing = paraConstConnections.SingleOrDefault(x => x.Parameter == node);
+
+        if (existing != null)
+        {
+            existing.Constant = constant;
+            Debug.Log("Replaced Constatnt!");
+        }
+        else
+        {
+            this.paraConstConnections.Add(new ParameterConstant(node, constant));
+        }
     }
 
     public void TrackResultAssignMethodCall(MethodNode node)
@@ -26,37 +42,23 @@ public class ConnectionsTracker
         this.resultMethodCall = node;
     }
 
-    //public void TrackParameterAssignedVariable()
-    //{
+    #endregion
 
-    //}
-
-    //public void TrackParamaterAssignedMethodReturn()
-    //{
-
-    //}
+    #region PRINT_RESULTS
 
     public void PrintResult()
     {
-        //foreach (var conn in this.paraConstConnections)
-        //{
-        //var par = conn.Parameter;
-        //object val = conn.Constant.GetVal();
-
-        //par.ParameterInfo.  par.Object;
-        //}
-
-        if(resultMethodCall == null)
+        if (resultMethodCall == null)
         {
             Debug.Log("Result Not Connected!");
             return;
         }
 
-        List<object> values = new List<object>(); 
+        List<object> values = new List<object>();
 
         foreach (var item in this.resultMethodCall.MyParamaters)
         {
-            var some = this.paraConstConnections.Where(x=> x.Parameter.ParameterInfo == item).ToArray();
+            var some = this.paraConstConnections.Where(x => x.Parameter.ParameterInfo == item).ToArray();
             if (some.Length == 0)
             {
                 Debug.Log("Param matching wrong!! no const!!");
@@ -76,7 +78,12 @@ public class ConnectionsTracker
 
         Debug.Log("SUCCESS " + result.ToString());
     }
+
+    #endregion
+
 }
+
+#region DATA_CLASSES
 
 public class InputVariable
 {
@@ -104,3 +111,5 @@ public class ParameterConstant
         Constant = constant;
     }
 }
+
+#endregion

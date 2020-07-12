@@ -6,11 +6,11 @@ using UnityEngine;
 public class LineDrawer : MonoBehaviour
 {
     private List<Line> lines = new List<Line>();
-    private InGameUI UI;
+    private WorldSpaceUI UI;
 
     private void Start()
     {
-        this.UI = GameObject.Find("Main").GetComponent<InGameUI>();
+        this.UI = GameObject.Find("Main").GetComponent<WorldSpaceUI>();
     }
 
     public void RegisterLine(Transform transOne, Transform transTwo, float thickness, Color color)

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    private InGameUI UI;
+    private WorldSpaceUI UI;
     private bool isRotating = false;
     private Camera myCamera;
     private SpellcraftCam camBehaviour;
@@ -61,7 +61,7 @@ public class Node : MonoBehaviour
         shadows[5] = away;
     }
 
-    public void Setup(InGameUI ui)
+    public void Setup(WorldSpaceUI ui)
     {
         this.UI = ui;
     }

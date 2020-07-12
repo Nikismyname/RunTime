@@ -3,10 +3,10 @@ using UnityEngine.UI;
 
 public class ConstantNode : MonoBehaviour
 {
-    private InGameUI UI;
+    private WorldSpaceUI UI;
     private object value;
 
-    public void Setup(object value, InGameUI UI)
+    public void Setup(object value, WorldSpaceUI UI)
     {
         this.value = value;
         this.UI = UI;
