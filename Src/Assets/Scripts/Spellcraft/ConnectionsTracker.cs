@@ -67,20 +67,23 @@ public class ConnectionsTracker
 
     #region PRINT_RESULTS
 
-    public void PrintResult()
+    public object PrintResult(Variable[] variables = null)
     {
+        if (variables == null)
+            variables = new Variable[0];
+
         if (this.resultMethodCall == null)
         {
             Debug.Log("Result Not Connected!");
-            return;
+            return null;
         }
 
-        object result = this.PrintResultRec(this.resultMethodCall);
-
+        object result = this.PrintResultRec(this.resultMethodCall, variables);
         Debug.Log("SUCCESS " + result.ToString());
+        return result;
     }
 
-    private object PrintResultRec(MethodNode node)
+    private object PrintResultRec(MethodNode node, Variable[] variables)
     {
         List<object> values = new List<object>();
 
@@ -95,7 +98,16 @@ public class ConnectionsTracker
 
             if (constant.Length == 1)
             {
-                values.Add(constant[0].Constant.GetVal());
+                if (constant[0].Constant.IsVariable())
+                {
+                    values.Add(constant[0].Constant.GetVal());
+                }
+                else
+                {
+                    /// Finding the variable with the right name and getting it's value. The values are passed by the resultUI.
+                    values.Add(variables.SingleOrDefault(x=>x.Name == constant[0].Constant.VariableName)?.Value);
+                }
+
                 continue;
             }
 
@@ -112,7 +124,7 @@ public class ConnectionsTracker
                 Debug.Break();
             }
 
-            values.Add(PrintResultRec(method[0].Method));
+            values.Add(PrintResultRec(method[0].Method, variables));
         }
 
         object obj = node.Object;
@@ -164,6 +176,13 @@ public class ParameterMethod
         Parameter = parameter;
         Method = method;
     }
+}
+
+public class Variable
+{
+    public string  Name { get; set; }
+
+    public object Value { get; set; }
 }
 
 #endregion

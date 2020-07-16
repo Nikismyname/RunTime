@@ -9,7 +9,9 @@ using UnityEngine.UI;
 public class WorldSpaceUI : MonoBehaviour
 {
     public Material transperantMat;
-    public GameObject worldSpaceCanvasPrefab;
+    public GameObject constantAndVariablePanelPrefab;
+    public GameObject resultAndVariablesPanelPrefab;
+
     public ZoomMode zoomMode { get; set; } = ZoomMode.OuterZoom;
     private Camera myCamera;
     private SpellcraftCam camHanding;
@@ -20,14 +22,16 @@ public class WorldSpaceUI : MonoBehaviour
     private TMP_Text worldSpaceText;
     private GameObject menu1;
     private GameObject result;
-    private ConnectionsTracker tracker = new ConnectionsTracker();
+    private ConnectionsTracker connTracker = new ConnectionsTracker();
     private ConstantElements[] constants;
     private GameObject rotatorGO;
     private ObjectRotator objRotator;
     private Transform constantsParent;
     private float constantsScale = 0.3f;
     private bool constantsShowing = false;
-
+    private ResultCanvas resultCanvas;
+    private GameObject resultCanvasVantigePoint;
+        
     private void Start()
     {
         this.constantsParent = new GameObject("Contants Parent!").transform;
@@ -41,12 +45,19 @@ public class WorldSpaceUI : MonoBehaviour
         this.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
         this.camHanding = this.myCamera.gameObject.AddComponent<SpellcraftCam>();
-        this.camHanding.SetTarget(new GameObject("Center"));
+        this.camHanding.Setup(new GameObject("Center"));
         this.drawer = gameObject.GetComponent<LineDrawer>();
         this.classVisualisation = new Defunclator(this);
 
+        this.resultCanvas = new ResultCanvas(this.resultAndVariablesPanelPrefab, this.myCamera, this.connTracker);
+        this.resultCanvas.SetPosition(new Vector3(0, 0, -25));
+        this.resultCanvas.SetScale(new Vector3(0.02f, 0.02f, 0.02f));
+
         //this.JustAddMethod();
         this.JustTwoAddMethod();
+
+        this.resultCanvasVantigePoint = new  GameObject("VantigePoint");
+        this.resultCanvasVantigePoint.transform.position = new Vector3(0,0,-30);
     }
 
     #endregion
@@ -92,6 +103,12 @@ public class WorldSpaceUI : MonoBehaviour
         this.result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.result.transform.position = new Vector3(0, -15, 0);
         this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
+
+        this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
+        {
+            new ResultCanvas.VariableInput(typeof(int),"int1WithExtras"),
+            new ResultCanvas.VariableInput(typeof(int),"int2WithExtras")
+        });
     }
 
     #endregion
@@ -143,7 +160,8 @@ public class WorldSpaceUI : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F))
         {
-            this.tracker.PrintResult();
+            //this.connTracker.PrintResult();
+            this.camHanding.SetRotateToView(this.resultCanvasVantigePoint);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -256,7 +274,7 @@ public class WorldSpaceUI : MonoBehaviour
 
     private ConstantElements CreateConstantCanvas(int value, Transform parent)
     {
-        GameObject obj = GameObject.Instantiate(this.worldSpaceCanvasPrefab);
+        GameObject obj = GameObject.Instantiate(this.constantAndVariablePanelPrefab);
 
         Canvas can = obj.GetComponent<Canvas>();
 
@@ -396,7 +414,7 @@ public class WorldSpaceUI : MonoBehaviour
                 return;
             }
 
-            this.tracker.TrackParameterAssignConstant(this.lastClickedParameter, node);
+            this.connTracker.TrackParameterAssignConstant(this.lastClickedParameter, node);
 
             this.ConstantsHide();
 
@@ -423,7 +441,7 @@ public class WorldSpaceUI : MonoBehaviour
             return;
         }
 
-        this.tracker.TrackResultAssignMethodCall(this.lastClickedMethod);
+        this.connTracker.TrackResultAssignMethodCall(this.lastClickedMethod);
 
         this.DrawConnection(this.result, this.lastClickedMethod.gameObject);
 
@@ -453,7 +471,7 @@ public class WorldSpaceUI : MonoBehaviour
             return;
         }
 
-        this.tracker.TrackParameterAssignMethod(node, this.lastClickedMethod);
+        this.connTracker.TrackParameterAssignMethod(node, this.lastClickedMethod);
 
         this.DrawConnection(node.gameObject, this.lastClickedMethod.gameObject);
 

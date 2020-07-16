@@ -1,11 +1,11 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ConstantNode : MonoBehaviour
 {
     public WorldSpaceUI.ConstantElements elements;
     public ParameterNode paramNode = null;
+    public string VariableName;
 
     private WorldSpaceUI UI;
     private object value;
@@ -13,13 +13,26 @@ public class ConstantNode : MonoBehaviour
     private Color selectedColor = Color.gray;
     private Color paramSelectedColor = Color.green;
     private bool used = false;
+    private bool isVariable;
 
-    public void Setup(object value, WorldSpaceUI UI, WorldSpaceUI.ConstantElements elements)
+    public void Setup(object value, WorldSpaceUI UI, WorldSpaceUI.ConstantElements elements, bool isVariable = false, string variableName = "constant")
     {
         this.value = value;
         this.UI = UI;
         this.elements = elements;
-        this.originalColor = this.elements.Button.GetComponent<Image>().color;
+        this.isVariable = isVariable;
+        this.VariableName = variableName;
+
+        ///Reusing the Constant code for variables too, will fix semantics later
+        if (this.isVariable)
+        {
+            this.originalColor = Color.Lerp(Color.red, Color.yellow, 0.5f).SetAlpha();
+            this.elements.Button.GetComponent<Image>().color = this.originalColor;
+        }
+        else
+        {
+            this.originalColor = this.elements.Button.GetComponent<Image>().color;
+        }
 
         gameObject.GetComponent<Button>().onClick.AddListener(this.OnClick);
     }
@@ -64,6 +77,11 @@ public class ConstantNode : MonoBehaviour
     private void SetColor(Color color)
     {
         this.elements.Button.GetComponent<Image>().color = color;
+    }
+
+    public bool IsVariable()
+    {
+        return this.isVariable;
     }
 }
 

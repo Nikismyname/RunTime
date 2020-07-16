@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
 
 public class SpellcraftCam : MonoBehaviour
 {
@@ -26,6 +27,16 @@ public class SpellcraftCam : MonoBehaviour
     private float lastLongDist;
     private float lastShortDist;
     private float shortDist;
+    private bool isRotateToView = false;
+    private GameObject rotateToViewTarget;
+    private Quaternion preRotateToViewRotation;
+    int maxSteps = 1;
+    int currentStep = 0;
+
+    //public float x;
+    //public float y;
+    //public float z;
+    //public float degree;
 
     void Start()
     {
@@ -83,22 +94,38 @@ public class SpellcraftCam : MonoBehaviour
 
     void LateUpdate()
     {
-        if(Input.GetKey(KeyCode.LeftShift) && this.rotate == true)
+        if (Input.GetKey(KeyCode.LeftShift) && this.rotate == true)
         {
             return;
         }
 
-        if (this.rotate)
+        if (this.isRotateToView)
         {
-            xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
-            yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+            this.currentRotation = transform.rotation;
+            float fraction = (float)this.currentStep / this.maxSteps;
+            this.desiredRotation = this.rotateToViewTarget.transform.rotation;
+            this.rotation = Quaternion.Lerp(this.preRotateToViewRotation, desiredRotation, fraction);
+            this.transform.rotation = rotation;
 
-            desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
-            currentRotation = transform.rotation;
+            if (this.currentStep == this.maxSteps)
+            {
+                Debug.Log("HERE");
+                this.isRotateToView = false;
+                this.xDeg = Vector3.Angle(Vector3.right, this.transform.right);
+                this.yDeg = Vector3.Angle(Vector3.up, this.transform.up);
+            }
 
-            rotation = Quaternion.Lerp(currentRotation, desiredRotation, 1);
-
-            transform.rotation = rotation;
+            this.currentStep++;
+        }
+        else if (this.rotate)
+        {
+            this.xDeg += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
+            this.yDeg -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+            
+            this.desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
+            this.currentRotation = transform.rotation;
+            this.rotation = Quaternion.Lerp(currentRotation, desiredRotation, 1);
+            this.transform.rotation = rotation;
         }
 
         desiredDistance -= Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime * zoomRate * Mathf.Abs(desiredDistance);
@@ -112,7 +139,24 @@ public class SpellcraftCam : MonoBehaviour
         Input.mousePosition.Set(0, 0, 0);
     }
 
-    public void SetTarget(GameObject obj)
+    public void SetRotateToView(GameObject rtvTarget)
+    {
+
+        this.rotateToViewTarget = rtvTarget;
+        this.rotateToViewTarget.transform.LookAt(this.target);
+        this.rotateToViewTarget.transform.Rotate(new Vector3(0, 0, 1), 90);
+        this.rotateToViewTarget.transform.Rotate(new Vector3(0, 0, 1), -90);
+        //this.rotateToViewTarget.transform.Rotate(new Vector3(x,y,z), degree); 
+        this.isRotateToView = true;
+        this.desiredDistance = (rtvTarget.transform.position - this.target.position).magnitude;
+
+        this.preRotateToViewRotation = transform.rotation;
+        float angle = Quaternion.Angle(transform.rotation, this.rotateToViewTarget.transform.rotation);
+        this.maxSteps = 25;
+        this.currentStep = 1;
+    }
+
+    public void Setup(GameObject obj)
     {
         this.mainTarget = obj;
         this.target = obj.transform;
@@ -120,7 +164,7 @@ public class SpellcraftCam : MonoBehaviour
 
     public Transform GetTarget()
     {
-        return this.target; 
+        return this.target;
     }
 
     public bool IsRotating()
