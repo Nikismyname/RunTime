@@ -1,5 +1,6 @@
 ﻿using Boo.Lang;
 using System;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,7 +61,13 @@ public class ResultCanvas
 
     private void OnClickDone()
     {
-        object result = this.connTracker.PrintResult();
+        Variable[] vars = this.variables.Where(x=>x.Panel.activeSelf == true).Select(x => new Variable
+        {
+            Name = x.Name.text, 
+            Value = int.Parse(x.Value.text)
+        }).ToArray();
+
+        object result = this.connTracker.PrintResult(vars);
         this.resultText.text = result.ToString();
     }
 

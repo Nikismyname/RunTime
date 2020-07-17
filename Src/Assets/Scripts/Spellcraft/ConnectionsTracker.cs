@@ -46,9 +46,6 @@ public class ConnectionsTracker
 
         if (existing != null)
         {
-            /// Assigning new constant to paramater, marking the previous constant as not used!
-            //existing.Constant.SetUsed(false, null);
-
             existing.Method = method;
             Debug.Log("replaced method");
         }
@@ -100,12 +97,12 @@ public class ConnectionsTracker
             {
                 if (constant[0].Constant.IsVariable())
                 {
-                    values.Add(constant[0].Constant.GetVal());
+                    /// Finding the variable with the right name and getting it's value. The values are passed by the resultUI.
+                    values.Add(variables.SingleOrDefault(x => x.Name == constant[0].Constant.VariableName)?.Value);
                 }
                 else
                 {
-                    /// Finding the variable with the right name and getting it's value. The values are passed by the resultUI.
-                    values.Add(variables.SingleOrDefault(x=>x.Name == constant[0].Constant.VariableName)?.Value);
+                    values.Add(constant[0].Constant.GetVal());
                 }
 
                 continue;
@@ -180,7 +177,7 @@ public class ParameterMethod
 
 public class Variable
 {
-    public string  Name { get; set; }
+    public string Name { get; set; }
 
     public object Value { get; set; }
 }

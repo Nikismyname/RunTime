@@ -56,7 +56,7 @@ public class Defunclator
         return null;
     }
 
-    public void GenerateClassVisualisation(ClassNode node, Vector3 position)
+    public MethodAndParameterNodes[] GenerateClassVisualisation(ClassNode node, Vector3 position)
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         basy.SetColor(Color.red);
@@ -66,11 +66,13 @@ public class Defunclator
 
         this.GeneratePropertyPips(node, basy);
 
-        this.GenerateMethodPips(node, basy);
+        MethodAndParameterNodes[] nodes = this.GenerateMethodPips(node, basy);
 
         basy.transform.position = position;
 
-        basy.transform.Rotate(new Vector3(1,0,0), 180f); 
+        basy.transform.Rotate(new Vector3(1, 0, 0), 180f);
+
+        return nodes; 
     }
 
     public void GeneratePropertyPips(ClassNode node, GameObject baseSphere)
@@ -93,11 +95,15 @@ public class Defunclator
         }
     }
 
-    public void GenerateMethodPips(ClassNode node, GameObject baseSphere)
+    public MethodAndParameterNodes[] GenerateMethodPips(ClassNode node, GameObject baseSphere)
     {
+        List<MethodAndParameterNodes> methodNodes = new List<MethodAndParameterNodes>();
+
         for (int j = 0; j < node.Methods.Length; j++)
         {
-            float initialOffset = 50f; 
+            MethodAndParameterNodes methodNode = new MethodAndParameterNodes();
+
+            float initialOffset = 50f;
             var method = node.Methods[j];
             GameObject methodPip = CreatePip(baseSphere, Color.white);
             ParameterInfo[] rawParamInfos = method.GetParameters().ToArray();
@@ -113,14 +119,28 @@ public class Defunclator
                 MyParameterInfo param = new MyParameterInfo(this.currParamId++, rawParamInfos[i]);
                 myParamaterInfos.Add(param);
                 GameObject paramaterPip = CreatePip(baseSphere, Color.black);
-                paramaterPip.AddComponent<ParameterNode>().Setup(param, node.Object, this.UI);
+                var paramScript = paramaterPip.AddComponent<ParameterNode>();
+                paramScript.Setup(param, node.Object, this.UI);
+                methodNode.Parameters.Add(paramScript);
                 float wantedAngleDown = initialOffset + (i + 1) * 20f;
                 paramaterPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), wantedAngleDown);
                 paramaterPip.RotateAroundUnitSphere(new Vector3(0, 1, 0), wantedAngleAround);
             }
 
-            methodPip.AddComponent<MethodNode>().Setup(method, myParamaterInfos.ToArray(), node.Object, this.UI);
+            var methodScript = methodPip.AddComponent<MethodNode>();
+            methodScript.Setup(method, myParamaterInfos.ToArray(), node.Object, this.UI);
+            methodNode.Method = methodScript;
+
+            methodNodes.Add(methodNode);
         }
+
+        return methodNodes.ToArray();
+    }
+
+    public class MethodAndParameterNodes
+    {
+        public MethodNode Method { get; set; }
+        public List<ParameterNode> Parameters { get; set; } = new List<ParameterNode>();
     }
 
     private GameObject CreatePip(GameObject parent, Color color, float scale = 0.1f)

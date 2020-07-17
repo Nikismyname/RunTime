@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class ConstantNode : MonoBehaviour
 {
-    public WorldSpaceUI.ConstantElements elements;
+    public InputCanvas.InputElements elements;
     public ParameterNode paramNode = null;
     public string VariableName;
 
@@ -15,7 +15,7 @@ public class ConstantNode : MonoBehaviour
     private bool used = false;
     private bool isVariable;
 
-    public void Setup(object value, WorldSpaceUI UI, WorldSpaceUI.ConstantElements elements, bool isVariable = false, string variableName = "constant")
+    public void Setup(object value, WorldSpaceUI UI, InputCanvas.InputElements elements, bool isVariable = false, string variableName = "constant")
     {
         this.value = value;
         this.UI = UI;

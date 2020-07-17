@@ -4,12 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class WorldSpaceUI : MonoBehaviour
 {
     public Material transperantMat;
-    public GameObject constantAndVariablePanelPrefab;
+    public GameObject inputPanelPrefab;
     public GameObject resultAndVariablesPanelPrefab;
 
     public ZoomMode zoomMode { get; set; } = ZoomMode.OuterZoom;
@@ -20,26 +19,23 @@ public class WorldSpaceUI : MonoBehaviour
     private Defunclator classVisualisation;
     private GameObject text1;
     private TMP_Text worldSpaceText;
-    private GameObject menu1;
-    private GameObject result;
+    private GameObject resultGO;
     private ConnectionsTracker connTracker = new ConnectionsTracker();
-    private ConstantElements[] constants;
     private GameObject rotatorGO;
     private ObjectRotator objRotator;
-    private Transform constantsParent;
-    private float constantsScale = 0.3f;
     private bool constantsShowing = false;
-    private ResultCanvas resultCanvas;
     private GameObject resultCanvasVantigePoint;
-        
+
+    private ResultCanvas resultCanvas;
+    private InputCanvas inputCanvas;
+
+
     private void Start()
     {
-        this.constantsParent = new GameObject("Contants Parent!").transform;
         this.rotatorGO = new GameObject("Rotator");
         this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>();
 
         this.text1 = GameObject.Find("WSCText1");
-        this.menu1 = GameObject.Find("WSCMenu1");
         this.worldSpaceText = this.text1.transform.Find("Text").GetComponent<TMP_Text>();
 
         this.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
@@ -53,62 +49,59 @@ public class WorldSpaceUI : MonoBehaviour
         this.resultCanvas.SetPosition(new Vector3(0, 0, -25));
         this.resultCanvas.SetScale(new Vector3(0.02f, 0.02f, 0.02f));
 
-        //this.JustAddMethod();
-        this.JustTwoAddMethod();
+        this.inputCanvas = new InputCanvas(this.myCamera, this.inputPanelPrefab);
 
-        this.resultCanvasVantigePoint = new  GameObject("VantigePoint");
-        this.resultCanvasVantigePoint.transform.position = new Vector3(0,0,-30);
+        this.JustTwoAddMethod(true);
+
+        this.resultCanvasVantigePoint = new GameObject("VantigePoint");
+        this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
     }
 
     #endregion
 
     #region LEVELS
 
-    public void JustAddMethod()
+    public async void JustTwoAddMethod(bool solved = false)
     {
-        ///CLASS NODES
-        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, 0, 0));
+        //var thing = this.classVisualisation.GenerateNodeData<Test>();
 
-        ///CONSTANTS
-        this.constants = new ConstantElements[]
-        {
-            this.CreateConstantCanvas(12, this.constantsParent),
-            this.CreateConstantCanvas(13, this.constantsParent),
-            this.CreateConstantCanvas(14, this.constantsParent),
-            this.CreateConstantCanvas(15, this.constantsParent),
-        };
+        ///CLASS NODES
+        var nodes1 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, +5, 0));
+        var nodes2 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, -5, 0));
 
         ///RESULT NODE
-        this.result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        this.result.transform.position = new Vector3(0, -15, 0);
-        this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
-    }
+        this.resultGO = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        this.resultGO.transform.position = new Vector3(0, -15, 0);
+        var resultNode = this.resultGO.AddComponent<ResultNode>();
+        resultNode.Setup(typeof(int), this);
 
-    public void JustTwoAddMethod()
-    {
-        ///CLASS NODES
-        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, +5, 0));
-        this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Test>(), new Vector3(0, -5, 0));
-
-        ///CONSTANTS
-        this.constants = new ConstantElements[]
-        {
-            this.CreateConstantCanvas(12, this.constantsParent),
-            this.CreateConstantCanvas(13, this.constantsParent),
-            this.CreateConstantCanvas(14, this.constantsParent),
-            this.CreateConstantCanvas(15, this.constantsParent),
-        };
-
-        ///RESULT NODE
-        this.result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        this.result.transform.position = new Vector3(0, -15, 0);
-        this.result.AddComponent<ResultNode>().Setup(typeof(int), this);
+        //TODO: The names are truncated for the frontend and names need to be 4 sumbols for things to match. FIX IT!
+        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(int), "int1");
+        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(int), "int2");
 
         this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
         {
-            new ResultCanvas.VariableInput(typeof(int),"int1WithExtras"),
-            new ResultCanvas.VariableInput(typeof(int),"int2WithExtras")
+            var1,
+            var2,
         });
+
+        var contant1 = this.inputCanvas.CreateInputCanvas(12, this, false);
+        var contant2 = this.inputCanvas.CreateInputCanvas(13, this, false);
+        var contant3 = this.inputCanvas.CreateInputCanvas(14, this, false);
+        var contant4 = this.inputCanvas.CreateInputCanvas(15, this, false);
+        var variable1 = this.inputCanvas.CreateInputCanvas(default, this, true, var1.Name);
+        var variable2 = this.inputCanvas.CreateInputCanvas(default, this, true, var2.Name);
+
+        if (solved)
+        {
+            await this.RegisterParameterClick(nodes1[0].Parameters[0], nodes2[0].Method);
+            this.RegisterConstantClick(variable1.Node, nodes1[0].Parameters[1]);
+            this.RegisterConstantClick(variable2.Node, nodes2[0].Parameters[0]);
+            this.RegisterConstantClick(contant4.Node, nodes2[0].Parameters[1]);
+            this.RegisterResultClick(resultNode, nodes1[0].Method);
+
+            this.inputCanvas.InputsHide();
+        }
     }
 
     #endregion
@@ -151,6 +144,11 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            this.inputCanvas.InputsHide();
+        }
+
         if (Input.GetKeyDown(KeyCode.G))
         {
             this.lastClickedMethod = null;
@@ -168,7 +166,7 @@ public class WorldSpaceUI : MonoBehaviour
         {
             if (this.constantsShowing)
             {
-                this.ConstantsHide();
+                this.inputCanvas.InputsHide();
             }
             else
             {
@@ -199,135 +197,6 @@ public class WorldSpaceUI : MonoBehaviour
             }
 
             this.dragged?.SetRotating(false);
-        }
-    }
-
-    #endregion
-
-    #region CONSTANTS
-
-    public async void ConstantsDisplay(Vector3 pos, ParameterNode node)
-    {
-        int columnCount = 2;
-        float buttonX = 1.5f;
-        float buttonY = 1f;
-        /// Scaling
-        buttonX *= this.constantsScale;
-        buttonY *= this.constantsScale;
-        ///...
-        int rows = (int)Mathf.Ceil((float)this.constants.Length / columnCount);
-        float wholeY = rows * buttonY;
-        float wholeX = buttonX * columnCount;
-
-
-        for (int y = 0; y < rows; y++)
-        {
-            for (int x = 0; x < columnCount; x++)
-            {
-                int index = y * columnCount + x;
-
-                if (index >= this.constants.Length)
-                {
-                    break;
-                }
-
-                ConstantElements c = this.constants[index];
-
-                c.ParentObject.SetActive(false);
-
-                float yy = y * buttonY - wholeY / 2 + buttonY / 2;
-                float xx = x * buttonX - wholeX / 2 + buttonX / 2;
-
-                c.RectTransform.localPosition = new Vector3(xx, yy, 0);
-
-                c.Node.FixColorBeforeShow(node);
-            }
-        }
-
-        this.constantsParent.LookAt(this.constantsParent.transform.position + this.myCamera.transform.forward);
-
-        Vector3 offset = (this.myCamera.transform.position - pos).normalized;
-
-        this.constantsParent.position = pos + offset;
-
-        this.constantsShowing = true;
-
-        /// Enabaling the constant canvases after some time so one does not get automatically clicked
-        await Task.Delay(100);
-
-        foreach (var item in this.constants)
-        {
-            item.ParentObject.SetActive(true);
-        }
-    }
-
-    public void ConstantsHide()
-    {
-        for (int i = 0; i < this.constants.Length; i++)
-        {
-            ConstantElements c = this.constants[i];
-            c.ParentObject.SetActive(false);
-        }
-
-        this.constantsShowing = false;
-    }
-
-    private ConstantElements CreateConstantCanvas(int value, Transform parent)
-    {
-        GameObject obj = GameObject.Instantiate(this.constantAndVariablePanelPrefab);
-
-        Canvas can = obj.GetComponent<Canvas>();
-
-        can.worldCamera = this.myCamera;
-
-        GameObject buttonGo = obj.transform.Find("Button").gameObject;
-
-        Button button = buttonGo.GetComponent<Button>();
-
-        GameObject textGO = buttonGo.transform.Find("Text").gameObject;
-
-        TMP_Text text = textGO.GetComponent<TMP_Text>();
-
-        text.text = value.ToString();
-
-        ConstantNode nodeBe = buttonGo.AddComponent<ConstantNode>();
-
-        RectTransform rt = obj.GetComponent<RectTransform>();
-
-        ConstantElements result = new ConstantElements(obj, text, nodeBe, rt, button);
-
-        obj.transform.SetParent(parent);
-
-        ///element scaling!
-        rt.localScale *= this.constantsScale;
-        ///
-
-        nodeBe.Setup(value, this, result);
-
-        return result;
-    }
-
-    public class ConstantElements
-    {
-        public GameObject ParentObject { get; set; }
-
-        public TMP_Text text { get; set; }
-
-        public ConstantNode Node { get; set; }
-
-        public RectTransform RectTransform { get; set; }
-
-        public Button Button { get; set; }
-
-        public bool Used { get; set; } = false;
-
-        public ConstantElements(GameObject canvas, TMP_Text text, ConstantNode node, RectTransform rectTransform, Button button)
-        {
-            this.RectTransform = rectTransform;
-            this.ParentObject = canvas;
-            this.text = text;
-            this.Node = node;
-            this.Button = button;
         }
     }
 
@@ -404,9 +273,15 @@ public class WorldSpaceUI : MonoBehaviour
 
     #region PUBLIC_INTERFACE_REGISTER_NODE_CLICK
 
-    public void RegisterConstantClick(ConstantNode node)
+    public void RegisterConstantClick(ConstantNode node, ParameterNode paraNodeIn = null)
     {
-        if (this.lastClickedParameter != null)
+        var paraNode = this.lastClickedParameter;
+        if (paraNodeIn != null)
+        {
+            paraNode = paraNodeIn;
+        }
+
+        if (paraNode != null)
         {
             if (node.elements.Used)
             {
@@ -414,16 +289,16 @@ public class WorldSpaceUI : MonoBehaviour
                 return;
             }
 
-            this.connTracker.TrackParameterAssignConstant(this.lastClickedParameter, node);
+            this.connTracker.TrackParameterAssignConstant(paraNode, node);
 
-            this.ConstantsHide();
+            this.inputCanvas.InputsHide();
 
-            this.lastClickedParameter.RegisterAssignment();
+            paraNode.RegisterAssignment();
 
-            ConstantElements n = this.constants.Single(x => x.Node == node);
+            InputCanvas.InputElements n = this.inputCanvas.GetInputs().Single(x => x.Node == node);
 
             n.Used = true;
-            n.Node.SetUsed(true, this.lastClickedParameter);
+            n.Node.SetUsed(true, paraNode);
 
             return;
         }
@@ -434,16 +309,22 @@ public class WorldSpaceUI : MonoBehaviour
         }
     }
 
-    public void RegisterResultClick(ResultNode resultNode)
+    public void RegisterResultClick(ResultNode resultNode, MethodNode methodNodeIn = null)
     {
-        if (this.lastClickedMethod == null)
+        var methodNode = this.lastClickedMethod;
+        if (methodNodeIn != null)
+        {
+            methodNode = methodNodeIn;
+        }
+
+        if (methodNode == null)
         {
             return;
         }
 
-        this.connTracker.TrackResultAssignMethodCall(this.lastClickedMethod);
+        this.connTracker.TrackResultAssignMethodCall(methodNode);
 
-        this.DrawConnection(this.result, this.lastClickedMethod.gameObject);
+        this.DrawConnection(this.resultGO, methodNode.gameObject);
 
         this.lastClickedMethod = null;
     }
@@ -458,22 +339,28 @@ public class WorldSpaceUI : MonoBehaviour
 
     private ParameterNode lastClickedParameter = null;
 
-    public void RegisterParameterClick(ParameterNode node)
+    public async Task RegisterParameterClick(ParameterNode node, MethodNode methodNodeIn = null)
     {
         this.lastClickedParameter = node;
 
         this.lastClickedParameter.RegisterSelection();
 
-        this.ConstantsDisplay(node.transform.position, node);
+        await this.inputCanvas.InputsDisplay(node.transform.position, node);
 
-        if (this.lastClickedMethod == null)
+        var methodNode = this.lastClickedMethod;
+        if (methodNodeIn != null)
+        {
+            methodNode = methodNodeIn;
+        }
+
+        if (methodNode == null)
         {
             return;
         }
 
-        this.connTracker.TrackParameterAssignMethod(node, this.lastClickedMethod);
+        this.connTracker.TrackParameterAssignMethod(node, methodNode);
 
-        this.DrawConnection(node.gameObject, this.lastClickedMethod.gameObject);
+        this.DrawConnection(node.gameObject, methodNode.gameObject);
 
         this.lastClickedParameter = null;
 
@@ -482,16 +369,22 @@ public class WorldSpaceUI : MonoBehaviour
 
     private MethodNode lastClickedMethod = null;
 
-    public void RegisterMethodClick(MethodNode node)
+    public void RegisterMethodClick(MethodNode node, ParameterNode paramNodeIn = null)
     {
         this.lastClickedMethod = node;
 
-        if (this.lastClickedParameter == null)
+        var paramNode = this.lastClickedParameter;
+        if(paramNodeIn != null)
+        {
+            paramNode = paramNodeIn;
+        }
+
+        if (paramNode == null)
         {
             return;
         }
 
-        this.DrawConnection(node.gameObject, this.lastClickedParameter.gameObject);
+        this.DrawConnection(node.gameObject, paramNode.gameObject);
 
         this.lastClickedParameter = null;
         this.lastClickedMethod = null;
