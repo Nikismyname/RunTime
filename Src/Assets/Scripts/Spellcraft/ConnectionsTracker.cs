@@ -122,11 +122,14 @@ public class ConnectionsTracker
 
             if (method.Length == 0)
             {
-                Debug.Log("Property not assigned to!!!");
-                Debug.Break();
+                /// Hack to let me only pass one float of many and the rest to be 0 
+                values.Add(paramater.Info.DefaultValue);
+                Debug.Log("Property not assigned to - Giving it the default!");
             }
-
-            values.Add(PrintResultRec(method[0].Method, variables));
+            else
+            {
+                values.Add(PrintResultRec(method[0].Method, variables));
+            }
         }
 
         object obj = node.Object;
