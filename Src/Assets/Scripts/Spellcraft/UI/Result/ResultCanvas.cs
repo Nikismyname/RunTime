@@ -1,6 +1,5 @@
-﻿using Boo.Lang;
-using System;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +11,8 @@ public class ResultCanvas
     private Button doneButton;
     private TMP_Text resultText;
     private ConnectionsTracker connTracker;
+    public const string PlayerPositionVarName = "plyPos";
+    public const string PlayerForwardVarName = "plyFor";
 
     public ResultCanvas(GameObject prefab, Camera cam, ConnectionsTracker connTracker, Transform parent)
     {
@@ -62,14 +63,49 @@ public class ResultCanvas
 
     private void OnClickDone()
     {
-        Variable[] vars = this.variables.Where(x=>x.Panel.activeSelf == true).Select(x => new Variable
-        {
-            Name = x.Name.text, 
-            Value = int.Parse(x.Value.text)
-        }).ToArray();
+        List<Variable> vars = new List<Variable>();
 
-        object result = this.connTracker.PrintResult(vars);
-        this.resultText.text = result.ToString();
+        for (int i = 0; i < this.variables.Count; i++)
+        {
+            var variable = variables[i];
+
+            if(variable.Panel.activeSelf == false)
+            {
+                continue;
+            }
+
+            object value;
+
+            /// Hardcoding player variables for now!
+            if (variable.Name.text == PlayerPositionVarName)
+            {
+                value = new Vector3(0,0,0);
+            }
+            else if (variable.Name.text == PlayerForwardVarName)
+            {
+                value = new Vector3(0, 0, 1);
+            }
+            else
+            {
+                value = float.Parse(variable.Value.text);
+            }
+
+            vars.Add(new Variable
+            {
+                Name = variable.Name.text,
+                Value = value
+            });
+        }
+
+        object result = this.connTracker.PrintResult(vars.ToArray());
+        if (result == null)
+        {
+            this.resultText.text = "VOID";
+        }
+        else
+        {
+            this.resultText.text = result.ToString();
+        }
     }
 
     private class VariableUIElements
@@ -117,12 +153,11 @@ public class ResultCanvas
     {
         this.canvas.SetActive(false);
     }
-
     public class VariableInput
     {
         public Type Type { get; set; }
 
-        public string  Name { get; set; }
+        public string Name { get; set; }
 
         public VariableInput(Type type, string name)
         {

@@ -76,7 +76,12 @@ public class ConnectionsTracker
         }
 
         object result = this.PrintResultRec(this.resultMethodCall, variables);
-        Debug.Log("SUCCESS " + result.ToString());
+
+        if (result != null)
+        {
+            Debug.Log("SUCCESS " + result.ToString());
+        }
+
         return result;
     }
 

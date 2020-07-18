@@ -26,7 +26,7 @@ public class WorldSpaceUI : MonoBehaviour
     private ResultCanvas resultCanvas;
     private InputCanvas inputCanvas;
     private LineDrawer drawer;
-    private Levels levels;
+    private Setups levels;
 
     private void Start()
     {
@@ -62,8 +62,9 @@ public class WorldSpaceUI : MonoBehaviour
 
         this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, resultNode);
         this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.parent.transform);
-        this.levels = new Levels(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, resultNode, this.classVisualisation);
-        this.levels.JustTwoAddMethod(true);
+        this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, resultNode, this.classVisualisation);
+        //this.levels.JustTwoAddMethod(true);
+        this.levels.SpellCraft_TEST(false);
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
         this.resultCanvasVantigePoint.transform.SetParent(this.parent.transform);

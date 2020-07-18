@@ -21,7 +21,7 @@ public class InputCanvas
         this.localParent.SetParent(parent); 
     }
 
-    public InputElements CreateInputCanvas(int value, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
+    public InputElements CreateInputCanvas(object value, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
     {
         GameObject obj = GameObject.Instantiate(this.constantAndVariablePanelPrefab);
         Canvas can = obj.GetComponent<Canvas>();
