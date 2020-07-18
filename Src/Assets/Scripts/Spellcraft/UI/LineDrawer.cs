@@ -1,26 +1,46 @@
-﻿using Boo.Lang;
+﻿#region INIT
+
 using System;
-using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class LineDrawer : MonoBehaviour
+public class LineDrawer
 {
     private List<Line> lines = new List<Line>();
     private WorldSpaceUI UI;
 
-    private void Start()
+    public LineDrawer(WorldSpaceUI UI)
     {
-        this.UI = GameObject.Find("Main").GetComponent<WorldSpaceUI>();
+        this.UI = UI;
     }
 
-    public void RegisterLine(Transform transOne, Transform transTwo, float thickness, Color color)
+    #endregion
+
+    #region UPDATE
+
+    private void Update()
     {
-        this.lines.Add(new Line(transOne, transTwo, thickness, color));
+        foreach (var line in this.lines)
+        {
+            line.Update();
+        }
     }
 
-    public void RegisterCurve(Transform transOne, Transform transTwo, Vector3 center, float scale, Color color, int level, Transform parent = null, float radius = 0.5f)
+    #endregion
+
+    #region DRAW_DYNAMIC
+
+    public void DrawDynamicLine(Transform transOne, Transform transTwo, float thickness, Color color)
     {
-        parent = parent == null ? transOne.parent.transform : parent; 
+        this.lines.Add(new Line(transOne, transTwo, thickness, color, this.UI.parent));
+    }
+
+    /// <summary>
+    /// Paranted to the class node sphere, no need to global parent them, need to global parent the spheres.
+    /// </summary>
+    public void DrawDynamicCurve(Transform transOne, Transform transTwo, Vector3 center, float scale, Color color, int level, Transform parent = null, float radius = 0.5f)
+    {
+        parent = parent == null ? transOne.parent.transform : parent;
 
         Vector3 one = transOne.position - center;
         Vector3 two = transTwo.position - center;
@@ -32,6 +52,10 @@ public class LineDrawer : MonoBehaviour
         float distance = 2 * Mathf.PI * radius * (angleFromCenter / 360);
 
         int count = (int)Math.Floor(distance / 0.1f);
+        if (count < 2)
+        {
+            count = 2;
+        }
 
         Vector3? previousPosition = null;
 
@@ -49,18 +73,19 @@ public class LineDrawer : MonoBehaviour
         }
     }
 
-    private GameObject CreateCurveSphere(Vector3 pos, Color color, float scale, Transform parent)
-    {
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        go.GetComponent<Renderer>().material = this.UI.transperantMat;
-        Color col = new Color(color.r, color.g, color.g, 0.0f);
-        go.SetColor(col);
-        go.transform.position = pos;
-        go.SetScale(new Vector3(scale, scale, scale));
-        go.SetActive(false);
-        go.transform.parent = parent;
-        return go;
-    }
+    //private GameObject CreateCurveSphere(Vector3 pos, Color color, float scale, Transform parent)
+    //{
+    //    GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+    //    go.GetComponent<Renderer>().material = this.UI.transperantMat;
+    //    Color col = new Color(color.r, color.g, color.g, 0.0f);
+    //    go.SetColor(col);
+    //    go.transform.position = pos;
+    //    go.SetScale(new Vector3(scale, scale, scale));
+    //    go.SetActive(false);
+    //    go.transform.parent = parent;
+
+    //    return go;
+    //}
 
     private GameObject CreateCurveCylinder(Vector3 one, Vector3 two, Color color, float scale, Transform parent)
     {
@@ -80,29 +105,47 @@ public class LineDrawer : MonoBehaviour
         return null;
     }
 
-    private void Update()
+    #endregion
+
+    #region DRAW_STATIC
+
+    public void DrawBox(float halfSize, float thickness, Vector3 center)
     {
-        foreach (var line in this.lines)
-        {
-            line.Update();
-        }
+        Transform parent = new GameObject("CubeParent").transform;
+        parent.SetParent(this.UI.parent.transform);
+
+        this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, -halfSize), center + new Vector3(halfSize, -halfSize, -halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, -halfSize), center + new Vector3(-halfSize, halfSize, -halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, -halfSize), center + new Vector3(-halfSize, -halfSize, halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(halfSize, halfSize, halfSize), center + new Vector3(-halfSize, halfSize, halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(halfSize, halfSize, halfSize), center + new Vector3(halfSize, -halfSize, halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(halfSize, halfSize, halfSize), center + new Vector3(halfSize, halfSize, -halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(-halfSize, halfSize, halfSize), center + new Vector3(-halfSize, halfSize, -halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(halfSize, halfSize, -halfSize), center + new Vector3(halfSize, -halfSize, -halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, halfSize), center + new Vector3(halfSize, -halfSize, halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(halfSize, -halfSize, halfSize), center + new Vector3(halfSize, -halfSize, -halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, halfSize), center + new Vector3(-halfSize, halfSize, halfSize), Color.black, thickness, parent);
+        this.DrawInGameLine(center + new Vector3(-halfSize, halfSize, -halfSize), center + new Vector3(halfSize, halfSize, -halfSize), Color.black, thickness, parent);
     }
 
-    private GameObject DrawInGameLine(Vector3 from, Vector3 to, Color color, float thickness)
+    private GameObject DrawInGameLine(Vector3 from, Vector3 to, Color color, float thickness, Transform parent)
     {
-        GameObject parent = new GameObject("LineParent");
+        GameObject localParent = new GameObject("LineParent");
         GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        parent.transform.position = new Vector3(0, -1, 0);
-        line.transform.parent = parent.transform;
+        localParent.transform.position = new Vector3(0, -1, 0);
+        line.transform.parent = localParent.transform;
 
-        parent.transform.position = from;
-        parent.transform.LookAt(to);
-        parent.transform.Rotate(new Vector3(1, 0, 0), 90);
+        localParent.transform.position = from;
+        localParent.transform.LookAt(to);
+        localParent.transform.Rotate(new Vector3(1, 0, 0), 90);
         line.GetComponent<Renderer>().material.color = color;
         line.SetShader();
-        parent.SetScale(new Vector3(thickness, (from - to).magnitude / 2, thickness));
-        return parent;
+        localParent.SetScale(new Vector3(thickness, (from - to).magnitude / 2, thickness));
+        localParent.transform.SetParent(parent);
+        return localParent;
     }
+
+    #endregion
 
     #region DATA CLASSES
 
@@ -116,18 +159,18 @@ public class LineDrawer : MonoBehaviour
         private float thickness;
         private bool shouldTrack = true;
 
-        public Line(Transform transOne, Transform transTwo, float thickness, Color color)
+        public Line(Transform transOne, Transform transTwo, float thickness, Color color, GameObject externalParent)
         {
             this.transOne = transOne;
             this.transTwo = transTwo;
             this.thickness = thickness;
-            this.CreateLine(color);
+            this.CreateLine(color, externalParent);
 
             this.transOneLast = transOne.position;
             this.transTwoLast = transTwo.position;
         }
 
-        private void CreateLine(Color color)
+        private void CreateLine(Color color, GameObject externalParent)
         {
             this.parent = new GameObject("LineParent");
             GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -140,6 +183,7 @@ public class LineDrawer : MonoBehaviour
             line.GetComponent<Renderer>().material.color = color;
             line.SetShader();
             this.parent.SetScale(new Vector3(this.thickness, (this.transOne.position - this.transTwo.position).magnitude / 2, this.thickness));
+            this.parent.transform.SetParent(externalParent.transform);
         }
 
         public void Update()
@@ -179,4 +223,3 @@ public class LineDrawer : MonoBehaviour
 
     #endregion
 }
-

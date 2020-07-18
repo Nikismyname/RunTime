@@ -1,4 +1,6 @@
-﻿using Boo.Lang;
+﻿#region INIT
+
+using Boo.Lang;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -15,10 +17,14 @@ public class Defunclator
 
     private int currParamId = 0;
 
-    public Defunclator(WorldSpaceUI ui)
+    public Defunclator(WorldSpaceUI UI)
     {
-        this.UI = ui;
+        this.UI = UI;
     }
+
+    #endregion
+
+    #region GENERATE_NODE_DATA
 
     public ClassNode GenerateNodeData<T>() where T : class, new()
     {
@@ -31,34 +37,16 @@ public class Defunclator
         return new ClassNode(type, props, methods, new T());
     }
 
-    public GameObject BuildUI(ClassNode node)
-    {
-        GameObject parent = new GameObject(node.Type.Name);
+    #endregion
 
-        int propCount = node.Properties.Length;
-        int methodCount = node.Methods.Length;
-
-        for (int i = 0; i < node.Properties.Length; i++)
-        {
-            var prop = node.Properties[i];
-            GameObject p = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            PropertyUINode beh = p.AddComponent<PropertyUINode>();
-            p.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            p.transform.position = new Vector3(this.GetPropX(i, propCount), 1, 0);
-            p.transform.parent = parent.transform;
-        }
-
-        for (int i = 0; i < node.Methods.Length; i++)
-        {
-            var method = node.Methods[i];
-        }
-
-        return null;
-    }
+    #region GENERATE_CLASS_VISUALISATION
 
     public MethodAndParameterNodes[] GenerateClassVisualisation(ClassNode node, Vector3 position)
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+        basy.transform.SetParent(this.UI.parent.transform);
+
         basy.SetColor(Color.red);
         basy.SetShader();
 
@@ -104,7 +92,7 @@ public class Defunclator
             MethodAndParameterNodes methodNode = new MethodAndParameterNodes();
 
             float initialOffset = 50f;
-            var method = node.Methods[j];
+            MethodInfo method = node.Methods[j];
             GameObject methodPip = CreatePip(baseSphere, Color.white);
             ParameterInfo[] rawParamInfos = method.GetParameters().ToArray();
 
@@ -119,8 +107,8 @@ public class Defunclator
                 MyParameterInfo param = new MyParameterInfo(this.currParamId++, rawParamInfos[i]);
                 myParamaterInfos.Add(param);
                 GameObject paramaterPip = CreatePip(baseSphere, Color.black);
-                var paramScript = paramaterPip.AddComponent<ParameterNode>();
-                paramScript.Setup(param, node.Object, this.UI);
+                ParameterNode paramScript = paramaterPip.AddComponent<ParameterNode>();
+                paramScript.Setup(param, method, node.Object, this.UI);
                 methodNode.Parameters.Add(paramScript);
                 float wantedAngleDown = initialOffset + (i + 1) * 20f;
                 paramaterPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), wantedAngleDown);
@@ -137,12 +125,6 @@ public class Defunclator
         return methodNodes.ToArray();
     }
 
-    public class MethodAndParameterNodes
-    {
-        public MethodNode Method { get; set; }
-        public List<ParameterNode> Parameters { get; set; } = new List<ParameterNode>();
-    }
-
     private GameObject CreatePip(GameObject parent, Color color, float scale = 0.1f)
     {
         GameObject pip = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -154,13 +136,14 @@ public class Defunclator
         return pip;
     }
 
-    private float GetPropX(int index, int count)
+    #endregion
+
+    #region DATA_CLASSES
+
+    public class MethodAndParameterNodes
     {
-        float propLenght = count * propertySphere + (count - 1) * marginX;
-
-        float result = index * (this.propertySphere + this.marginX) + this.propertySphere / 2 - propLenght / 2;
-
-        return result;
+        public MethodNode Method { get; set; }
+        public List<ParameterNode> Parameters { get; set; } = new List<ParameterNode>();
     }
 }
 
@@ -180,3 +163,42 @@ public class ClassNode
     public object Object { get; set; }
 }
 
+#endregion
+
+
+
+
+//private float GetPropX(int index, int count)
+//{
+//    float propLenght = count * propertySphere + (count - 1) * marginX;
+
+//    float result = index * (this.propertySphere + this.marginX) + this.propertySphere / 2 - propLenght / 2;
+
+//    return result;
+//}
+
+
+//public GameObject BuildUI(ClassNode node)
+//{
+//    GameObject parent = new GameObject(node.Type.Name);
+
+//    int propCount = node.Properties.Length;
+//    //int methodCount = node.Methods.Length;
+
+//    for (int i = 0; i < node.Properties.Length; i++)
+//    {
+//        var prop = node.Properties[i];
+//        GameObject p = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+//        PropertyUINode beh = p.AddComponent<PropertyUINode>();
+//        p.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+//        p.transform.position = new Vector3(this.GetPropX(i, propCount), 1, 0);
+//        p.transform.parent.SetParent(parent.transform);
+//    }
+
+//    //for (int i = 0; i < node.Methods.Length; i++)
+//    //{
+//    //    var method = node.Methods[i];
+//    //}
+
+//    return null;
+//}

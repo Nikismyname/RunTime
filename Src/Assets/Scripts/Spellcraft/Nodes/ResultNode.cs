@@ -17,7 +17,7 @@ public class ResultNode : MonoBehaviour
         //string message = $"Name: The RESULT, Type: {this.type.Name}";
         //this.UI.SetWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0, 1, 0));
         //this.UI.SetWorldCanvasText(message);
-        this.UI.RegisterResultClick(this);
+        this.UI.connRegisterer.RegisterResultClick(this);
     }
 }
 

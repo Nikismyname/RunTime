@@ -10,50 +10,43 @@ public class InputCanvas
     private GameObject constantAndVariablePanelPrefab;
     private float constantsScale = 0.3f;
     private List<InputElements> inputs = new List<InputElements>();
-    private bool constantsShowing = false;
-    private Transform parent;
+    private bool inputsShowing = false;
+    private Transform localParent;
 
-    public InputCanvas(Camera camera, GameObject constantAndVariablePanelPrefab)
+    public InputCanvas(Camera camera, GameObject constantAndVariablePanelPrefab, Transform parent)
     {
         this.camera = camera;
         this.constantAndVariablePanelPrefab = constantAndVariablePanelPrefab;
-        this.parent = new GameObject("Contants Parent!").transform;
+        this.localParent = new GameObject("Contants Parent!").transform;
+        this.localParent.SetParent(parent); 
     }
 
     public InputElements CreateInputCanvas(int value, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
     {
         GameObject obj = GameObject.Instantiate(this.constantAndVariablePanelPrefab);
-
         Canvas can = obj.GetComponent<Canvas>();
-
         can.worldCamera = this.camera;
-
         GameObject buttonGo = obj.transform.Find("Button").gameObject;
-
         Button button = buttonGo.GetComponent<Button>();
-
         GameObject textGO = buttonGo.transform.Find("Text").gameObject;
-
         TMP_Text text = textGO.GetComponent<TMP_Text>();
-
-        text.text = value.ToString();
+        if (isVariable)
+        {
+            text.text = name;
+        }
+        else
+        {
+            text.text = value.ToString();
+        }
 
         ConstantNode nodeBe = buttonGo.AddComponent<ConstantNode>();
-
         RectTransform rt = obj.GetComponent<RectTransform>();
-
         InputElements result = new InputElements(obj, text, nodeBe, rt, button);
-
-        obj.transform.SetParent(this.parent);
-
+        obj.transform.SetParent(this.localParent);
         ///element scaling!
         rt.localScale *= this.constantsScale;
-        ///
-
         nodeBe.Setup(value, worldSpaceUI, result, isVariable, name);
-
         this.inputs.Add(result);
-
         return result;
     }
 
@@ -95,13 +88,13 @@ public class InputCanvas
             }
         }
 
-        this.parent.LookAt(this.parent.transform.position + this.camera.transform.forward);
+        this.localParent.LookAt(this.localParent.transform.position + this.camera.transform.forward);
 
         Vector3 offset = (this.camera.transform.position - pos).normalized;
 
-        this.parent.position = pos + offset;
+        this.localParent.position = pos + offset;
 
-        this.constantsShowing = true;
+        this.inputsShowing = true;
 
         /// Enabaling the constant canvases after some time so one does not get automatically clicked
         await Task.Delay(100);
@@ -111,7 +104,7 @@ public class InputCanvas
             item.ParentObject.SetActive(true);
         }
 
-        Debug.Log("Display");
+        //Debug.Log("Display");
     }
 
     public void InputsHide()
@@ -122,9 +115,9 @@ public class InputCanvas
             c.ParentObject.SetActive(false);
         }
 
-        this.constantsShowing = false;
+        this.inputsShowing = false;
 
-        Debug.Log("Hide");
+        //Debug.Log("Hide");
     }
 
     #region DATA_CLASSES
@@ -132,6 +125,11 @@ public class InputCanvas
     public InputElements[] GetInputs()
     {
         return this.inputs.ToArray();
+    }
+
+    public bool AreInputsShowing()
+    {
+        return this.inputsShowing;
     }
 
     public class InputElements

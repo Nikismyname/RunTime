@@ -39,8 +39,8 @@ public class ConstantNode : MonoBehaviour
 
     private void OnClick()
     {
-        Debug.Log("HERE " + this.value.ToString());
-        this.UI.RegisterConstantClick(this);
+        //Debug.Log("HERE " + this.value.ToString());
+        this.UI.connRegisterer.RegisterConstantClick(this);
     }
 
     public object GetVal()

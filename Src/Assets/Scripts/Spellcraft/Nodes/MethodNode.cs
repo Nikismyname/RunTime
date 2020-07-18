@@ -23,8 +23,8 @@ public class MethodNode : MonoBehaviour
     private void OnMouseDown()
     {
         string message = $"Name: Some, Type: {this.type.Name}";
-        this.UI.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0, 1, 0));
-        this.UI.SetTextWorldCanvasText(message);
-        this.UI.RegisterMethodClick(this);
+        this.UI.infoCanvas.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0, 1, 0));
+        this.UI.infoCanvas.SetTextWorldCanvasText(message);
+        this.UI.connRegisterer.RegisterMethodClick(this);
     }
 }

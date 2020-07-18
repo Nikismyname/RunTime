@@ -13,9 +13,10 @@ public class ResultCanvas
     private TMP_Text resultText;
     private ConnectionsTracker connTracker;
 
-    public ResultCanvas(GameObject prefab, Camera cam, ConnectionsTracker connTracker)
+    public ResultCanvas(GameObject prefab, Camera cam, ConnectionsTracker connTracker, Transform parent)
     {
         this.canvas = GameObject.Instantiate(prefab);
+        this.canvas.transform.SetParent(parent);
         this.canvas.GetComponent<Canvas>().worldCamera = cam;
         this.ParseElements();
 
@@ -35,8 +36,8 @@ public class ResultCanvas
             /// We have var passed
             if(i <= vars.Length -1)
             {
-                this.variables[i].Name.text = vars[i].Name.Substring(0, 4);
-                this.variables[i].Type .text = vars[i].Type.Name.Substring(0,4);
+                this.variables[i].Name.text = vars[i].Name;
+                this.variables[i].Type .text = vars[i].Type.Name;
             }
             else /// we have ui variable (we have 3 for now) but no data for them
             {
@@ -105,6 +106,16 @@ public class ResultCanvas
     public void SetScale(Vector3 scale)
     {
         this.canvas.transform.localScale = scale;
+    }
+
+    public void Show()
+    {
+        this.canvas.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        this.canvas.SetActive(false);
     }
 
     public class VariableInput
