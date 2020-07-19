@@ -1,42 +1,42 @@
 ﻿#region INIT
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class ConnectionsTracker
 {
-    InputVariable[] inputVariables;
-    ConstantNode[] inputConstants;
-    ResultConstant result;
-    MethodNode resultMethodCall;
+    private MethodNode resultMethodCall;
+    private List<ParameterDirectInput> paraDirectInputConnections = new List<ParameterDirectInput>();
+    private List<ParameterMethod> paraMethConnections = new List<ParameterMethod>();
 
-    PropertyNode[] propertyNodes;
-    MethodNode[] methodNodes;
-    ParameterNode[] parameterNodes;
+    private CubePersistance persistance;
+    private List<ClassTracking> classTypeNamesForPersistance = new List<ClassTracking>();
 
-    List<ParameterConstant> paraConstConnections = new List<ParameterConstant>();
-    List<ParameterMethod> paraMethConnections = new List<ParameterMethod>();
     #endregion
+
+    public ConnectionsTracker(WorldSpaceUI UI)
+    {
+        this.persistance = new CubePersistance(UI);
+    }
 
     #region TRACKING
 
-    public void TrackParameterAssignConstant(ParameterNode node, ConstantNode constant)
+    public void TrackParameterAssignConstant(ParameterNode node, DirectInputNode constant)
     {
-        var existing = paraConstConnections.SingleOrDefault(x => x.Parameter == node);
+        var existing = paraDirectInputConnections.SingleOrDefault(x => x.Parameter == node);
 
         if (existing != null)
         {
             /// Assigning new constant to paramater, marking the previous constant as not used!
-            existing.Constant.SetUsed(false, null);
+            existing.DirectInput.SetUsed(false, null);
 
-            existing.Constant = constant;
+            existing.DirectInput = constant;
             Debug.Log("replaced constatnt");
         }
         else
         {
-            this.paraConstConnections.Add(new ParameterConstant(node, constant));
+            this.paraDirectInputConnections.Add(new ParameterDirectInput(node, constant));
         }
     }
 
@@ -91,7 +91,7 @@ public class ConnectionsTracker
 
         foreach (var paramater in node.MyParamaters)
         {
-            var constant = this.paraConstConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
+            var constant = this.paraDirectInputConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
             if (constant.Length > 1)
             {
                 Debug.Log("MORE THANT ONE CONSTANT!!!!");
@@ -100,14 +100,14 @@ public class ConnectionsTracker
 
             if (constant.Length == 1)
             {
-                if (constant[0].Constant.IsVariable())
+                if (constant[0].DirectInput.IsVariable())
                 {
                     /// Finding the variable with the right name and getting it's value. The values are passed by the resultUI.
-                    values.Add(variables.SingleOrDefault(x => x.Name == constant[0].Constant.VariableName)?.Value);
+                    values.Add(variables.SingleOrDefault(x => x.Name == constant[0].DirectInput.VariableName)?.Value);
                 }
                 else
                 {
-                    values.Add(constant[0].Constant.GetVal());
+                    values.Add(constant[0].DirectInput.GetVal());
                 }
 
                 continue;
@@ -134,39 +134,66 @@ public class ConnectionsTracker
 
         object obj = node.Object;
         object[] par = values.ToArray();
-        object result = node.MethodInfo.Invoke(obj, par);
+        object result = node.MyMethodInfo.Info.Invoke(obj, par);
 
         return result;
     }
 
     #endregion
+
+    public void RegisterClassName(ClassTracking classInfo)
+    {
+        this.classTypeNamesForPersistance.Add(classInfo);
+    }
+
+    public void Persist()
+    {
+        MethodIDParamaterID[] methodParams = this.paraMethConnections
+            .Select(x => new MethodIDParamaterID
+            {
+                MethodID = x.Method.ID,
+                ParameterID = x.Parameter.ID,
+            })
+            .ToArray();
+
+        DirectInputIDParamaterID[] directInputs = paraDirectInputConnections
+            .Select(x => new DirectInputIDParamaterID
+            {
+                DirectInputID = x.DirectInput.ID,
+                ParameterID = x.Parameter.ID,
+                Value = x.DirectInput.IsVariable() ? null : x.DirectInput.GetVal()
+            })
+            .ToArray();
+
+        ClassInfo[] infos = this.classTypeNamesForPersistance
+            .Select(x => new ClassInfo
+            {
+                Name = x.Name,
+                Position = x.node.transform.position,
+            })
+            .ToArray();
+
+        this.persistance.Persist(infos, methodParams, directInputs);
+    }
+
+    public void LoadPersistedData()
+    {
+        this.persistance.LoadPersistedData();
+    }
 }
 
 #region DATA_CLASSES
 
-public class InputVariable
-{
-    public string Name { get; set; }
-    public Type Type { get; set; }
-    public object Value { get; set; }
-}
-
-public class InputConstant : InputVariable { }
-
-public class ResultConstant : InputVariable { }
-
-public class ResultVariable : InputVariable { }
-
-public class ParameterConstant
+public class ParameterDirectInput
 {
     public ParameterNode Parameter { get; set; }
 
-    public ConstantNode Constant { get; set; }
+    public DirectInputNode DirectInput { get; set; }
 
-    public ParameterConstant(ParameterNode parameter, ConstantNode constant)
+    public ParameterDirectInput(ParameterNode parameter, DirectInputNode constant)
     {
         Parameter = parameter;
-        Constant = constant;
+        DirectInput = constant;
     }
 }
 
@@ -188,6 +215,13 @@ public class Variable
     public string Name { get; set; }
 
     public object Value { get; set; }
+}
+
+public class ClassTracking
+{
+    public string Name { get; set; }
+
+    public Node node { get; set; }
 }
 
 #endregion

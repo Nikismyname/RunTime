@@ -1,23 +1,25 @@
 ﻿#region INIT
 
-using Boo.Lang;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-public class Defunclator
+public class ClassVisualisation
 {
-    private float marginY = 0.1f;
-    private float marginX = 0.1f;
-    private float methodCube = 0.3f;
-    private float methodSphere = 0.2f;
-    private float propertySphere = 0.3f;
+    //private float marginY = 0.1f;
+    //private float marginX = 0.1f;
+    //private float methodCube = 0.3f;
+    //private float methodSphere = 0.2f;
+    //private float propertySphere = 0.3f;
+
     private WorldSpaceUI UI;
 
     private int currParamId = 0;
+    private int currMethodId = 0;
 
-    public Defunclator(WorldSpaceUI UI)
+    public ClassVisualisation(WorldSpaceUI UI)
     {
         this.UI = UI;
     }
@@ -29,19 +31,23 @@ public class Defunclator
     public ClassNode GenerateNodeData<T>() where T : class, new()
     {
         Type type = typeof(T);
-        ///TODO: Maybe mechanic where the private ones do different thing!!!
         PropertyInfo[] props = type.GetProperties();
-        //MethodInfo[] methods = type.GetMethods();
         MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(x => !x.Name.StartsWith("set_") && !x.Name.StartsWith("get_")).ToArray();
-        //Debug.Log(string.Join(", ", methods.Select(x=>x.Name).ToArray()));
         return new ClassNode(type, props, methods, new T());
+    }
+
+    public ClassNode GenerateNodeData(Type type)
+    {
+        PropertyInfo[] props = type.GetProperties();
+        MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(x => !x.Name.StartsWith("set_") && !x.Name.StartsWith("get_")).ToArray();
+        return new ClassNode(type, props, methods, Activator.CreateInstance(type));
     }
 
     #endregion
 
     #region GENERATE_CLASS_VISUALISATION
 
-    public MethodAndParameterNodes[] GenerateClassVisualisation(ClassNode node, Vector3 position)
+    public MethodAndParameterNodes[] GenerateClassVisualisation(ClassNode node, Vector3 position, out Node nodeOut)
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
@@ -50,7 +56,9 @@ public class Defunclator
         basy.SetColor(Color.red);
         basy.SetShader();
 
-        basy.AddComponent<Node>().Setup(this.UI);
+        Node nodeBeh = basy.AddComponent<Node>();
+        nodeBeh.Setup(this.UI);
+        nodeOut = nodeBeh;
 
         this.GeneratePropertyPips(node, basy);
 
@@ -116,7 +124,7 @@ public class Defunclator
             }
 
             var methodScript = methodPip.AddComponent<MethodNode>();
-            methodScript.Setup(method, myParamaterInfos.ToArray(), node.Object, this.UI);
+            methodScript.Setup(new MyMethodInfo(this.currMethodId++, method), myParamaterInfos.ToArray(), node.Object, this.UI);
             methodNode.Method = methodScript;
 
             methodNodes.Add(methodNode);

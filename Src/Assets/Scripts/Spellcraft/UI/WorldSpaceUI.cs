@@ -8,36 +8,39 @@ public class WorldSpaceUI : MonoBehaviour
     public GameObject inputPanelPrefab;
     public GameObject resultAndVariablesPanelPrefab;
     public GameObject worldSpaceTextPrefab;
+    public bool LoadLevel;
 
     public ZoomMode zoomMode { get; set; } = ZoomMode.OuterZoom;
     public GameObject parent;
     private Camera myCamera;
     private SpellcraftCam camHanding;
     private Node dragged = null;
-    private Defunclator classVisualisation;
     private GameObject resultGO;
-    private ConnectionsTracker connTracker = new ConnectionsTracker();
     private GameObject rotatorGO;
     private ObjectRotator objRotator;
     private GameObject resultCanvasVantigePoint;
 
+    public ClassVisualisation classVisualisation;
     public ConnectionsRegisterer connRegisterer;
     public InfoCanvas infoCanvas;
-    private ResultCanvas resultCanvas;
-    private InputCanvas inputCanvas;
-    private LineDrawer drawer;
-    private Setups levels;
+    public ConnectionsTracker connTracker;
+    public ResultCanvas resultCanvas;
+    public InputCanvas inputCanvas;
+    public LineDrawer drawer;
+    public Setups levels;
 
     private void Start()
     {
         this.parent = new GameObject("Spellcraft Parent");
- 
+
+        this.connTracker = new ConnectionsTracker(this);
+
         ///Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
         this.rotatorGO.transform.SetParent(this.parent.transform);
         this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>();
         ///...
-        
+
         ///Parented
         this.drawer = new LineDrawer(this);
         this.drawer.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
@@ -46,13 +49,13 @@ public class WorldSpaceUI : MonoBehaviour
         GameObject center = new GameObject("Center");
         center.transform.SetParent(this.parent.transform);
         this.camHanding.Setup(center);
-        this.classVisualisation = new Defunclator(this);
+        this.classVisualisation = new ClassVisualisation(this);
         this.resultCanvas = new ResultCanvas(this.resultAndVariablesPanelPrefab, this.myCamera, this.connTracker, this.parent.transform);
         this.resultCanvas.SetPosition(new Vector3(0, 0, -25));
         this.resultCanvas.SetScale(new Vector3(0.02f, 0.02f, 0.02f));
         this.resultCanvas.Hide();
         this.inputCanvas = new InputCanvas(this.myCamera, this.inputPanelPrefab, this.parent.transform);
-        
+
         ///Extract that somewhere
         this.resultGO = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.resultGO.name = "Result GO";
@@ -63,11 +66,15 @@ public class WorldSpaceUI : MonoBehaviour
         this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, resultNode);
         this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.parent.transform);
         this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, resultNode, this.classVisualisation);
-        //this.levels.JustTwoAddMethod(true);
-        this.levels.SpellCraft_TEST(false);
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
         this.resultCanvasVantigePoint.transform.SetParent(this.parent.transform);
+
+        //this.levels.JustTwoAddMethod(true);
+        if (LoadLevel)
+        {
+            this.levels.SpellCraft_TEST(false);
+        }
     }
 
     #endregion
@@ -76,6 +83,16 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            this.connTracker.Persist();
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            this.connTracker.LoadPersistedData();
+        }
+
         if (Input.GetKeyDown(KeyCode.T))
         {
             this.inputCanvas.InputsHide();

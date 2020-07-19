@@ -1,0 +1,16 @@
+<>perDel<>
+{"ID":1,"Name":"2"}
+<>perDel<>
+{"Name":"2"}
+<>perDel<>
+{"ID":1,"Name":"2","classNames":["Projectile","Vector3Util"]}
+{"ID":1,"Name":"2","classNames":["Projectile","Vector3Util"]}
+{"ID":1,"Name":"2","classNames":["Projectile","Vector3Util"]}
+{"ID":1,"Name":"2","classNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"]}
+{"ID":1,"Name":"2","classNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"]}
+{"ID":1,"Name":"2","classNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"]}
+{"ID":1,"Name":"2","classNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"]}
+{"ID":1,"Name":"2","ClassNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"],"MethsParams":[],"DirectInputs":[]}
+{"ID":1,"Name":"2","ClassNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"],"MethsParams":[],"DirectInputs":[]}
+{"ID":1,"Name":"2","ClassNames":["SpellcraftClasses+Projectile","Vector3Classes+Vector3Util"],"MethsParams":[],"DirectInputs":[]}
+{"ID":1,"Name":"2","ClassInfos":[{"Name":"SpellcraftClasses+Projectile","Position":{"x":-7.63663,"y":7.54785538,"z":-7.05999374}},{"Name":"Vector3Classes+Vector3Util","Position":{"x":7.789647,"y":-8.408062,"z":6.32502174}}],"MethsParams":[],"DirectInputs":[]}

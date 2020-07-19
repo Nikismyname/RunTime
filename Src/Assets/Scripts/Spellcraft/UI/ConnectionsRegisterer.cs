@@ -26,7 +26,7 @@ public class ConnectionsRegisterer
 
     #endregion
 
-    public void RegisterConstantClick(ConstantNode node, ParameterNode paraNodeIn = null)
+    public void RegisterConstantClick(DirectInputNode node, ParameterNode paraNodeIn = null)
     {
         var paraNode = this.lastClickedParameter;
         if (paraNodeIn != null)
@@ -115,7 +115,7 @@ public class ConnectionsRegisterer
         }
 
         /// Trying to short circuit pram to its method return
-        if (node.Object == methodNode.Object && node.myMethod == methodNode.MethodInfo)
+        if (node.Object == methodNode.Object && node.myMethod == methodNode.MyMethodInfo.Info)
         {
             Debug.Log($"RegisterParameterClick SHORT CIRCUIT");
             return;
@@ -147,7 +147,7 @@ public class ConnectionsRegisterer
         }
 
         /// Trying to short circuit pram to its method return
-        if (paramNode.Object == node.Object && paramNode.myMethod == node.MethodInfo)
+        if (paramNode.Object == node.Object && paramNode.myMethod == node.MyMethodInfo.Info)
         {
             Debug.Log($"RegisterMethodClick SHORT CIRCUIT");
             return;

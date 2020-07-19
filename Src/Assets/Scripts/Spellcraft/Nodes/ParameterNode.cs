@@ -9,12 +9,14 @@ public class ParameterNode : MonoBehaviour
 
     private WorldSpaceUI UI;
     private bool assigned = false;
+    public int ID { get; set; }
 
     public void Setup(MyParameterInfo PropertyInfo, MethodInfo myMethod, object ClassObject, WorldSpaceUI UI)
     {
         this.ParameterInfo = PropertyInfo;
         this.Object = ClassObject;
         this.myMethod = myMethod;
+        this.ID = PropertyInfo.ID;
 
         this.UI = UI;
     }

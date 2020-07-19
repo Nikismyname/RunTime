@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using UnityEngine;
 
 public class MethodNode : MonoBehaviour
@@ -7,22 +6,24 @@ public class MethodNode : MonoBehaviour
     private WorldSpaceUI UI;
     private Type type;
     public object Object { get; set; }
-    public MethodInfo MethodInfo { get; set; }
+    public MyMethodInfo MyMethodInfo { get; set; }
     public MyParameterInfo[] MyParamaters { get; set; }
+    public int ID { get; set; }
 
-    public void Setup(MethodInfo methodInfo, MyParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI)
+    public void Setup(MyMethodInfo methodInfo, MyParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI)
     {
-        this.MethodInfo = methodInfo;
+        this.MyMethodInfo = methodInfo;
         this.MyParamaters = myParamaters;
         this.Object = classObject;
         this.UI = UI;
+        this.ID = methodInfo.ID;
 
-        this.type = methodInfo.ReturnType;
+        this.type = methodInfo.Info.ReturnType;
     }
 
     private void OnMouseDown()
     {
-        string message = $"Name: {this.MethodInfo.Name}, Type: {this.type.Name}";
+        string message = $"Name: {this.MyMethodInfo.Info.Name}, Type: {this.type.Name}";
         this.UI.infoCanvas.SetTextWorldCanvasPosition(this.gameObject.transform.parent.transform.position + new Vector3(0, 1, 0));
         this.UI.infoCanvas.SetTextWorldCanvasText(message);
         this.UI.connRegisterer.RegisterMethodClick(this);

@@ -21,7 +21,7 @@ public class InputCanvas
         this.localParent.SetParent(parent); 
     }
 
-    public InputElements CreateInputCanvas(object value, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
+    public InputElements CreateInputCanvas(object value, int ID, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
     {
         GameObject obj = GameObject.Instantiate(this.constantAndVariablePanelPrefab);
         Canvas can = obj.GetComponent<Canvas>();
@@ -39,13 +39,13 @@ public class InputCanvas
             text.text = value.ToString();
         }
 
-        ConstantNode nodeBe = buttonGo.AddComponent<ConstantNode>();
+        DirectInputNode nodeBe = buttonGo.AddComponent<DirectInputNode>();
         RectTransform rt = obj.GetComponent<RectTransform>();
         InputElements result = new InputElements(obj, text, nodeBe, rt, button);
         obj.transform.SetParent(this.localParent);
         ///element scaling!
         rt.localScale *= this.constantsScale;
-        nodeBe.Setup(value, worldSpaceUI, result, isVariable, name);
+        nodeBe.Setup(value, ID, worldSpaceUI, result, isVariable, name);
         this.inputs.Add(result);
         return result;
     }
@@ -138,7 +138,7 @@ public class InputCanvas
 
         public TMP_Text text { get; set; }
 
-        public ConstantNode Node { get; set; }
+        public DirectInputNode Node { get; set; }
 
         public RectTransform RectTransform { get; set; }
 
@@ -146,7 +146,7 @@ public class InputCanvas
 
         public bool Used { get; set; } = false;
 
-        public InputElements(GameObject canvas, TMP_Text text, ConstantNode node, RectTransform rectTransform, Button button)
+        public InputElements(GameObject canvas, TMP_Text text, DirectInputNode node, RectTransform rectTransform, Button button)
         {
             this.RectTransform = rectTransform;
             this.ParentObject = canvas;

@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ConstantNode : MonoBehaviour
+public class DirectInputNode : MonoBehaviour
 {
     public InputCanvas.InputElements elements;
     public ParameterNode paramNode = null;
     public string VariableName;
-
     private WorldSpaceUI UI;
     private object value;
     private Color originalColor;
@@ -15,7 +14,9 @@ public class ConstantNode : MonoBehaviour
     private bool used = false;
     private bool isVariable;
 
-    public void Setup(object value, WorldSpaceUI UI, InputCanvas.InputElements elements, bool isVariable = false, string variableName = "constant")
+    public int ID { get; set; }
+
+    public void Setup(object value, int ID, WorldSpaceUI UI, InputCanvas.InputElements elements, bool isVariable = false, string variableName = "constant")
     {
         this.value = value;
         this.UI = UI;
