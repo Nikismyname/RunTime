@@ -23,6 +23,7 @@ public class DirectInputNode : MonoBehaviour
         this.elements = elements;
         this.isVariable = isVariable;
         this.VariableName = variableName;
+        this.ID = ID;
 
         ///Reusing the Constant code for variables too, will fix semantics later
         if (this.isVariable)

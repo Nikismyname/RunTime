@@ -1,5 +1,6 @@
 ﻿#region INIT
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class ConnectionsTracker
 
     private CubePersistance persistance;
     private List<ClassTracking> classTypeNamesForPersistance = new List<ClassTracking>();
+    private List<DirectInput> directInputs = new List<DirectInput>(); 
 
     #endregion
 
@@ -110,6 +112,9 @@ public class ConnectionsTracker
                     values.Add(constant[0].DirectInput.GetVal());
                 }
 
+                ///TODO: FIX
+                values[values.Count - 1] = Convert.ChangeType(values[values.Count - 1], paramater.Info.ParameterType);
+
                 continue;
             }
 
@@ -130,11 +135,28 @@ public class ConnectionsTracker
             {
                 values.Add(PrintResultRec(method[0].Method, variables));
             }
+
+            values[values.Count - 1] = Convert.ChangeType(values[values.Count - 1], paramater.Info.ParameterType);
         }
 
         object obj = node.Object;
         object[] par = values.ToArray();
+
+        ///DEBUGGING
+        Debug.Log("###########################################################################################");
+        Debug.Log($"<<<<{node.Object.GetType().Name}>>>");
+        Debug.Log($">>>{node.MyMethodInfo.Info.Name}<<<");
+        for (int i = 0; i < node.MyParamaters.Length; i++)
+        {
+            var param = node.MyParamaters[i];
+
+            Debug.Log($"{param.Info.ParameterType.Name} {par[i].ToString()}");
+        }
+        ///...
+
         object result = node.MyMethodInfo.Info.Invoke(obj, par);
+
+        Debug.Log("PASSED");
 
         return result;
     }
@@ -161,7 +183,6 @@ public class ConnectionsTracker
             {
                 DirectInputID = x.DirectInput.ID,
                 ParameterID = x.Parameter.ID,
-                Value = x.DirectInput.IsVariable() ? null : x.DirectInput.GetVal()
             })
             .ToArray();
 
@@ -173,12 +194,17 @@ public class ConnectionsTracker
             })
             .ToArray();
 
-        this.persistance.Persist(infos, methodParams, directInputs);
+        this.persistance.Persist(infos, methodParams, this.directInputs.ToArray(), directInputs, resultMethodCall == null? (int?)null: resultMethodCall.ID);
     }
 
     public void LoadPersistedData()
     {
         this.persistance.LoadPersistedData();
+    }
+
+    public void RegisterDirectInput(DirectInput DI)
+    {
+        this.directInputs.Add(DI);
     }
 }
 

@@ -30,44 +30,44 @@ public class Setups
 
     #region PRESETS
 
-    //public async void JustTwoAddMethod(bool solved = false)
-    //{
-    //    ///CLASS NODES
-    //    var nodes1 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, +5, 0), out _);
-    //    this.UI.connTracker.RegisterClassName(nameof(TestClasses.Test));
-    //    var nodes2 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, -5, 0), out _);
-    //    this.UI.connTracker.RegisterClassName(nameof(TestClasses.Test));
+    public async void JustTwoAddMethod(bool solved = false)
+    {
+        ///CLASS NODES
+        var nodes1 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, +5, 0), out _);
+        //this.UI.connTracker.RegisterClassName(nameof(TestClasses.Test));
+        var nodes2 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, -5, 0), out _);
+        //this.UI.connTracker.RegisterClassName(nameof(TestClasses.Test));
 
-    //    //TODO: The names are truncated for the frontend and names need to be 4 sumbols for things to match. FIX IT!
-    //    ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(int), "addOne");
-    //    ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(int), "addTwo");
+        //TODO: The names are truncated for the frontend and names need to be 4 sumbols for things to match. FIX IT!
+        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(int), "addOne");
+        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(int), "addTwo");
 
-    //    this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
-    //    {
-    //        var1,
-    //        var2,
-    //    });
+        this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
+        {
+            var1,
+            var2,
+        });
 
-    //    int id = 0;
+        int id = 0;
 
-    //    var contant1 = this.inputCanvas.CreateInputCanvas(12,id++, this.UI, false);
-    //    var contant2 = this.inputCanvas.CreateInputCanvas(13,id++, this.UI, false);
-    //    var contant3 = this.inputCanvas.CreateInputCanvas(14,id++, this.UI, false);
-    //    var contant4 = this.inputCanvas.CreateInputCanvas(15, id++, this.UI, false);
-    //    var variable1 = this.inputCanvas.CreateInputCanvas(default,id++, this.UI, true, var1.Name);
-    //    var variable2 = this.inputCanvas.CreateInputCanvas(default, id++, this.UI, true, var2.Name);
+        var contant1 = this.inputCanvas.CreateInputCanvas(12, id++, this.UI, false);
+        var contant2 = this.inputCanvas.CreateInputCanvas(13, id++, this.UI, false);
+        var contant3 = this.inputCanvas.CreateInputCanvas(14, id++, this.UI, false);
+        var contant4 = this.inputCanvas.CreateInputCanvas(15, id++, this.UI, false);
+        var variable1 = this.inputCanvas.CreateInputCanvas(default, id++, this.UI, true, var1.Name);
+        var variable2 = this.inputCanvas.CreateInputCanvas(default, id++, this.UI, true, var2.Name);
 
-    //    if (solved)
-    //    {
-    //        await this.connRegisterer.RegisterParameterClick(nodes1[0].Parameters[0], nodes2[0].Method);
-    //        this.connRegisterer.RegisterConstantClick(variable1.Node, nodes1[0].Parameters[1]);
-    //        this.connRegisterer.RegisterConstantClick(variable2.Node, nodes2[0].Parameters[0]);
-    //        this.connRegisterer.RegisterConstantClick(contant4.Node, nodes2[0].Parameters[1]);
-    //        this.connRegisterer.RegisterResultClick(this.resultNode, nodes1[0].Method);
+        if (solved)
+        {
+            await this.connRegisterer.RegisterParameterClick(nodes1[0].Parameters[0], nodes2[0].Method);
+            this.connRegisterer.RegisterConstantClick(variable1.Node, nodes1[0].Parameters[1]);
+            this.connRegisterer.RegisterConstantClick(variable2.Node, nodes2[0].Parameters[0]);
+            this.connRegisterer.RegisterConstantClick(contant4.Node, nodes2[0].Parameters[1]);
+            this.connRegisterer.RegisterResultClick(this.resultNode, nodes1[0].Method);
 
-    //        this.inputCanvas.InputsHide();
-    //    }
-    //}
+            this.inputCanvas.InputsHide();
+        }
+    }
 
     #endregion
 
@@ -94,13 +94,20 @@ public class Setups
 
         int id = 0;
 
-        var contant1 = this.inputCanvas.CreateInputCanvas(0.5f, id++, this.UI, false);
-        var contant2 = this.inputCanvas.CreateInputCanvas(0.5f, id++, this.UI, false);
-        var contant3 = this.inputCanvas.CreateInputCanvas(14, id++, this.UI, false);
-        var contant4 = this.inputCanvas.CreateInputCanvas(15, id++, this.UI, false);
-        var contant5 = this.inputCanvas.CreateInputCanvas(16, id++, this.UI, false);
-        var variable1 = this.inputCanvas.CreateInputCanvas(default, id++, this.UI, true, ResultCanvas.PlayerPositionVarName);
-        var variable2 = this.inputCanvas.CreateInputCanvas(default, id++, this.UI, true, ResultCanvas.PlayerForwardVarName);
+        var contant1 = this.inputCanvas.CreateInputCanvas(0.5f, ++id, this.UI, false);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 0.5f));
+        var contant2 = this.inputCanvas.CreateInputCanvas(0.5f, ++id, this.UI, false);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 0.5f));
+        var contant3 = this.inputCanvas.CreateInputCanvas(14, ++id, this.UI, false);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 14));
+        var contant4 = this.inputCanvas.CreateInputCanvas(15, ++id, this.UI, false);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 15));
+        var contant5 = this.inputCanvas.CreateInputCanvas(16, ++id, this.UI, false);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 16));
+        var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerPositionVarName);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerPositionVarName, null));
+        var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerForwardVarName);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerForwardVarName, null));
     }
 
     #endregion

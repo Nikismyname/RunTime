@@ -110,7 +110,11 @@ public class ConnectionsRegisterer
         if (methodNode == null)
         {
             Debug.Log($"RegisterParameterClick methodNode NULL");
-            await this.inputCanvas.InputsDisplay(node.transform.position, node);
+            /// If Natural click show Inputs!
+            if (methodNodeIn == null)
+            {
+                await this.inputCanvas.InputsDisplay(node.transform.position, node);
+            }
             return;
         }
 

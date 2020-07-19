@@ -29,6 +29,8 @@ public class WorldSpaceUI : MonoBehaviour
     public LineDrawer drawer;
     public Setups levels;
 
+    public ResultNode resultNode;
+
     private void Start()
     {
         this.parent = new GameObject("Spellcraft Parent");
@@ -61,11 +63,11 @@ public class WorldSpaceUI : MonoBehaviour
         this.resultGO.name = "Result GO";
         this.resultGO.transform.SetParent(this.parent.transform);
         this.resultGO.transform.position = new Vector3(0, -15, 0);
-        ResultNode resultNode = this.resultGO.AddComponent<ResultNode>();
+        this.resultNode = this.resultGO.AddComponent<ResultNode>();
 
-        this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, resultNode);
+        this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, this.resultNode);
         this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.parent.transform);
-        this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, resultNode, this.classVisualisation);
+        this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, this.resultNode, this.classVisualisation);
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
         this.resultCanvasVantigePoint.transform.SetParent(this.parent.transform);
