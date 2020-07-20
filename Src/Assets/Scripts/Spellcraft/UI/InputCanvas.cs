@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -9,9 +10,10 @@ public class InputCanvas
     private Camera camera;
     private GameObject constantAndVariablePanelPrefab;
     private float constantsScale = 0.3f;
-    private List<InputElements> inputs = new List<InputElements>();
     private bool inputsShowing = false;
     private Transform localParent;
+
+    private List<InputElements> inputs = new List<InputElements>();
 
     public InputCanvas(Camera camera, GameObject constantAndVariablePanelPrefab, Transform parent)
     {
@@ -19,6 +21,16 @@ public class InputCanvas
         this.constantAndVariablePanelPrefab = constantAndVariablePanelPrefab;
         this.localParent = new GameObject("Contants Parent!").transform;
         this.localParent.SetParent(parent); 
+    }
+
+    public void Reset()
+    {
+        foreach (GameObject obj in this.inputs.Select(x=>x.Object))
+        {
+            GameObject.Destroy(obj);
+        }
+
+        this.inputs = new List<InputElements>();
     }
 
     public InputElements CreateInputCanvas(object value, int ID, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
@@ -77,7 +89,7 @@ public class InputCanvas
 
                 InputElements c = this.inputs[index];
 
-                c.ParentObject.SetActive(false);
+                c.Object.SetActive(false);
 
                 float yy = y * buttonY - wholeY / 2 + buttonY / 2;
                 float xx = x * buttonX - wholeX / 2 + buttonX / 2;
@@ -101,7 +113,7 @@ public class InputCanvas
 
         foreach (var item in this.inputs)
         {
-            item.ParentObject.SetActive(true);
+            item.Object.SetActive(true);
         }
 
         //Debug.Log("Display");
@@ -112,7 +124,7 @@ public class InputCanvas
         for (int i = 0; i < this.inputs.Count; i++)
         {
             InputElements c = this.inputs[i];
-            c.ParentObject.SetActive(false);
+            c.Object.SetActive(false);
         }
 
         this.inputsShowing = false;
@@ -134,7 +146,7 @@ public class InputCanvas
 
     public class InputElements
     {
-        public GameObject ParentObject { get; set; }
+        public GameObject Object { get; set; }
 
         public TMP_Text text { get; set; }
 
@@ -149,7 +161,7 @@ public class InputCanvas
         public InputElements(GameObject canvas, TMP_Text text, DirectInputNode node, RectTransform rectTransform, Button button)
         {
             this.RectTransform = rectTransform;
-            this.ParentObject = canvas;
+            this.Object = canvas;
             this.text = text;
             this.Node = node;
             this.Button = button;

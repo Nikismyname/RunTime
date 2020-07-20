@@ -11,16 +11,26 @@ public class ConnectionsTracker
     private List<ParameterDirectInput> paraDirectInputConnections = new List<ParameterDirectInput>();
     private List<ParameterMethod> paraMethConnections = new List<ParameterMethod>();
 
-    private CubePersistance persistance;
     private List<ClassTracking> classTypeNamesForPersistance = new List<ClassTracking>();
     private List<DirectInput> directInputs = new List<DirectInput>(); 
 
-    #endregion
+    private CubePersistance persistance;
 
     public ConnectionsTracker(WorldSpaceUI UI)
     {
         this.persistance = new CubePersistance(UI);
     }
+
+    public void Reset()
+    {
+        this.resultMethodCall = null;
+        this.paraDirectInputConnections = new List<ParameterDirectInput>();
+        this.paraMethConnections = new List<ParameterMethod>();
+        this.classTypeNamesForPersistance = new List<ClassTracking>();
+        this.directInputs = new List<DirectInput>();
+    }
+
+    #endregion
 
     #region TRACKING
 

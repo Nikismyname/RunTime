@@ -32,42 +32,42 @@ public class Node : MonoBehaviour
 
         GameObject bottom = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bottom.name = "Bottom Shadow";
-        bottom.transform.SetParent(this.UI.parent.transform);
+        bottom.transform.SetParent(this.UI.levelSpecificParent.transform);
         bottom.transform.localScale = new Vector3(1, 0.1f, 1);
         bottom.SetActive(false);
         shadows[0] = bottom;
 
         GameObject top = GameObject.CreatePrimitive(PrimitiveType.Cube);
         top.name = "Top Shadow";
-        top.transform.SetParent(this.UI.parent.transform);
+        top.transform.SetParent(this.UI.levelSpecificParent.transform);
         top.transform.localScale = new Vector3(1, 0.1f, 1);
         top.SetActive(false);
         shadows[1] = top;
 
         GameObject left = GameObject.CreatePrimitive(PrimitiveType.Cube);
         left.name = "Left Shadow";
-        left.transform.SetParent(this.UI.parent.transform);
+        left.transform.SetParent(this.UI.levelSpecificParent.transform);
         left.transform.localScale = new Vector3(0.1f, 1, 1);
         left.SetActive(false);
         shadows[2] = left;
 
         GameObject right = GameObject.CreatePrimitive(PrimitiveType.Cube);
         right.name = "Right Shadow";
-        right.transform.SetParent(this.UI.parent.transform);
+        right.transform.SetParent(this.UI.levelSpecificParent.transform);
         right.transform.localScale = new Vector3(0.1f, 1, 1);
         right.SetActive(false);
         shadows[3] = right;
 
         GameObject toUs = GameObject.CreatePrimitive(PrimitiveType.Cube);
         toUs.name = "ToUs Shadow";
-        toUs.transform.SetParent(this.UI.parent.transform);
+        toUs.transform.SetParent(this.UI.levelSpecificParent.transform);
         toUs.transform.localScale = new Vector3(1, 1, 0.1f);
         toUs.SetActive(false);
         shadows[4] = toUs;
 
         GameObject away = GameObject.CreatePrimitive(PrimitiveType.Cube);
         away.name = "Away Shadow";
-        away.transform.SetParent(this.UI.parent.transform);
+        away.transform.SetParent(this.UI.levelSpecificParent.transform);
         away.transform.localScale = new Vector3(1, 1, 0.1f);
         away.SetActive(false);
         shadows[5] = away;

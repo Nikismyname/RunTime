@@ -32,7 +32,7 @@ public class LineDrawer
 
     public void DrawDynamicLine(Transform transOne, Transform transTwo, float thickness, Color color)
     {
-        this.lines.Add(new Line(transOne, transTwo, thickness, color, this.UI.parent));
+        this.lines.Add(new Line(transOne, transTwo, thickness, color, this.UI.levelSpecificParent));
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public class LineDrawer
     public void DrawBox(float halfSize, float thickness, Vector3 center)
     {
         Transform parent = new GameObject("CubeParent").transform;
-        parent.SetParent(this.UI.parent.transform);
+        parent.SetParent(this.UI.levelSpecificParent.transform);
 
         this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, -halfSize), center + new Vector3(halfSize, -halfSize, -halfSize), Color.black, thickness, parent);
         this.DrawInGameLine(center + new Vector3(-halfSize, -halfSize, -halfSize), center + new Vector3(-halfSize, halfSize, -halfSize), Color.black, thickness, parent);

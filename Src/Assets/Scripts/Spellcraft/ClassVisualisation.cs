@@ -8,12 +8,6 @@ using UnityEngine;
 
 public class ClassVisualisation
 {
-    //private float marginY = 0.1f;
-    //private float marginX = 0.1f;
-    //private float methodCube = 0.3f;
-    //private float methodSphere = 0.2f;
-    //private float propertySphere = 0.3f;
-
     private WorldSpaceUI UI;
 
     private int currParamId = 0;
@@ -22,6 +16,12 @@ public class ClassVisualisation
     public ClassVisualisation(WorldSpaceUI UI)
     {
         this.UI = UI;
+    }
+
+    public void Reset()
+    {
+        this.currMethodId = 0;
+        this.currParamId = 0;
     }
 
     #endregion
@@ -51,7 +51,7 @@ public class ClassVisualisation
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-        basy.transform.SetParent(this.UI.parent.transform);
+        basy.transform.SetParent(this.UI.levelSpecificParent.transform);
 
         basy.SetColor(Color.red);
         basy.SetShader();
@@ -172,41 +172,3 @@ public class ClassNode
 }
 
 #endregion
-
-
-
-
-//private float GetPropX(int index, int count)
-//{
-//    float propLenght = count * propertySphere + (count - 1) * marginX;
-
-//    float result = index * (this.propertySphere + this.marginX) + this.propertySphere / 2 - propLenght / 2;
-
-//    return result;
-//}
-
-
-//public GameObject BuildUI(ClassNode node)
-//{
-//    GameObject parent = new GameObject(node.Type.Name);
-
-//    int propCount = node.Properties.Length;
-//    //int methodCount = node.Methods.Length;
-
-//    for (int i = 0; i < node.Properties.Length; i++)
-//    {
-//        var prop = node.Properties[i];
-//        GameObject p = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-//        PropertyUINode beh = p.AddComponent<PropertyUINode>();
-//        p.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-//        p.transform.position = new Vector3(this.GetPropX(i, propCount), 1, 0);
-//        p.transform.parent.SetParent(parent.transform);
-//    }
-
-//    //for (int i = 0; i < node.Methods.Length; i++)
-//    //{
-//    //    var method = node.Methods[i];
-//    //}
-
-//    return null;
-//}

@@ -121,6 +121,15 @@ public class CubePersistance
         this.UI.inputCanvas.InputsHide();
     }
 
+    public static CubeInfo[] GetAllSavedCubes()
+    {
+        string[] texts = File.ReadAllLines(fileName).Where(x=> string.IsNullOrWhiteSpace(x) == false).ToArray();
+
+        CubeInfo[] infos = texts.Select(x => JsonConvert.DeserializeObject<CubeInfo>(x)).ToArray();
+
+        return infos;
+    }
+
     private string Serialize(object obj)
     {
         return JsonConvert.SerializeObject(obj, Formatting.None, this.settings);

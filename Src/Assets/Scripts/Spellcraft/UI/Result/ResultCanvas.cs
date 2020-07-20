@@ -14,6 +14,11 @@ public class ResultCanvas
     public const string PlayerPositionVarName = "plyPos";
     public const string PlayerForwardVarName = "plyFor";
 
+    public void Reset()
+    {
+        /// TODO:
+    }
+
     public ResultCanvas(GameObject prefab, Camera cam, ConnectionsTracker connTracker, Transform parent)
     {
         this.canvas = GameObject.Instantiate(prefab);

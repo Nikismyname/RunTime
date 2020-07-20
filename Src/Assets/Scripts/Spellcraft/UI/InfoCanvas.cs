@@ -23,11 +23,17 @@ public class InfoCanvas
     {
         this.text.text = text;
     }
-
+    
     public void SetTextWorldCanvasPosition(Vector3 position)
     {
         this.rectTransform.position = position;
         this.rectTransform.LookAt(this.rectTransform.transform.position + this.camera.transform.forward);
+    }
+
+    public void Reset()
+    {
+        this.SetTextWorldCanvasText(string.Empty);
+        this.SetTextWorldCanvasPosition(new Vector3(1000, 1000, 1000));
     }
 }
 

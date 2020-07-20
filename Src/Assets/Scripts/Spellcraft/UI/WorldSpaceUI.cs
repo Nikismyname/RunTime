@@ -1,5 +1,7 @@
 ﻿#region INIT
 
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class WorldSpaceUI : MonoBehaviour
@@ -11,7 +13,8 @@ public class WorldSpaceUI : MonoBehaviour
     public bool LoadLevel;
 
     public ZoomMode zoomMode { get; set; } = ZoomMode.OuterZoom;
-    public GameObject parent;
+    public GameObject levelSpecificParent;
+    public GameObject persistantParent; 
     private Camera myCamera;
     private SpellcraftCam camHanding;
     private Node dragged = null;
@@ -21,25 +24,27 @@ public class WorldSpaceUI : MonoBehaviour
     private GameObject resultCanvasVantigePoint;
 
     public ClassVisualisation classVisualisation;
+    public LineDrawer drawer;
+    public Setups levels;
     public ConnectionsRegisterer connRegisterer;
-    public InfoCanvas infoCanvas;
+
     public ConnectionsTracker connTracker;
     public ResultCanvas resultCanvas;
     public InputCanvas inputCanvas;
-    public LineDrawer drawer;
-    public Setups levels;
+    public InfoCanvas infoCanvas;
 
     public ResultNode resultNode;
 
     private void Start()
     {
-        this.parent = new GameObject("Spellcraft Parent");
+        this.levelSpecificParent = new GameObject("Spellcraft Parent");
+        this.persistantParent = new GameObject("Persistant Parent");
 
         this.connTracker = new ConnectionsTracker(this);
 
         ///Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
-        this.rotatorGO.transform.SetParent(this.parent.transform);
+        this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
         this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>();
         ///...
 
@@ -49,34 +54,56 @@ public class WorldSpaceUI : MonoBehaviour
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
         this.camHanding = this.myCamera.gameObject.AddComponent<SpellcraftCam>();
         GameObject center = new GameObject("Center");
-        center.transform.SetParent(this.parent.transform);
+        center.transform.SetParent(this.levelSpecificParent.transform);
         this.camHanding.Setup(center);
         this.classVisualisation = new ClassVisualisation(this);
-        this.resultCanvas = new ResultCanvas(this.resultAndVariablesPanelPrefab, this.myCamera, this.connTracker, this.parent.transform);
+        this.resultCanvas = new ResultCanvas(this.resultAndVariablesPanelPrefab, this.myCamera, this.connTracker, this.persistantParent.transform);
         this.resultCanvas.SetPosition(new Vector3(0, 0, -25));
         this.resultCanvas.SetScale(new Vector3(0.02f, 0.02f, 0.02f));
         this.resultCanvas.Hide();
-        this.inputCanvas = new InputCanvas(this.myCamera, this.inputPanelPrefab, this.parent.transform);
+        this.inputCanvas = new InputCanvas(this.myCamera, this.inputPanelPrefab, this.persistantParent.transform);
 
         ///Extract that somewhere
         this.resultGO = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.resultGO.name = "Result GO";
-        this.resultGO.transform.SetParent(this.parent.transform);
+        this.resultGO.transform.SetParent(this.persistantParent.transform);
         this.resultGO.transform.position = new Vector3(0, -15, 0);
         this.resultNode = this.resultGO.AddComponent<ResultNode>();
-
+        ///... 
+        
         this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, this.resultNode);
-        this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.parent.transform);
+        this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.levelSpecificParent.transform);
         this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, this.resultNode, this.classVisualisation);
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
-        this.resultCanvasVantigePoint.transform.SetParent(this.parent.transform);
+        this.resultCanvasVantigePoint.transform.SetParent(this.levelSpecificParent.transform);
 
         //this.levels.JustTwoAddMethod(true);
         if (LoadLevel)
         {
             this.levels.SpellCraft_TEST(false);
         }
+    }
+
+    private void Reinit()
+    {
+        this.levelSpecificParent = new GameObject("Spellcraft Parent");
+
+        ///Rotation of class nodes implementation that wull be replaced
+        this.rotatorGO = new GameObject("Rotator");
+        this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
+        this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>();
+        ///...
+
+        this.drawer.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
+
+        GameObject center = new GameObject("Center");
+        center.transform.SetParent(this.levelSpecificParent.transform);
+        this.camHanding.Setup(center);
+
+        this.resultCanvasVantigePoint = new GameObject("VantigePoint");
+        this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
+        this.resultCanvasVantigePoint.transform.SetParent(this.levelSpecificParent.transform);
     }
 
     #endregion
@@ -93,6 +120,11 @@ public class WorldSpaceUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.L))
         {
             this.connTracker.LoadPersistedData();
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            this.ResetData();
         }
 
         if (Input.GetKeyDown(KeyCode.T))
@@ -156,6 +188,25 @@ public class WorldSpaceUI : MonoBehaviour
     public void SetDragged(Node dragged)
     {
         this.dragged = dragged;
+    }
+
+    public void ResetData()
+    {
+        /// I was implementing the reset of all systems but then tought - maybe just destroy the parent and reinit what is needs reiniting!
+        //this.infoCanvas.Reset();
+        //this.connTracker.Reset();
+        //this.resultCanvas.Reset(); ///Not implemented right now!
+        //this.inputCanvas.Reset();
+
+        Destroy(this.levelSpecificParent);
+        ///
+        this.Reinit();
+        /// Resets the ids for generated nodes to 0 so it matches with the persisted values!
+        this.classVisualisation.Reset();
+        /// Removes all connection data for the previous level!
+        this.connTracker.Reset();
+        /// destroys the old input canvases and reinits the inputs List; 
+        this.inputCanvas.Reset();
     }
 
     #endregion
