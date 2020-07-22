@@ -26,12 +26,12 @@ public class CubePersistance
         };
     }
 
-    public void Persist(ClassInfo[] classTypesAndPosInOrder, MethodIDParamaterID[] methodParams, DirectInput[] directInputs, DirectInputIDParamaterID[] directInputIDsParamID, int? resultMethodId)
+    public void Persist(ClassInfo[] classTypesAndPosInOrder, MethodIDParamaterID[] methodParams, DirectInput[] directInputs, DirectInputIDParamaterID[] directInputIDsParamID, string name, int? resultMethodId)
     {
         CubeInfo info = new CubeInfo
         {
             ID = 1,
-            Name = "2",
+            Name = name,
             ClassInfos = classTypesAndPosInOrder,
             MethsParams = methodParams,
             DirectInputParamater = directInputIDsParamID,

@@ -63,7 +63,7 @@ public class WorldSpaceUI : MonoBehaviour
         this.myCamera2.enabled = false;
 
         this.procUI = this.GetComponent<SpellcraftProcUI>();
-        this.procUI.Setup(this.myCamera, 0.035f);
+        this.procUI.Setup(this.myCamera2, this.connTracker ,0.035f);
         float YY = 40;
         this.procUI.SetCanvasPosition(new Vector3(20, YY, 20));
         this.procUIAnchor = new GameObject("ProcUIAnchor");

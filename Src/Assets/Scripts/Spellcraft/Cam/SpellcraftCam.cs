@@ -148,7 +148,6 @@ public class SpellcraftCam : MonoBehaviour
         transform.position = position;
 
         Input.mousePosition.Set(0, 0, 0);
-        Debug.Log("old situation");
     }
 
     public void SetRotateToView(GameObject rtvTarget)

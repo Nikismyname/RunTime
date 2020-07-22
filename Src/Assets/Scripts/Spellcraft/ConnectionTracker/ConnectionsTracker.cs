@@ -12,7 +12,7 @@ public class ConnectionsTracker
     private List<ParameterMethod> paraMethConnections = new List<ParameterMethod>();
 
     private List<ClassTracking> classTypeNamesForPersistance = new List<ClassTracking>();
-    private List<DirectInput> directInputs = new List<DirectInput>(); 
+    private List<DirectInput> directInputs = new List<DirectInput>();
 
     private CubePersistance persistance;
 
@@ -178,7 +178,7 @@ public class ConnectionsTracker
         this.classTypeNamesForPersistance.Add(classInfo);
     }
 
-    public void Persist()
+    public void Persist(string name = "some_name")
     {
         MethodIDParamaterID[] methodParams = this.paraMethConnections
             .Select(x => new MethodIDParamaterID
@@ -204,7 +204,7 @@ public class ConnectionsTracker
             })
             .ToArray();
 
-        this.persistance.Persist(infos, methodParams, this.directInputs.ToArray(), directInputs, resultMethodCall == null? (int?)null: resultMethodCall.ID);
+        this.persistance.Persist(infos, methodParams, this.directInputs.ToArray(), directInputs, name, resultMethodCall == null ? (int?)null : resultMethodCall.ID);
     }
 
     public void LoadPersistedData()

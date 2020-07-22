@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -11,6 +10,7 @@ public class SpellcraftProcUI : MonoBehaviour
     public GameObject inputFieldPrefab;
     public GameObject dropDownPrefab;
     public GameObject textPrefab;
+    private ConnectionsTracker tracker; 
     private Camera camera;
 
     private float canvasHalfY = 250;
@@ -27,18 +27,27 @@ public class SpellcraftProcUI : MonoBehaviour
     private GameObject canvasGO;
     private Canvas canvas;
 
-    List<GameObject> UIElements = new List<GameObject>();
+    private List<GameObject> UIElements = new List<GameObject>();
+
+    private List<GameObject> loadButtons = new List<GameObject>();
+    private List<GameObject> saveButtons = new List<GameObject>();
 
     public GameObject GetGameObject()
     {
         return this.canvasGO;
     }
 
-    public void Setup(Camera camera, float globalScale = 0.2f)
+    public void Setup(Camera camera, ConnectionsTracker tracker , float globalScale = 0.2f)
     {
+        this.tracker = tracker;
         this.camera = camera;
         this.globalScale = globalScale;
 
+        this.Init();
+    }
+
+    public void Init()
+    {
         this.canvasGO = new GameObject("MainCanvas");
         this.canvas = canvasGO.AddComponent<Canvas>();
         this.canvas.worldCamera = this.camera;
@@ -57,6 +66,8 @@ public class SpellcraftProcUI : MonoBehaviour
         }
 
         canvasGO.SetScale(new Vector3(this.globalScale, this.globalScale, this.globalScale));
+
+        this.SetCanvasPosition(new Vector3(20, 40, 20));
     }
 
     public void SetCanvasPosition(Vector3 pos)
@@ -66,16 +77,24 @@ public class SpellcraftProcUI : MonoBehaviour
 
     private void CreateLoadRow(Vector2 TR, out float x, out float y)
     {
-        string[] realNames = CubePersistance.GetAllSavedCubes().Select(z=> z.Name).ToArray();
+        for (int i = 0; i < this.loadButtons.Count; i++)
+        {
+            GameObject.Destroy(this.loadButtons[i]);
+        }
 
-        string[] textNames = new string[] { "1", "2", "3", "4", "5" };
+        this.loadButtons = new List<GameObject>();
+
+        string[] textNames = CubePersistance.GetAllSavedCubes().Select(z=> z.Name).ToArray();
 
         for (int i = 0; i < textNames.Length; i++)
         {
             string name = textNames[i];
 
-            this.DrawButton(name, new Vector2(TR.x, TR.y - i * (this.buttonPixelsY + this.YOffset)));
-            this.DrawButton("X", new Vector2(TR.x + this.buttonPixelsX + this.XOffset, TR.y - i * (this.buttonPixelsY + this.YOffset)), new Vector2(30, 30), Color.red);
+            GameObject main = this.DrawButton(name, new Vector2(TR.x, TR.y - i * (this.buttonPixelsY + this.YOffset)));
+            GameObject delete = this.DrawButton("X", new Vector2(TR.x + this.buttonPixelsX + this.XOffset, TR.y - i * (this.buttonPixelsY + this.YOffset)), new Vector2(30, 30), Color.red);
+
+            loadButtons.Add(main);
+            loadButtons.Add(delete);
         }
 
         x = TR.x + this.buttonPixelsX + this.XOffset * 2 + 30;
@@ -84,14 +103,25 @@ public class SpellcraftProcUI : MonoBehaviour
 
     private void DrawSaveCubeMenu(Vector2 TR)
     {
-        this.DrawText(new Vector2(TR.x, TR.y), "Name The Save", 20);
-        this.DrawInputMenu(new Vector2(TR.x, TR.y - this.YOffset - this.buttonPixelsY));
-        DrawButton("Save", new Vector2(TR.x, TR.y - (this.YOffset + this.buttonPixelsY) * 2));
+        for (int i = 0; i < this.saveButtons.Count; i++)
+        {
+            GameObject.Destroy(this.saveButtons[i]);
+        }
+
+        this.saveButtons = new List<GameObject>();
+
+        GameObject text = this.DrawText(new Vector2(TR.x, TR.y), "Name The Save", 20);
+        GameObject input = this.DrawInputMenu(new Vector2(TR.x, TR.y - this.YOffset - this.buttonPixelsY));
+        GameObject saveButton = DrawButton("Save", new Vector2(TR.x, TR.y - (this.YOffset + this.buttonPixelsY) * 2));
+        saveButton.GetComponent<Button>().onClick.AddListener(()=>this.OnClickSave(input.GetComponent<TMP_InputField>()));
+        this.saveButtons.Add(text);
+        this.saveButtons.Add(input);
+        this.saveButtons.Add(saveButton);
     }
 
     #region PRIMITIVES
 
-    private void DrawButton(string text, Vector2 pos, Vector2? sizeDelta = null, Color? color = null)
+    private GameObject DrawButton(string text, Vector2 pos, Vector2? sizeDelta = null, Color? color = null)
     {
         sizeDelta = sizeDelta == null ? new Vector2(this.buttonPixelsX, this.buttonPixelsY) : sizeDelta;
 
@@ -106,9 +136,11 @@ public class SpellcraftProcUI : MonoBehaviour
         }
 
         this.UIElements.Add(button);
+
+        return button; 
     }
 
-    private void DrawText(Vector2 pos, string textInpt, int fontSize, int XX = 200, int YY = 30)
+    private GameObject DrawText(Vector2 pos, string textInpt, int fontSize, int XX = 200, int YY = 30)
     {
         GameObject text = Instantiate(this.textPrefab, canvasGO.transform);
         RectTransform rt = text.GetComponent<RectTransform>();
@@ -120,9 +152,11 @@ public class SpellcraftProcUI : MonoBehaviour
         t.alignment = TextAlignmentOptions.Center;
 
         this.UIElements.Add(text);
+
+        return text;
     }
 
-    private void DrawInputMenu(Vector2 pos, int XX = 200, int YY = 30)
+    private GameObject DrawInputMenu(Vector2 pos, int XX = 200, int YY = 30)
     {
         GameObject input = Instantiate(this.inputFieldPrefab, canvasGO.transform);
         RectTransform rt = input.GetComponent<RectTransform>();
@@ -130,12 +164,33 @@ public class SpellcraftProcUI : MonoBehaviour
         input.transform.position = new Vector3(pos.x + XX / 2, pos.y - YY / 2, 0);
 
         this.UIElements.Add(input);
+
+        return input;
     }
 
     #endregion
 
-    #region HELPERS
+    #region BUTTONS 
 
-    #endregion
+    public void OnClickSave(TMP_InputField nameInput)
+    {
+        string name = nameInput.text;
+
+        string[] existingNames = CubePersistance.GetAllSavedCubes().Select(z => z.Name).ToArray();
+
+        if (string.IsNullOrWhiteSpace(name) || name.Length < 5 || existingNames.Contains(name))
+        {
+            Debug.Log("Invalid Name!");
+            return;
+        }
+
+        Debug.Log("VALID Name!");
+
+        this.tracker.Persist(name);
+
+        this.Init();
+    }
+
+    #endregion 
 }
 
