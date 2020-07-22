@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -23,17 +24,24 @@ public class SpellcraftProcUI : MonoBehaviour
     private float YOffset = 5f;
     private float XOffset = 5f;
 
-    GameObject canvasGO;
+    private GameObject canvasGO;
+    private Canvas canvas;
 
     List<GameObject> UIElements = new List<GameObject>();
 
-    private void Start()
+    public GameObject GetGameObject()
     {
-        this.camera = Camera.main;
+        return this.canvasGO;
+    }
+
+    public void Setup(Camera camera, float globalScale = 0.2f)
+    {
+        this.camera = camera;
+        this.globalScale = globalScale;
 
         this.canvasGO = new GameObject("MainCanvas");
-        var canvas = canvasGO.AddComponent<Canvas>();
-        canvas.worldCamera = camera;
+        this.canvas = canvasGO.AddComponent<Canvas>();
+        this.canvas.worldCamera = this.camera;
         var rectT = canvas.GetComponent<RectTransform>();
         this.canvasGO.AddComponent<CanvasScaler>();
         this.canvasGO.AddComponent<GraphicRaycaster>();
@@ -51,9 +59,9 @@ public class SpellcraftProcUI : MonoBehaviour
         canvasGO.SetScale(new Vector3(this.globalScale, this.globalScale, this.globalScale));
     }
 
-    private void SetUpLoadMenu()
+    public void SetCanvasPosition(Vector3 pos)
     {
-
+        this.canvasGO.transform.position = pos;
     }
 
     private void CreateLoadRow(Vector2 TR, out float x, out float y)

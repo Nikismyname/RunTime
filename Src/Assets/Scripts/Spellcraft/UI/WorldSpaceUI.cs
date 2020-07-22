@@ -1,5 +1,6 @@
 ﻿#region INIT
 
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using UnityEngine;
@@ -16,7 +17,9 @@ public class WorldSpaceUI : MonoBehaviour
     public GameObject levelSpecificParent;
     public GameObject persistantParent; 
     private Camera myCamera;
-    private SpellcraftCam camHanding;
+    private Camera myCamera2;
+    private SpellMenuDragCam camHandling2;
+    private SpellcraftCam camHandling;
     private Node dragged = null;
     private GameObject resultGO;
     private GameObject rotatorGO;
@@ -32,6 +35,8 @@ public class WorldSpaceUI : MonoBehaviour
     public ResultCanvas resultCanvas;
     public InputCanvas inputCanvas;
     public InfoCanvas infoCanvas;
+    public SpellcraftProcUI procUI;
+    public GameObject procUIAnchor;
 
     public ResultNode resultNode;
 
@@ -52,10 +57,21 @@ public class WorldSpaceUI : MonoBehaviour
         this.drawer = new LineDrawer(this);
         this.drawer.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
-        this.camHanding = this.myCamera.gameObject.AddComponent<SpellcraftCam>();
+        this.camHandling = this.myCamera.gameObject.AddComponent<SpellcraftCam>();
+        this.myCamera2 = GameObject.Find("Camera2").GetComponent<Camera>();
+        this.camHandling2 = this.myCamera2.gameObject.AddComponent<SpellMenuDragCam>();
+        this.myCamera2.enabled = false;
+
+        this.procUI = this.GetComponent<SpellcraftProcUI>();
+        this.procUI.Setup(this.myCamera, 0.035f);
+        float YY = 40;
+        this.procUI.SetCanvasPosition(new Vector3(20, YY, 20));
+        this.procUIAnchor = new GameObject("ProcUIAnchor");
+        this.procUIAnchor.transform.position = new Vector3(20, YY, 0);
+
         GameObject center = new GameObject("Center");
         center.transform.SetParent(this.levelSpecificParent.transform);
-        this.camHanding.Setup(center);
+        this.camHandling.Setup(center);
         this.classVisualisation = new ClassVisualisation(this);
         this.resultCanvas = new ResultCanvas(this.resultAndVariablesPanelPrefab, this.myCamera, this.connTracker, this.persistantParent.transform);
         this.resultCanvas.SetPosition(new Vector3(0, 0, -25));
@@ -99,7 +115,7 @@ public class WorldSpaceUI : MonoBehaviour
 
         GameObject center = new GameObject("Center");
         center.transform.SetParent(this.levelSpecificParent.transform);
-        this.camHanding.Setup(center);
+        this.camHandling.Setup(center);
 
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
@@ -112,6 +128,22 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            if(this.myCamera.enabled == false) /// SECOND CAM IS ON
+            {
+                this.camHandling.SetEnabled(true);
+                this.camHandling2.UnsetTarget(this.myCamera.gameObject);
+            }
+            else /// FIRST CAM IS ON
+            {
+                this.camHandling.SetEnabled(false);
+                this.myCamera2.enabled = true;
+                this.myCamera.enabled = false;
+                this.camHandling2.SetTarget(this.procUIAnchor.transform.position, this.myCamera.gameObject.transform.rotation, this.myCamera.gameObject.transform.position);
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             this.connTracker.Persist();
@@ -140,7 +172,7 @@ public class WorldSpaceUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F))
         {
             this.resultCanvas.Show();
-            this.camHanding.SetRotateToView(this.resultCanvasVantigePoint);
+            this.camHandling.SetRotateToView(this.resultCanvasVantigePoint);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -151,7 +183,7 @@ public class WorldSpaceUI : MonoBehaviour
             }
             else
             {
-                this.camHanding.UntriggerZoom();
+                this.camHandling.UntriggerZoom();
                 this.zoomMode = ZoomMode.OuterZoom;
             }
         }
@@ -164,12 +196,12 @@ public class WorldSpaceUI : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             this.dragged?.SetRotating(true);
-            this.camHanding.GetMouseButtonDownOne();
+            this.camHandling.GetMouseButtonDownOne();
         }
 
         if (Input.GetMouseButtonUp(1))
         {
-            this.camHanding.GetMouseButtonUpOne();
+            this.camHandling.GetMouseButtonUpOne();
 
             if (this.dragged != null)
             {
