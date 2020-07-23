@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SpellcraftProcUI : MonoBehaviour
+public class SpellcraftProcUIRPG : MonoBehaviour
 {
     public GameObject buttonPrefab;
     public GameObject inputFieldPrefab;
@@ -48,14 +48,6 @@ public class SpellcraftProcUI : MonoBehaviour
 
     public void Init()
     {
-        if(this.buttonPrefab == null)
-        {
-            this.buttonPrefab = Resources.Load("Prefabs/NonCanvaces/TMP/TMPButton", typeof(GameObject)) as GameObject;
-            this.inputFieldPrefab = Resources.Load("Prefabs/NonCanvaces/TMP/TMPInputField", typeof(GameObject)) as GameObject;
-            this.dropDownPrefab = Resources.Load("Prefabs/NonCanvaces/TMP/TMPDropdown", typeof(GameObject)) as GameObject;
-            this.textPrefab = Resources.Load("Prefabs/NonCanvaces/TMP/TMPText", typeof(GameObject)) as GameObject;
-        }
-
         this.canvasGO = new GameObject("MainCanvas");
         this.canvas = canvasGO.AddComponent<Canvas>();
         this.canvas.worldCamera = this.camera;

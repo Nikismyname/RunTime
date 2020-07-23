@@ -1,8 +1,5 @@
 ﻿#region INIT
 
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using UnityEngine;
 
 public class WorldSpaceUI : MonoBehaviour
@@ -23,7 +20,6 @@ public class WorldSpaceUI : MonoBehaviour
     private Node dragged = null;
     private GameObject resultGO;
     private GameObject rotatorGO;
-    private ObjectRotator objRotator;
     private GameObject resultCanvasVantigePoint;
 
     public ClassVisualisation classVisualisation;
@@ -42,6 +38,14 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Start()
     {
+        if(transperantMat == null)
+        {
+            this.transperantMat = Resources.Load("Materials/transperantMat", typeof(Material)) as Material;
+            this.inputPanelPrefab = Resources.Load("Prefabs/WorldSpaceCanvases/ConstantCanvasPrefab", typeof(GameObject)) as GameObject;
+            this.resultAndVariablesPanelPrefab = Resources.Load("Prefabs/WorldSpaceCanvases/ResultCanvasPrefab", typeof(GameObject)) as GameObject;
+            this.worldSpaceTextPrefab = Resources.Load("Prefabs/WorldSpaceCanvases/WorldSpaceTextPrefab", typeof(GameObject)) as GameObject;
+        }
+
         this.levelSpecificParent = new GameObject("Spellcraft Parent");
         this.persistantParent = new GameObject("Persistant Parent");
 
@@ -50,7 +54,6 @@ public class WorldSpaceUI : MonoBehaviour
         ///Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
         this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
-        this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>();
         ///...
 
         ///Parented
@@ -108,7 +111,6 @@ public class WorldSpaceUI : MonoBehaviour
         ///Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
         this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
-        this.objRotator = this.rotatorGO.AddComponent<ObjectRotator>();
         ///...
 
         this.drawer.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
