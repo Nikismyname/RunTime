@@ -102,7 +102,7 @@ public class ResultCanvas
             });
         }
 
-        object result = this.connTracker.PrintResult(vars.ToArray());
+        object result = this.connTracker.PrintResult(null, vars.ToArray());
         if (result == null)
         {
             this.resultText.text = "VOID";
@@ -151,7 +151,14 @@ public class ResultCanvas
 
     public void Show()
     {
-        this.canvas.SetActive(true);
+        if (this.canvas.activeSelf == true)
+        {
+            this.canvas.SetActive(false);
+        }
+        else
+        {
+            this.canvas.SetActive(true);
+        }
     }
 
     public void Hide()

@@ -7,20 +7,21 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.Networking.Match;
-using UnityEngine.XR;
 
 public class CubePersistance
 {
+    private static JsonSerializerSettings settings;
     private const string fileName = "persistance.txt";
-    private JsonSerializerSettings settings;
-    private WorldSpaceUI UI; 
+    private WorldSpaceUI UI;
 
     public CubePersistance(WorldSpaceUI UI)
     {
         this.UI = UI;
+    }
 
-        this.settings = new JsonSerializerSettings()
+    static CubePersistance()
+    {
+        settings = new JsonSerializerSettings()
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
@@ -39,7 +40,7 @@ public class CubePersistance
             ResultMethodID = resultMethodId,
         };
 
-        string text = this.Serialize(info);
+        string text = Serialize(info);
 
         File.AppendAllLines(fileName, new string[]
         {
@@ -47,12 +48,18 @@ public class CubePersistance
         });
     }
 
-    public void LoadPersistedData()
+    public void LoadPersistedData(string name, bool visualise = false)
     {
-        string text = File.ReadAllLines(fileName).Last();
-        CubeInfo info = JsonConvert.DeserializeObject<CubeInfo>(text);
+        CubeInfo[] infos = GetAllSavedCubes();
 
-        List<ClassVisualisation.MethodAndParameterNodes[]> methodInfoWithParamInfo = new List<ClassVisualisation.MethodAndParameterNodes[]>(); 
+        CubeInfo info = infos.FirstOrDefault(x => x.Name == name);
+        if (info == null)
+        {
+            Debug.Log("No info with the given name!!!");
+            return;
+        }
+
+        List<ClassVisualisation.MethodAndParameterNodes[]> methodInfoWithParamInfo = new List<ClassVisualisation.MethodAndParameterNodes[]>();
 
         /// Creating and regestering the class nodes
         for (int i = 0; i < info.ClassInfos.Length; i++)
@@ -62,7 +69,8 @@ public class CubePersistance
             Vector3 position = cin.Position;
 
             var spellClass = this.UI.classVisualisation.GenerateClassVisualisation(this.UI.classVisualisation.GenerateNodeData(type), position, out Node one);
-            this.UI.connTracker.RegisterClassName(new ClassTracking { Name = type.FullName, node = one });
+            this.UI.connTracker.RegisterClassNameForPersistanc(new ClassTracking { Name = type.FullName, node = one }, info.Name);
+
             methodInfoWithParamInfo.Add(spellClass);
         }
         ///... 
@@ -79,13 +87,13 @@ public class CubePersistance
             if (DI.Name == null)
             {
                 var cnst = this.UI.inputCanvas.CreateInputCanvas(DI.Value, DI.ID, this.UI, false);
-                this.UI.connTracker.RegisterDirectInput(new DirectInput(DI.ID, null, DI.Value));
+                this.UI.connTracker.RegisterDirectInput(new DirectInput(DI.ID, null, DI.Value), info.Name);
                 inputs.Add(cnst);
             }
             else /// VARIABLE
             {
                 var var = this.UI.inputCanvas.CreateInputCanvas(default, DI.ID, this.UI, true, DI.Name);
-                this.UI.connTracker.RegisterDirectInput(new DirectInput(DI.ID, DI.Name, null));
+                this.UI.connTracker.RegisterDirectInput(new DirectInput(DI.ID, DI.Name, null), info.Name);
                 inputs.Add(var);
                 variablesForDisplay.Add(new ResultCanvas.VariableInput(typeof(float), DI.Name));
             }
@@ -99,10 +107,17 @@ public class CubePersistance
         {
             MethodIDParamaterID MP = info.MethsParams[i];
 
-            MethodNode mNode = methodInfoWithParamInfo.SelectMany(x => x.Select(y => y.Method)).Single(x=> x.ID == MP.MethodID); 
-            ParameterNode pNode = methodInfoWithParamInfo.SelectMany(x => x.SelectMany(y=>y.Parameters)).Single(x => x.ID == MP.MethodID);
+            MethodNode mNode = methodInfoWithParamInfo.SelectMany(x => x.Select(y => y.Method)).Single(x => x.ID == MP.MethodID);
+            ParameterNode pNode = methodInfoWithParamInfo.SelectMany(x => x.SelectMany(y => y.Parameters)).Single(x => x.ID == MP.MethodID);
 
-            _ = this.UI.connRegisterer.RegisterParameterClick(pNode,mNode);
+            if (visualise)
+            {
+                _ = this.UI.connRegisterer.RegisterParameterClick(pNode, mNode);
+            }
+            else
+            {
+                this.UI.connTracker.TrackParameterAssignMethod(pNode, mNode, info.Name);
+            }
         }
         ///... 
 
@@ -111,28 +126,62 @@ public class CubePersistance
             DirectInputIDParamaterID DP = info.DirectInputParamater[i];
 
             ParameterNode pNode = methodInfoWithParamInfo.SelectMany(x => x.SelectMany(y => y.Parameters)).Single(x => x.ID == DP.ParameterID);
-            DirectInputNode DINode = inputs.Select(x=> x.Node).Single(x => x.ID == DP.DirectInputID);
+            DirectInputNode DINode = inputs.Select(x => x.Node).Single(x => x.ID == DP.DirectInputID);
 
-            this.UI.connRegisterer.RegisterConstantClick(DINode, pNode);
+            if (visualise)
+            {
+                this.UI.connRegisterer.RegisterConstantClick(DINode, pNode);
+            }
+            else
+            {
+                this.UI.connTracker.TrackParameterAssignConstant(pNode, DINode, info.Name);
+            }
         }
 
         MethodNode resultMethod = methodInfoWithParamInfo.SelectMany(x => x.Select(y => y.Method)).Single(x => x.ID == info.ResultMethodID);
-        this.UI.connRegisterer.RegisterResultClick(this.UI.resultNode, resultMethod);
+        if (visualise)
+        {
+            this.UI.connRegisterer.RegisterResultClick(this.UI.resultNode, resultMethod);
+        }
+        else
+        {
+            this.UI.connTracker.TrackResultAssignMethodCall(resultMethod, info.Name);
+        }
+
         this.UI.inputCanvas.InputsHide();
+    }
+
+    public static void DeleteCube(string name)
+    {
+        CubeInfo[] cubes = GetAllSavedCubes();
+
+        CubeInfo existing = cubes.SingleOrDefault(x => x.Name == name); 
+
+        if(existing == null)
+        {
+            Debug.Log("Cube to delete not found!");
+            return;
+        }
+
+        cubes = cubes.Where(x => x.Name != name).ToArray();
+
+        string[] lines = cubes.Select(x => Serialize(x)).ToArray();
+
+        File.WriteAllLines(fileName, lines);
     }
 
     public static CubeInfo[] GetAllSavedCubes()
     {
-        string[] texts = File.ReadAllLines(fileName).Where(x=> string.IsNullOrWhiteSpace(x) == false).ToArray();
+        string[] texts = File.ReadAllLines(fileName).Where(x => string.IsNullOrWhiteSpace(x) == false).ToArray();
 
         CubeInfo[] infos = texts.Select(x => JsonConvert.DeserializeObject<CubeInfo>(x)).ToArray();
 
         return infos;
     }
 
-    private string Serialize(object obj)
+    private static string Serialize(object obj)
     {
-        return JsonConvert.SerializeObject(obj, Formatting.None, this.settings);
+        return JsonConvert.SerializeObject(obj, Formatting.None, settings);
     }
 
     #endregion
@@ -150,7 +199,7 @@ public class CubeInfo
     public string Name;
     public ClassInfo[] ClassInfos;
     public DirectInput[] directInputs;
-    public int? ResultMethodID; 
+    public int? ResultMethodID;
 
     public MethodIDParamaterID[] MethsParams;
     public DirectInputIDParamaterID[] DirectInputParamater;
@@ -184,7 +233,7 @@ public class MethodIDParamaterID
 
 public class ClassInfo
 {
-    public string  Name { get; set; }
+    public string Name { get; set; }
     public Vector3 Position { get; set; }
 }
 

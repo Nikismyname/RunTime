@@ -43,7 +43,7 @@ public class PlayerHandling2 : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("Player Handling2");
+        //Debug.Log("Player Handling2");
 
         this.active = true;
         this.ms = GameObject.Find("Main").GetComponent<TargetManagerBehaviour>();

@@ -46,7 +46,7 @@ public class ClassVisualisation
     #endregion
 
     #region GENERATE_CLASS_VISUALISATION
-
+    
     public MethodAndParameterNodes[] GenerateClassVisualisation(ClassNode node, Vector3 position, out Node nodeOut)
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);

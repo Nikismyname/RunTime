@@ -7,13 +7,9 @@ using UnityEngine;
 
 public class ConnectionsTracker
 {
-    private MethodNode resultMethodCall;
-    private List<ParameterDirectInput> paraDirectInputConnections = new List<ParameterDirectInput>();
-    private List<ParameterMethod> paraMethConnections = new List<ParameterMethod>();
+    private const string workBundleName = "WorkingOn"; 
 
-    private List<ClassTracking> classTypeNamesForPersistance = new List<ClassTracking>();
-    private List<DirectInput> directInputs = new List<DirectInput>();
-
+    private List<CubeBundle> bundles = new List<CubeBundle>();
     private CubePersistance persistance;
 
     public ConnectionsTracker(WorldSpaceUI UI)
@@ -21,22 +17,35 @@ public class ConnectionsTracker
         this.persistance = new CubePersistance(UI);
     }
 
+    public void RegisterBundle(string name)
+    {
+        name = name == null ? workBundleName : name; 
+
+        this.bundles.Add(new CubeBundle(name));
+    }
+
     public void Reset()
     {
-        this.resultMethodCall = null;
-        this.paraDirectInputConnections = new List<ParameterDirectInput>();
-        this.paraMethConnections = new List<ParameterMethod>();
-        this.classTypeNamesForPersistance = new List<ClassTracking>();
-        this.directInputs = new List<DirectInput>();
+        //this.resultMethodCall = null;
+        //this.paraDirectInputConnections = new List<ParameterDirectInput>();
+        //this.paraMethConnections = new List<ParameterMethod>();
+        //this.classTypeNamesForPersistance = new List<ClassTracking>();
+        //this.directInputs = new List<DirectInput>();
     }
 
     #endregion
 
     #region TRACKING
 
-    public void TrackParameterAssignConstant(ParameterNode node, DirectInputNode constant)
+    public void TrackParameterAssignConstant(ParameterNode node, DirectInputNode constant, string name = null)
     {
-        var existing = paraDirectInputConnections.SingleOrDefault(x => x.Parameter == node);
+        if (name == null)
+        {
+            Debug.LogWarning("name null");
+            return;
+        }
+
+        var existing = this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections.SingleOrDefault(x => x.Parameter == node);
 
         if (existing != null)
         {
@@ -48,13 +57,19 @@ public class ConnectionsTracker
         }
         else
         {
-            this.paraDirectInputConnections.Add(new ParameterDirectInput(node, constant));
+            this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections.Add(new ParameterDirectInput(node, constant));
         }
     }
 
-    public void TrackParameterAssignMethod(ParameterNode node, MethodNode method)
+    public void TrackParameterAssignMethod(ParameterNode node, MethodNode method, string name = null)
     {
-        var existing = paraMethConnections.SingleOrDefault(x => x.Parameter == node);
+        if(name == null)
+        {
+            Debug.LogWarning("name null");
+            return;
+        }
+
+        var existing = this.bundles.Single(x=>x.Name == name)?.ParaMethConnections.SingleOrDefault(x => x.Parameter == node);
 
         if (existing != null)
         {
@@ -63,31 +78,41 @@ public class ConnectionsTracker
         }
         else
         {
-            this.paraMethConnections.Add(new ParameterMethod(node, method));
+            this.bundles.Single(x => x.Name == name)?.ParaMethConnections.Add(new ParameterMethod(node, method));
         }
     }
 
-    public void TrackResultAssignMethodCall(MethodNode node)
+    public void TrackResultAssignMethodCall(MethodNode node, string name = null)
     {
-        this.resultMethodCall = node;
+        if (name == null)
+        {
+            Debug.LogWarning("name null");
+            return;
+        }
+
+        this.bundles.Single(x => x.Name == name).ResultMethodCall = node;
     }
 
     #endregion
 
     #region PRINT_RESULTS
 
-    public object PrintResult(Variable[] variables = null)
+    public object PrintResult(string bundleName, Variable[] variables = null)
     {
+        bundleName = bundleName == null ? workBundleName : bundleName; 
+
+        CubeBundle bundle = this.bundles.Single(x => x.Name == bundleName); 
+       
         if (variables == null)
             variables = new Variable[0];
 
-        if (this.resultMethodCall == null)
+        if (bundle.ResultMethodCall == null)
         {
             Debug.Log("Result Not Connected!");
             return null;
         }
 
-        object result = this.PrintResultRec(this.resultMethodCall, variables);
+        object result = this.PrintResultRec(bundle.ResultMethodCall, bundle, variables);
 
         if (result != null)
         {
@@ -97,13 +122,13 @@ public class ConnectionsTracker
         return result;
     }
 
-    private object PrintResultRec(MethodNode node, Variable[] variables)
+    private object PrintResultRec(MethodNode node, CubeBundle bundle, Variable[] variables)
     {
         List<object> values = new List<object>();
 
         foreach (var paramater in node.MyParamaters)
         {
-            var constant = this.paraDirectInputConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
+            var constant = bundle.ParaDirectInputConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
             if (constant.Length > 1)
             {
                 Debug.Log("MORE THANT ONE CONSTANT!!!!");
@@ -128,7 +153,7 @@ public class ConnectionsTracker
                 continue;
             }
 
-            var method = this.paraMethConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
+            var method = bundle.ParaMethConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
             if (method.Length > 1)
             {
                 Debug.Log("MORE THANT ONE CONSTANT!!!!");
@@ -143,7 +168,7 @@ public class ConnectionsTracker
             }
             else
             {
-                values.Add(PrintResultRec(method[0].Method, variables));
+                values.Add(PrintResultRec(method[0].Method, bundle, variables));
             }
 
             values[values.Count - 1] = Convert.ChangeType(values[values.Count - 1], paramater.Info.ParameterType);
@@ -173,14 +198,16 @@ public class ConnectionsTracker
 
     #endregion
 
-    public void RegisterClassName(ClassTracking classInfo)
+    public void RegisterClassNameForPersistanc(ClassTracking classInfo, string name)
     {
-        this.classTypeNamesForPersistance.Add(classInfo);
+        name = name == null ? workBundleName : name;
+
+        this.bundles.Single(x => x.Name == name).ClassTypeNamesForPersistance.Add(classInfo);
     }
 
     public void Persist(string name = "some_name")
     {
-        MethodIDParamaterID[] methodParams = this.paraMethConnections
+        MethodIDParamaterID[] methodParams = this.bundles.Single(x=>x.Name == workBundleName).ParaMethConnections
             .Select(x => new MethodIDParamaterID
             {
                 MethodID = x.Method.ID,
@@ -188,7 +215,7 @@ public class ConnectionsTracker
             })
             .ToArray();
 
-        DirectInputIDParamaterID[] directInputs = paraDirectInputConnections
+        DirectInputIDParamaterID[] directInputs = this.bundles.Single(x => x.Name == workBundleName).ParaDirectInputConnections
             .Select(x => new DirectInputIDParamaterID
             {
                 DirectInputID = x.DirectInput.ID,
@@ -196,7 +223,7 @@ public class ConnectionsTracker
             })
             .ToArray();
 
-        ClassInfo[] infos = this.classTypeNamesForPersistance
+        ClassInfo[] infos = this.bundles.Single(x => x.Name == workBundleName).ClassTypeNamesForPersistance
             .Select(x => new ClassInfo
             {
                 Name = x.Name,
@@ -204,17 +231,40 @@ public class ConnectionsTracker
             })
             .ToArray();
 
-        this.persistance.Persist(infos, methodParams, this.directInputs.ToArray(), directInputs, name, resultMethodCall == null ? (int?)null : resultMethodCall.ID);
+        this.persistance.Persist(
+            infos,
+            methodParams,
+            this.bundles.Single(x => x.Name == workBundleName).DirectInputs.ToArray(),
+            directInputs,
+            name, 
+            this.bundles.Single(x => x.Name == workBundleName).ResultMethodCall == null ? (int?)null : this.bundles.Single(x => x.Name == workBundleName).ResultMethodCall.ID);
     }
 
-    public void LoadPersistedData()
+    public void LoadPersistedData(string name, bool visualise = false)
     {
-        this.persistance.LoadPersistedData();
+        this.persistance.LoadPersistedData(name, visualise);
     }
 
-    public void RegisterDirectInput(DirectInput DI)
+    public void RegisterDirectInput(DirectInput DI, string name)
     {
-        this.directInputs.Add(DI);
+        name = name == null ? workBundleName : name;
+
+        this.bundles.Single(x => x.Name == name).DirectInputs.Add(DI);
+    }
+
+    public class CubeBundle
+    {
+        public CubeBundle(string Name)
+        {
+            this.Name = Name;
+        }
+
+        public string Name { get; set; }
+        public MethodNode ResultMethodCall { get; set; }
+        public List<ParameterDirectInput> ParaDirectInputConnections { get; set; } = new List<ParameterDirectInput>();
+        public List<ParameterMethod> ParaMethConnections { get; set; } = new List<ParameterMethod>();
+        public List<ClassTracking> ClassTypeNamesForPersistance { get; set; } = new List<ClassTracking>();
+        public List<DirectInput> DirectInputs { get; set; } = new List<DirectInput>();
     }
 }
 

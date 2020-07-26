@@ -12,7 +12,7 @@ public class WorldSpaceUI : MonoBehaviour
 
     public ZoomMode zoomMode { get; set; } = ZoomMode.OuterZoom;
     public GameObject levelSpecificParent;
-    public GameObject persistantParent; 
+    public GameObject persistantParent;
     private Camera myCamera;
     private Camera myCamera2;
     private SpellMenuDragCam camHandling2;
@@ -39,7 +39,7 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Start()
     {
-        if(transperantMat == null)
+        if (transperantMat == null)
         {
             this.transperantMat = Resources.Load("Materials/transperantMat", typeof(Material)) as Material;
             this.inputPanelPrefab = Resources.Load("Prefabs/WorldSpaceCanvases/ConstantCanvasPrefab", typeof(GameObject)) as GameObject;
@@ -67,7 +67,7 @@ public class WorldSpaceUI : MonoBehaviour
         this.myCamera2.enabled = false;
 
         this.procUI = this.GetComponent<SpellcraftProcUI>();
-        this.procUI.Setup(this.myCamera2, this.connTracker ,0.035f);
+        this.procUI.Setup(this.myCamera2, this.connTracker, 0.035f);
         float YY = 40;
         this.procUI.SetCanvasPosition(new Vector3(20, YY, 20));
         this.procUIAnchor = new GameObject("ProcUIAnchor");
@@ -90,7 +90,7 @@ public class WorldSpaceUI : MonoBehaviour
         this.resultGO.transform.position = new Vector3(0, -15, 0);
         this.resultNode = this.resultGO.AddComponent<ResultNode>();
         ///... 
-        
+
         this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, this.resultNode);
         this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.levelSpecificParent.transform);
         this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, this.resultNode, this.classVisualisation);
@@ -104,7 +104,7 @@ public class WorldSpaceUI : MonoBehaviour
             this.levels.SpellCraft_TEST(false);
         }
 
-        this.levelSpecificParent.transform.position = this.position; 
+        this.levelSpecificParent.transform.position = this.position;
         this.persistantParent.transform.position = this.position;
     }
 
@@ -139,30 +139,9 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            if(this.myCamera.enabled == false) /// SECOND CAM IS ON
-            {
-                this.camHandling.SetEnabled(true);
-                this.camHandling2.UnsetTarget(this.myCamera.gameObject);
-            }
-            else /// FIRST CAM IS ON
-            {
-                this.camHandling.SetEnabled(false);
-                this.myCamera2.enabled = true;
-                this.myCamera.enabled = false;
-                this.camHandling2.SetTarget(this.procUIAnchor.transform.position, this.myCamera.gameObject.transform.rotation, this.myCamera.gameObject.transform.position);
-            }
-        }
-
         if (Input.GetKeyDown(KeyCode.P))
         {
             this.connTracker.Persist();
-        }
-
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            this.connTracker.LoadPersistedData();
         }
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -180,7 +159,7 @@ public class WorldSpaceUI : MonoBehaviour
             this.connRegisterer.ResetToNull();
         }
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.G))
         {
             this.resultCanvas.Show();
             this.camHandling.SetRotateToView(this.resultCanvasVantigePoint);
@@ -221,6 +200,26 @@ public class WorldSpaceUI : MonoBehaviour
             }
 
             this.dragged?.SetRotating(false);
+        }
+    }
+
+    public void SwitchToMenu()
+    {
+        /// SECOND CAM IS ON
+        if (this.myCamera.enabled == false)
+        {
+            this.camHandling.SetEnabled(true);
+            this.camHandling2.UnsetTarget(this.myCamera.gameObject);
+            //Debug.Log("SPELL MOVE TO MAILN");
+        }
+        /// FIRST CAM IS ON
+        else
+        {
+            this.camHandling.SetEnabled(false);
+            this.myCamera2.enabled = true;
+            this.myCamera.enabled = false;
+            this.camHandling2.SetTarget(this.procUIAnchor.transform.position, this.myCamera.gameObject.transform.rotation, this.myCamera.gameObject.transform.position);
+            //Debug.Log("SPELL MOVE TO second");
         }
     }
 

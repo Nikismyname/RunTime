@@ -75,12 +75,14 @@ public class Setups
 
     public void SpellCraft_TEST(bool solved = false)
     {
+        this.UI.connTracker.RegisterBundle(null);
+
         ///CLASS NODES
         var spellClass = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<SpellcraftClasses.Projectile>(), new Vector3(0, 0, 0), out Node one);
-        this.UI.connTracker.RegisterClassName(new ClassTracking { Name = typeof(SpellcraftClasses.Projectile).FullName, node = one });
+        this.UI.connTracker.RegisterClassNameForPersistanc(new ClassTracking { Name = typeof(SpellcraftClasses.Projectile).FullName, node = one }, null);
 
         var vecUtil = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Vector3Classes.Vector3Util>(), new Vector3(0, +5, 0), out Node two);
-        this.UI.connTracker.RegisterClassName(new ClassTracking { Name = typeof(Vector3Classes.Vector3Util).FullName, node = two });
+        this.UI.connTracker.RegisterClassNameForPersistanc(new ClassTracking { Name = typeof(Vector3Classes.Vector3Util).FullName, node = two }, null);
 
         //TODO: The names are truncated for the frontend and names need to be 6 sumbols for things to match. FIX IT!
         ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerPositionVarName);
@@ -95,19 +97,19 @@ public class Setups
         int id = 0;
 
         var contant1 = this.inputCanvas.CreateInputCanvas(0.5f, ++id, this.UI, false);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 0.5f));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 0.5f), null);
         var contant2 = this.inputCanvas.CreateInputCanvas(0.5f, ++id, this.UI, false);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 0.5f));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 0.5f), null);
         var contant3 = this.inputCanvas.CreateInputCanvas(14, ++id, this.UI, false);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 14));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 14), null);
         var contant4 = this.inputCanvas.CreateInputCanvas(15, ++id, this.UI, false);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 15));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 15), null);
         var contant5 = this.inputCanvas.CreateInputCanvas(16, ++id, this.UI, false);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 16));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 16), null);
         var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerPositionVarName);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerPositionVarName, null));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerPositionVarName, null), null);
         var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerForwardVarName);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerForwardVarName, null));
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerForwardVarName, null), null);
     }
 
     #endregion

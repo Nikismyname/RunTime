@@ -5,7 +5,9 @@ public class LevelMainRPG : LevelBase
     private GameObject player;
     private GameObject mainCamera;
     private GameObject mainSpellCamera;
+    private GameObject secondSpellCamera;
     private WorldSpaceUI worldSpaceUI;
+    public ActionKeyPersistance persistanse = new ActionKeyPersistance();
 
     private void Start()
     {
@@ -16,6 +18,7 @@ public class LevelMainRPG : LevelBase
         this.player = ReferenceBuffer.Instance.gl.Player(new Vector3(0, 0, 10), true, true, true);
         this.mainCamera = GameObject.Find("MainCamera");
         this.mainSpellCamera = GameObject.Find("Camera"); /// second cam is Camera2
+        this.secondSpellCamera = GameObject.Find("Camera2");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
         ///...
@@ -36,14 +39,46 @@ public class LevelMainRPG : LevelBase
                 this.mainCamera.GetComponent<Camera>().enabled = false;
                 this.mainSpellCamera.GetComponent<Camera>().enabled = true;
                 ReferenceBuffer.Instance.UI.SetActive(false);
+                //Debug.Log("RPG OFF");
             }
             /// Spellcraft Mode active
             else
             {
                 this.mainCamera.GetComponent<Camera>().enabled = true;
                 this.mainSpellCamera.GetComponent<Camera>().enabled = false;
+                this.secondSpellCamera.GetComponent<Camera>().enabled = false;
                 ReferenceBuffer.Instance.UI.SetActive(true);
+                //Debug.Log("RPG ON");
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.C) && this.mainCamera.GetComponent<Camera>().enabled == false)
+        {
+            this.worldSpaceUI.SwitchToMenu();
+            //Debug.Log("SPELL SWITCH");
+        }
+    }
+
+    public void SwithchToSpellCraft()
+    {
+        if (this.mainCamera.GetComponent<Camera>().enabled == true)
+        {
+            this.mainCamera.GetComponent<Camera>().enabled = false;
+            this.mainSpellCamera.GetComponent<Camera>().enabled = true;
+            ReferenceBuffer.Instance.UI.SetActive(false);
+            //Debug.Log("RPG OFF");
+        }
+    }
+
+    public void SwithchToRPG()
+    {
+        if (this.mainCamera.GetComponent<Camera>().enabled == false)
+        {
+            this.mainCamera.GetComponent<Camera>().enabled = true;
+            this.mainSpellCamera.GetComponent<Camera>().enabled = false;
+            this.secondSpellCamera.GetComponent<Camera>().enabled = false;
+            ReferenceBuffer.Instance.UI.SetActive(true);
+            //Debug.Log("RPG ON");
         }
     }
 

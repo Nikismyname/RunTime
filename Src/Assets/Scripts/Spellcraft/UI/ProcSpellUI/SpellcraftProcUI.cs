@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#region INIT
+
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -27,7 +29,7 @@ public class SpellcraftProcUI : MonoBehaviour
     private GameObject canvasGO;
     private Canvas canvas;
 
-    private List<GameObject> UIElements = new List<GameObject>();
+    //private List<GameObject> UIElements = new List<GameObject>();
 
     private List<GameObject> loadButtons = new List<GameObject>();
     private List<GameObject> saveButtons = new List<GameObject>();
@@ -67,8 +69,10 @@ public class SpellcraftProcUI : MonoBehaviour
         this.CreateLoadRow(new Vector2(0, 0), out float x1, out float y1);
         this.DrawSaveCubeMenu(new Vector2(x1, 0));
 
+        var UIElements = this.loadButtons.Concat(this.saveButtons);
+
         /// assuming  00 is TopRight so far, moving all elements to align
-        foreach (var elem in this.UIElements)
+        foreach (var elem in UIElements)
         {
             elem.transform.position -= new Vector3(this.canvasHalfX, -this.canvasHalfY);
         }
@@ -78,10 +82,14 @@ public class SpellcraftProcUI : MonoBehaviour
         this.SetCanvasPosition(new Vector3(20, 40, 20));
     }
 
+    #endregion 
+
     public void SetCanvasPosition(Vector3 pos)
     {
         this.canvasGO.transform.position = pos;
     }
+
+    #region HIGER_LEVEL UL MAKERS
 
     private void CreateLoadRow(Vector2 TR, out float x, out float y)
     {
@@ -100,6 +108,9 @@ public class SpellcraftProcUI : MonoBehaviour
 
             GameObject main = this.DrawButton(name, new Vector2(TR.x, TR.y - i * (this.buttonPixelsY + this.YOffset)));
             GameObject delete = this.DrawButton("X", new Vector2(TR.x + this.buttonPixelsX + this.XOffset, TR.y - i * (this.buttonPixelsY + this.YOffset)), new Vector2(30, 30), Color.red);
+
+            main.GetComponent<Button>().onClick.AddListener(() => this.OnClickLoadCube(name)); 
+            delete.GetComponent<Button>().onClick.AddListener(() => this.OnClickDeleteCube(name));
 
             loadButtons.Add(main);
             loadButtons.Add(delete);
@@ -127,6 +138,8 @@ public class SpellcraftProcUI : MonoBehaviour
         this.saveButtons.Add(saveButton);
     }
 
+    #endregion
+
     #region PRIMITIVES
 
     private GameObject DrawButton(string text, Vector2 pos, Vector2? sizeDelta = null, Color? color = null)
@@ -143,7 +156,7 @@ public class SpellcraftProcUI : MonoBehaviour
             button.GetComponent<Image>().color = color.Value;
         }
 
-        this.UIElements.Add(button);
+        //this.UIElements.Add(button);
 
         return button; 
     }
@@ -159,7 +172,7 @@ public class SpellcraftProcUI : MonoBehaviour
         t.fontSize = fontSize;
         t.alignment = TextAlignmentOptions.Center;
 
-        this.UIElements.Add(text);
+        //this.UIElements.Add(text);
 
         return text;
     }
@@ -171,14 +184,14 @@ public class SpellcraftProcUI : MonoBehaviour
         rt.sizeDelta = new Vector2(XX, YY);
         input.transform.position = new Vector3(pos.x + XX / 2, pos.y - YY / 2, 0);
 
-        this.UIElements.Add(input);
+        //this.UIElements.Add(input);
 
         return input;
     }
 
     #endregion
 
-    #region BUTTONS 
+    #region ON_CLICK_EVENTS 
 
     public void OnClickSave(TMP_InputField nameInput)
     {
@@ -196,6 +209,17 @@ public class SpellcraftProcUI : MonoBehaviour
 
         this.tracker.Persist(name);
 
+        this.Init();
+    }
+
+    public void OnClickLoadCube(string name)
+    {
+        Debug.Log("NOT IMPLEMENTED!");
+    }
+
+    public void OnClickDeleteCube(string name)
+    {
+        CubePersistance.DeleteCube(name);
         this.Init();
     }
 
