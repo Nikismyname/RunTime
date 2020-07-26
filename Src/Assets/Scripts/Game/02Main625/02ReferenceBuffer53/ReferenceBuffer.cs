@@ -23,6 +23,7 @@ public class ReferenceBuffer : MonoBehaviour
     public UniUIManager UniUIManager { get; set; }
     public EditorInput EditorInput { get; set; }
     public GenerateUpdateAndDisplayTargetSpeceficUI ManageProcUI { get; set; }
+    public GameObject UI { get; set; }
 
     private void Awake()
     {
@@ -49,6 +50,7 @@ public class ReferenceBuffer : MonoBehaviour
         this.EditorInput = main.GetComponent<EditorInput>();
         GameObject actionsContent = GameObject.Find("ActionsContent"); 
         this.ManageProcUI = actionsContent.GetComponent<GenerateUpdateAndDisplayTargetSpeceficUI>();
+        this.UI = GameObject.Find("UI");
     }
 
     public void RegisterPlayerHandling(PlayerHandling2 playerHandling)

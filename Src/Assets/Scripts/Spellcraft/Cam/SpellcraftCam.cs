@@ -120,7 +120,7 @@ public class SpellcraftCam : MonoBehaviour
 
             if (this.currentStep == this.maxSteps)
             {
-                Debug.Log("HERE");
+                Debug.Log("isRotateToView DONE");
                 this.isRotateToView = false;
                 this.xDeg = Vector3.Angle(Vector3.right, this.transform.right);
                 this.yDeg = Vector3.Angle(Vector3.up, this.transform.up);

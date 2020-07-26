@@ -35,6 +35,7 @@ public class WorldSpaceUI : MonoBehaviour
     public GameObject procUIAnchor;
 
     public ResultNode resultNode;
+    private Vector3 position;
 
     private void Start()
     {
@@ -102,6 +103,9 @@ public class WorldSpaceUI : MonoBehaviour
         {
             this.levels.SpellCraft_TEST(false);
         }
+
+        this.levelSpecificParent.transform.position = this.position; 
+        this.persistantParent.transform.position = this.position;
     }
 
     private void Reinit()
@@ -122,6 +126,11 @@ public class WorldSpaceUI : MonoBehaviour
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
         this.resultCanvasVantigePoint.transform.SetParent(this.levelSpecificParent.transform);
+    }
+
+    public void Setup(Vector3 position)
+    {
+        this.position = position;
     }
 
     #endregion
