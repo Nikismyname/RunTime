@@ -27,6 +27,7 @@ public class LevelMainRPG : LevelBase
         this.worldSpaceUI = gameObject.AddComponent<WorldSpaceUI>();
         this.worldSpaceUI.Setup(new Vector3(0, -40, 0));
         this.worldSpaceUI.LoadLevel = true;
+        ReferenceBuffer.Instance.RegisterWorldSapceUI(this.worldSpaceUI);
     }
 
     private void Update()

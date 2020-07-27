@@ -27,6 +27,8 @@ public class CubePersistance
         };
     }
 
+    #endregion
+
     public void Persist(ClassInfo[] classTypesAndPosInOrder, MethodIDParamaterID[] methodParams, DirectInput[] directInputs, DirectInputIDParamaterID[] directInputIDsParamID, string name, int? resultMethodId)
     {
         CubeInfo info = new CubeInfo
@@ -50,6 +52,9 @@ public class CubePersistance
 
     public void LoadPersistedData(string name, bool visualise = false)
     {
+        /// Reseting the ID for every new deserialized item so the ids match the original ids.
+        this.UI.classVisualisation.Reset();
+
         CubeInfo[] infos = GetAllSavedCubes();
 
         CubeInfo info = infos.FirstOrDefault(x => x.Name == name);
@@ -69,7 +74,8 @@ public class CubePersistance
             Vector3 position = cin.Position;
 
             var spellClass = this.UI.classVisualisation.GenerateClassVisualisation(this.UI.classVisualisation.GenerateNodeData(type), position, out Node one);
-            this.UI.connTracker.RegisterClassNameForPersistanc(new ClassTracking { Name = type.FullName, node = one }, info.Name);
+
+            this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking { Name = type.FullName, node = one }, info.Name);
 
             methodInfoWithParamInfo.Add(spellClass);
         }
@@ -138,7 +144,24 @@ public class CubePersistance
             }
         }
 
-        MethodNode resultMethod = methodInfoWithParamInfo.SelectMany(x => x.Select(y => y.Method)).Single(x => x.ID == info.ResultMethodID);
+        MethodNode[] methodNodes = methodInfoWithParamInfo.SelectMany(x => x.Select(y => y.Method)).ToArray();
+
+        MethodNode[] resultMethods = methodNodes.Where(x => x.ID == info.ResultMethodID.Value).ToArray();
+
+        if(resultMethods.Length == 0)
+        {
+            Debug.Log("Result Node not found!");
+            return; 
+        }
+
+        if(resultMethods.Length > 1)
+        {
+            Debug.Log("More than one Result Node!!");
+            return;
+        }
+
+        MethodNode resultMethod = resultMethods[0];
+
         if (visualise)
         {
             this.UI.connRegisterer.RegisterResultClick(this.UI.resultNode, resultMethod);
@@ -155,9 +178,9 @@ public class CubePersistance
     {
         CubeInfo[] cubes = GetAllSavedCubes();
 
-        CubeInfo existing = cubes.SingleOrDefault(x => x.Name == name); 
+        CubeInfo existing = cubes.SingleOrDefault(x => x.Name == name);
 
-        if(existing == null)
+        if (existing == null)
         {
             Debug.Log("Cube to delete not found!");
             return;
@@ -178,6 +201,8 @@ public class CubePersistance
 
         return infos;
     }
+
+    #region HELPERS
 
     private static string Serialize(object obj)
     {

@@ -79,10 +79,10 @@ public class Setups
 
         ///CLASS NODES
         var spellClass = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<SpellcraftClasses.Projectile>(), new Vector3(0, 0, 0), out Node one);
-        this.UI.connTracker.RegisterClassNameForPersistanc(new ClassTracking { Name = typeof(SpellcraftClasses.Projectile).FullName, node = one }, null);
+        this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking { Name = typeof(SpellcraftClasses.Projectile).FullName, node = one }, null);
 
         var vecUtil = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Vector3Classes.Vector3Util>(), new Vector3(0, +5, 0), out Node two);
-        this.UI.connTracker.RegisterClassNameForPersistanc(new ClassTracking { Name = typeof(Vector3Classes.Vector3Util).FullName, node = two }, null);
+        this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking { Name = typeof(Vector3Classes.Vector3Util).FullName, node = two }, null);
 
         //TODO: The names are truncated for the frontend and names need to be 6 sumbols for things to match. FIX IT!
         ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerPositionVarName);

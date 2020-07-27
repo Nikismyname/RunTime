@@ -39,11 +39,8 @@ public class ConnectionsTracker
 
     public void TrackParameterAssignConstant(ParameterNode node, DirectInputNode constant, string name = null)
     {
-        if (name == null)
-        {
-            Debug.LogWarning("name null");
-            return;
-        }
+        name = name == null ? workBundleName : name;
+
 
         var existing = this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections.SingleOrDefault(x => x.Parameter == node);
 
@@ -63,11 +60,7 @@ public class ConnectionsTracker
 
     public void TrackParameterAssignMethod(ParameterNode node, MethodNode method, string name = null)
     {
-        if(name == null)
-        {
-            Debug.LogWarning("name null");
-            return;
-        }
+        name = name == null ? workBundleName : name;
 
         var existing = this.bundles.Single(x=>x.Name == name)?.ParaMethConnections.SingleOrDefault(x => x.Parameter == node);
 
@@ -84,11 +77,7 @@ public class ConnectionsTracker
 
     public void TrackResultAssignMethodCall(MethodNode node, string name = null)
     {
-        if (name == null)
-        {
-            Debug.LogWarning("name null");
-            return;
-        }
+        name = name == null ? workBundleName : name;
 
         this.bundles.Single(x => x.Name == name).ResultMethodCall = node;
     }
@@ -101,8 +90,24 @@ public class ConnectionsTracker
     {
         bundleName = bundleName == null ? workBundleName : bundleName; 
 
-        CubeBundle bundle = this.bundles.Single(x => x.Name == bundleName); 
-       
+        CubeBundle bundle = this.bundles.SingleOrDefault(x => x.Name == bundleName);
+        
+        if(bundle == null)
+        {
+            this.bundles.Add(new CubeBundle(bundleName));
+            this.LoadPersistedData(bundleName, false);
+            Debug.Log($"Bundle not Found, Loading Bundle: {bundleName}");
+        }
+
+        bundle = this.bundles.SingleOrDefault(x => x.Name == bundleName);
+
+        if (bundle == null)
+        {
+            this.LoadPersistedData(bundleName, false);
+            Debug.LogError($"Bundle not Found After Loading it, ABORT");
+            return null;
+        }
+
         if (variables == null)
             variables = new Variable[0];
 
@@ -198,7 +203,7 @@ public class ConnectionsTracker
 
     #endregion
 
-    public void RegisterClassNameForPersistanc(ClassTracking classInfo, string name)
+    public void RegisterClassNameForPersistance(ClassTracking classInfo, string name)
     {
         name = name == null ? workBundleName : name;
 
@@ -231,13 +236,15 @@ public class ConnectionsTracker
             })
             .ToArray();
 
+        var resultM = this.bundles.Single(x => x.Name == workBundleName).ResultMethodCall;
+
         this.persistance.Persist(
             infos,
             methodParams,
             this.bundles.Single(x => x.Name == workBundleName).DirectInputs.ToArray(),
             directInputs,
-            name, 
-            this.bundles.Single(x => x.Name == workBundleName).ResultMethodCall == null ? (int?)null : this.bundles.Single(x => x.Name == workBundleName).ResultMethodCall.ID);
+            name,
+            resultM?.ID);
     }
 
     public void LoadPersistedData(string name, bool visualise = false)

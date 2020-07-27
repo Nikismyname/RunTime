@@ -34,7 +34,7 @@ public class ActionButton : MonoBehaviour
         {
             this.GetComponent<Button>().onClick.AddListener(this.OnClick);
             this.rpg = (LevelMainRPG)ReferenceBuffer.Instance.LevelManager.levelMono;
-            var mappings = this.rpg.persistanse.GetKeyCubeMapping();
+            var mappings = ActionKeyPersistance.GetKeyCubeMapping();
 
             var myMap = mappings.SingleOrDefault(x => x.KeyId == this.ID);
 

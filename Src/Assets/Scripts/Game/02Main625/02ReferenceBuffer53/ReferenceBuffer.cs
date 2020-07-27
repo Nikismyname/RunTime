@@ -24,13 +24,12 @@ public class ReferenceBuffer : MonoBehaviour
     public EditorInput EditorInput { get; set; }
     public GenerateUpdateAndDisplayTargetSpeceficUI ManageProcUI { get; set; }
     public GameObject UI { get; set; }
+    public WorldSpaceUI worldSpaceUI { get; set; }
 
     private void Awake()
     {
         Instance = this;
-
         GameObject main = GameObject.Find("Main");
-
         this.ShowCode = GameObject.Find("ShowCodeButton").GetComponent<ShowCodeBehaviour>();
         this.ColorPicker = GameObject.Find("ColorPicker");
         this.ColorPicker.SetActive(false);
@@ -51,6 +50,17 @@ public class ReferenceBuffer : MonoBehaviour
         GameObject actionsContent = GameObject.Find("ActionsContent"); 
         this.ManageProcUI = actionsContent.GetComponent<GenerateUpdateAndDisplayTargetSpeceficUI>();
         this.UI = GameObject.Find("UI");
+    }
+
+    //private void Start()
+    //{
+    //    GameObject main = GameObject.Find("Main");
+    //    this.worldSpaceUI = main.GetComponent<WorldSpaceUI>();
+    //}
+
+    public void RegisterWorldSapceUI(WorldSpaceUI worldSpaceUI)
+    {
+        this.worldSpaceUI = worldSpaceUI;
     }
 
     public void RegisterPlayerHandling(PlayerHandling2 playerHandling)
