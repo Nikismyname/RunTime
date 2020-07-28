@@ -12,7 +12,7 @@ public class SpellcraftProcUI : MonoBehaviour
     public GameObject inputFieldPrefab;
     public GameObject dropDownPrefab;
     public GameObject textPrefab;
-    private ConnectionsTracker tracker; 
+    private ConnectionsTracker tracker;
     private Camera camera;
 
     private float canvasHalfY = 250;
@@ -33,13 +33,16 @@ public class SpellcraftProcUI : MonoBehaviour
 
     private List<GameObject> loadButtons = new List<GameObject>();
     private List<GameObject> saveButtons = new List<GameObject>();
+    private List<GameObject> actionMapButtons = new List<GameObject>();
+
+    private List<ActionButtonMap> actionButtonData = new List<ActionButtonMap>();
 
     public GameObject GetGameObject()
     {
         return this.canvasGO;
     }
 
-    public void Setup(Camera camera, ConnectionsTracker tracker , float globalScale = 0.2f)
+    public void Setup(Camera camera, ConnectionsTracker tracker, float globalScale = 0.2f)
     {
         this.tracker = tracker;
         this.camera = camera;
@@ -50,7 +53,7 @@ public class SpellcraftProcUI : MonoBehaviour
 
     public void Init()
     {
-        if(this.buttonPrefab == null)
+        if (this.buttonPrefab == null)
         {
             this.buttonPrefab = Resources.Load("Prefabs/NonCanvaces/TMP/TMPButton", typeof(GameObject)) as GameObject;
             this.inputFieldPrefab = Resources.Load("Prefabs/NonCanvaces/TMP/TMPInputField", typeof(GameObject)) as GameObject;
@@ -66,10 +69,11 @@ public class SpellcraftProcUI : MonoBehaviour
         this.canvasGO.AddComponent<GraphicRaycaster>();
         rectT.sizeDelta = new Vector2(this.canvasHalfX * 2, this.canvasHalfY * 2);
 
-        this.CreateLoadRow(new Vector2(0, 0), out float x1, out float y1);
-        this.DrawSaveCubeMenu(new Vector2(x1, 0));
+        this.DrawLoadRow(new Vector2(0, 0), out float x1, out float y1);
+        this.DrawSaveCubeMenu(new Vector2(x1, 0), out float x2);
+        this.DrawActionButtonMapping(new Vector2(x1 + x2, 0), out float x3);
 
-        var UIElements = this.loadButtons.Concat(this.saveButtons);
+        var UIElements = this.loadButtons.Concat(this.saveButtons).Concat(this.actionMapButtons);
 
         /// assuming  00 is TopRight so far, moving all elements to align
         foreach (var elem in UIElements)
@@ -91,7 +95,39 @@ public class SpellcraftProcUI : MonoBehaviour
 
     #region HIGER_LEVEL UL MAKERS
 
-    private void CreateLoadRow(Vector2 TR, out float x, out float y)
+    private void DrawActionButtonMapping(Vector2 TR, out float x)
+    {
+        for (int i = 0; i < this.actionMapButtons.Count; i++)
+        {
+            GameObject.Destroy(this.actionMapButtons[i]);
+        }
+        this.actionMapButtons = new List<GameObject>();
+        this.actionButtonData = new List<ActionButtonMap>();
+
+        var mappings = ActionKeyPersistance.GetKeyCubeMapping();
+
+        for (int yy = 0; yy < 3; yy++)
+        {
+            for (int xx = 0; xx < 3; xx++)
+            {
+                GameObject mapButton = DrawButton("", new Vector2(TR.x + this.XOffset + xx * (this.XOffset + this.buttonPixelsX), TR.y - (yy * (this.YOffset + this.buttonPixelsY))));
+                this.actionMapButtons.Add(mapButton);
+                int keyId = yy * 3 + xx + 1;
+                var node = new ActionButtonMap(keyId, mapButton, this.actionButtonData);
+                var mapping = mappings.FirstOrDefault(y => y.KeyId == keyId);
+                if (mapping != null)
+                {
+                    node.SetName(mapping.CubeName);
+                }
+                this.actionButtonData.Add(node);
+                mapButton.GetComponent<Button>().onClick.AddListener(() => node.Select());
+            }
+        }
+
+        x = 12;
+    }
+
+    private void DrawLoadRow(Vector2 TR, out float x, out float y)
     {
         for (int i = 0; i < this.loadButtons.Count; i++)
         {
@@ -100,7 +136,7 @@ public class SpellcraftProcUI : MonoBehaviour
 
         this.loadButtons = new List<GameObject>();
 
-        string[] textNames = CubePersistance.GetAllSavedCubes().Select(z=> z.Name).ToArray();
+        string[] textNames = CubePersistance.GetAllSavedCubes().Select(z => z.Name).ToArray();
 
         for (int i = 0; i < textNames.Length; i++)
         {
@@ -109,7 +145,7 @@ public class SpellcraftProcUI : MonoBehaviour
             GameObject main = this.DrawButton(name, new Vector2(TR.x, TR.y - i * (this.buttonPixelsY + this.YOffset)));
             GameObject delete = this.DrawButton("X", new Vector2(TR.x + this.buttonPixelsX + this.XOffset, TR.y - i * (this.buttonPixelsY + this.YOffset)), new Vector2(30, 30), Color.red);
 
-            main.GetComponent<Button>().onClick.AddListener(() => this.OnClickLoadCube(name)); 
+            main.GetComponent<Button>().onClick.AddListener(() => this.OnClickLoadCube(name));
             delete.GetComponent<Button>().onClick.AddListener(() => this.OnClickDeleteCube(name));
 
             loadButtons.Add(main);
@@ -120,7 +156,7 @@ public class SpellcraftProcUI : MonoBehaviour
         y = 42;
     }
 
-    private void DrawSaveCubeMenu(Vector2 TR)
+    private void DrawSaveCubeMenu(Vector2 TR, out float x)
     {
         for (int i = 0; i < this.saveButtons.Count; i++)
         {
@@ -132,10 +168,12 @@ public class SpellcraftProcUI : MonoBehaviour
         GameObject text = this.DrawText(new Vector2(TR.x, TR.y), "Name The Save", 20);
         GameObject input = this.DrawInputMenu(new Vector2(TR.x, TR.y - this.YOffset - this.buttonPixelsY));
         GameObject saveButton = DrawButton("Save", new Vector2(TR.x, TR.y - (this.YOffset + this.buttonPixelsY) * 2));
-        saveButton.GetComponent<Button>().onClick.AddListener(()=>this.OnClickSave(input.GetComponent<TMP_InputField>()));
+        saveButton.GetComponent<Button>().onClick.AddListener(() => this.OnClickSave(input.GetComponent<TMP_InputField>()));
         this.saveButtons.Add(text);
         this.saveButtons.Add(input);
         this.saveButtons.Add(saveButton);
+
+        x = this.buttonPixelsX + this.YOffset;
     }
 
     #endregion
@@ -158,7 +196,7 @@ public class SpellcraftProcUI : MonoBehaviour
 
         //this.UIElements.Add(button);
 
-        return button; 
+        return button;
     }
 
     private GameObject DrawText(Vector2 pos, string textInpt, int fontSize, int XX = 200, int YY = 30)
@@ -212,17 +250,85 @@ public class SpellcraftProcUI : MonoBehaviour
         this.Init();
     }
 
-    public void OnClickLoadCube(string name)
-    {
-        Debug.Log("NOT IMPLEMENTED!");
-    }
-
     public void OnClickDeleteCube(string name)
     {
         CubePersistance.DeleteCube(name);
         this.Init();
     }
 
-    #endregion 
+    private void OnClickLoadCube(string cubeName)
+    {
+        var mappings = ActionKeyPersistance.GetKeyCubeMapping();
+
+        if (mappings.Any(x => x.CubeName == cubeName))
+        {
+            Debug.Log("There is already key with that qubename!!!");
+            return;
+        }
+
+        var selected = this.actionButtonData.SingleOrDefault(x => x.Selected == true);
+
+        if (selected != null)
+        {
+            selected.SetName(cubeName);
+            selected.Deselect();
+            ActionKeyPersistance.Persist(new ActionKeyPersistance.ActionKeyPersistanceData
+            {
+                CubeName = cubeName,
+                KeyId = selected.ID, 
+            });
+        }
+    }
+
+    #endregion
+
+    #region DATA_CLASSES
+
+    public class ActionButtonMap
+    {
+        public ActionButtonMap(int id, GameObject gameObject, List<ActionButtonMap> all)
+        {
+            this.ID = id;
+            this.GameObject = gameObject;
+            this.all = all;
+        }
+
+        private List<ActionButtonMap> all;
+
+        public int ID { get; set; }
+
+        public GameObject GameObject { get; set; }
+
+        public string Name { get; set; } = null;
+
+        public bool Selected { get; set; } = false;
+
+
+        public void SetName(string name)
+        {
+            this.Name = name;
+
+            this.GameObject.transform.Find("Text").GetComponent<TMP_Text>().text = name;
+        }
+
+        public void Select()
+        {
+            foreach (var item in this.all)
+            {
+                item.Deselect();
+            }
+
+            this.Selected = true;
+            this.GameObject.GetComponent<Image>().color = Color.green;
+        }
+
+        public void Deselect()
+        {
+            this.Selected = false;
+            this.GameObject.GetComponent<Image>().color = Color.white;
+        }
+    }
+
+    #endregion
 }
 
