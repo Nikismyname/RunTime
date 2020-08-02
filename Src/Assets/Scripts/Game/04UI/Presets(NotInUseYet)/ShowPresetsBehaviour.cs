@@ -117,4 +117,52 @@ public class ShowPresetsBehaviour : MonoBehaviour
 
         public string CubeName { get; set; } = null;
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            this.ActionButtonOnClick(1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            this.ActionButtonOnClick(2);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            this.ActionButtonOnClick(3);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            this.ActionButtonOnClick(4);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            this.ActionButtonOnClick(5);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            this.ActionButtonOnClick(6);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha7))
+        {
+            this.ActionButtonOnClick(7);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha8))
+        {
+            this.ActionButtonOnClick(8);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            this.ActionButtonOnClick(9);
+        }
+    }
 }

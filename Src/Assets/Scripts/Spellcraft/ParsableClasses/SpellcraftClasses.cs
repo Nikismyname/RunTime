@@ -16,8 +16,9 @@ public class SpellcraftClasses
 
     public class BooletBehaviour: MonoBehaviour
     {
-        private Vector3 velocity; 
-
+        private Vector3 velocity;
+        private readonly float speed = 8f;
+        private float timeSpan = 5f;
         public void Setup(Vector3 velocity)
         {
             this.velocity = velocity; 
@@ -25,7 +26,17 @@ public class SpellcraftClasses
 
         private void Update()
         {
-            this.transform.position += this.velocity * Time.deltaTime;
+            float delta = Time.deltaTime;
+            this.timeSpan -= delta; 
+
+            if(this.timeSpan <= 0)
+            {
+                Destroy(gameObject);
+                Debug.Log("Destroyed!");
+            }
+
+            this.timeSpan -= delta;
+            this.transform.position -= this.velocity * delta * this.speed;
         }
     }
 }
