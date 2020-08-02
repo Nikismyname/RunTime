@@ -8,6 +8,7 @@ public class LevelMainRPG : LevelBase
     private GameObject secondSpellCamera;
     private WorldSpaceUI worldSpaceUI;
     public ActionKeyPersistance persistanse = new ActionKeyPersistance();
+    private GameObject droneCamGO;
 
     private void Start()
     {
@@ -28,6 +29,10 @@ public class LevelMainRPG : LevelBase
         this.worldSpaceUI.Setup(new Vector3(0, -40, 0));
         this.worldSpaceUI.LoadLevel = true;
         ReferenceBuffer.Instance.RegisterWorldSapceUI(this.worldSpaceUI);
+
+        this.droneCamGO = GameObject.Find("DroneCamera");
+        this.droneCamGO.GetComponent<Camera>().enabled = false;
+        this.droneCamGO.transform.position = new Vector3(5, 5, 5);
     }
 
     private void Update()
@@ -35,22 +40,13 @@ public class LevelMainRPG : LevelBase
         if (Input.GetKeyDown(KeyCode.F))
         {
             /// RPG Mode active
-            if (this.mainCamera.GetComponent<Camera>().enabled == true) 
-            {
-                this.mainCamera.GetComponent<Camera>().enabled = false;
-                this.mainSpellCamera.GetComponent<Camera>().enabled = true;
-                ReferenceBuffer.Instance.UI.SetActive(false);
-                //Debug.Log("RPG OFF");
-            }
-            /// Spellcraft Mode active
-            else
-            {
-                this.mainCamera.GetComponent<Camera>().enabled = true;
-                this.mainSpellCamera.GetComponent<Camera>().enabled = false;
-                this.secondSpellCamera.GetComponent<Camera>().enabled = false;
-                ReferenceBuffer.Instance.UI.SetActive(true);
-                //Debug.Log("RPG ON");
-            }
+            this.SwithchToSpellCraft();
+            this.SwithchToRPG();
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.D))
+        {
+            this.SwitchToDrone();
         }
 
         if (Input.GetKeyDown(KeyCode.C) && this.mainCamera.GetComponent<Camera>().enabled == false)
@@ -80,6 +76,28 @@ public class LevelMainRPG : LevelBase
             this.secondSpellCamera.GetComponent<Camera>().enabled = false;
             ReferenceBuffer.Instance.UI.SetActive(true);
             //Debug.Log("RPG ON");
+        }
+    }
+
+    public void SwitchToDrone()
+    {
+        /// Only switch to drone from rpg mode!
+        if (this.mainCamera.GetComponent<Camera>().enabled == true)
+        {
+            /// Switch To Drone
+            if (this.droneCamGO.GetComponent<Camera>().enabled == false)
+            {
+                this.droneCamGO.GetComponent<Camera>().enabled = true;
+                this.mainSpellCamera.GetComponent<Camera>().enabled = false;
+                this.player.SetActive(false);
+            }
+            /// Swith off drone
+            else
+            {
+                this.droneCamGO.GetComponent<Camera>().enabled = false;
+                this.mainSpellCamera.GetComponent<Camera>().enabled = true;
+                this.player.SetActive(true);
+            }
         }
     }
 
