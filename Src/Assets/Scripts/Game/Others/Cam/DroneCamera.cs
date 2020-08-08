@@ -12,6 +12,9 @@ public class DroneCamera : MonoBehaviour
 
     private float multyplier = 1f;
 
+    private float xDeg = 0.0f; 
+    private float yDeg = 0.0f; 
+
     private void Start()
     {
         this.myCamera = gameObject.GetComponent<Camera>();
@@ -24,27 +27,27 @@ public class DroneCamera : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKey(KeyCode.W))
         {
             this.transform.position += this.transform.forward * this.forwardSpeed * Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKey(KeyCode.S))
         {
             this.transform.position -= this.transform.forward * this.backwardSpeed * Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKey(KeyCode.A))
         {
             this.transform.position -= this.transform.right * this.sideSpeed * Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKey(KeyCode.D))
         {
             this.transform.position += this.transform.right * this.sideSpeed * Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space))
         {
             this.transform.position += this.transform.up * this.upSpeed * Time.deltaTime;
         }
@@ -53,6 +56,24 @@ public class DroneCamera : MonoBehaviour
         {
             this.transform.position -= this.transform.up * this.downSpeed * Time.deltaTime;
         }
+
+        float multy = 30f;
+
+        xDeg += Input.GetAxis("Mouse X") * Time.deltaTime * multy;
+        yDeg -= Input.GetAxis("Mouse Y") * Time.deltaTime * multy;
+
+        Quaternion desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
+
+        transform.rotation = desiredRotation;
+    }
+
+    private float ClampAngle(float angle, float min, float max)
+    {
+        if (angle < -360)
+            angle += 360;
+        if (angle > 360)
+            angle -= 360;
+        return Mathf.Clamp(angle, min, max);
     }
 }
 

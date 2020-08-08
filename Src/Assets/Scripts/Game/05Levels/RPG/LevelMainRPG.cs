@@ -33,6 +33,7 @@ public class LevelMainRPG : LevelBase
         this.droneCamGO = GameObject.Find("DroneCamera");
         this.droneCamGO.GetComponent<Camera>().enabled = false;
         this.droneCamGO.transform.position = new Vector3(5, 5, 5);
+        this.droneCamGO.AddComponent<Drone>();
     }
 
     private void Update()
@@ -95,7 +96,7 @@ public class LevelMainRPG : LevelBase
             else
             {
                 this.droneCamGO.GetComponent<Camera>().enabled = false;
-                this.mainSpellCamera.GetComponent<Camera>().enabled = true;
+                this.mainCamera.GetComponent<Camera>().enabled = true;
                 this.player.SetActive(true);
             }
         }

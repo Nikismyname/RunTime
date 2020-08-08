@@ -147,4 +147,13 @@ public static class GameObjectExtensions
         go.transform.parent = parent;
         GameObject.Destroy(rotator);
     }
+
+    public static void MyRotate(this GameObject go, Vector3 axis, float angle)
+    {
+        GameObject rotator = new GameObject("Rotator");
+        go.transform.parent = rotator.transform;
+        rotator.transform.Rotate(axis, angle);
+        go.transform.parent = null;
+        GameObject.Destroy(rotator);
+    }
 }
