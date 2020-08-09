@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class ConnectionsTracker
 {
-    private const string workBundleName = "WorkingOn"; 
+    private const string workBundleName = "WorkingOn";
 
     private List<CubeBundle> bundles = new List<CubeBundle>();
     private CubePersistance persistance;
@@ -19,7 +19,7 @@ public class ConnectionsTracker
 
     public void RegisterBundle(string name)
     {
-        name = name == null ? workBundleName : name; 
+        name = name == null ? workBundleName : name;
 
         this.bundles.Add(new CubeBundle(name));
     }
@@ -42,7 +42,8 @@ public class ConnectionsTracker
         name = name == null ? workBundleName : name;
 
 
-        var existing = this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections.SingleOrDefault(x => x.Parameter == node);
+        var existing = this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections
+            .SingleOrDefault(x => x.Parameter == node);
 
         if (existing != null)
         {
@@ -54,7 +55,8 @@ public class ConnectionsTracker
         }
         else
         {
-            this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections.Add(new ParameterDirectInput(node, constant));
+            this.bundles.Single(x => x.Name == name)?.ParaDirectInputConnections
+                .Add(new ParameterDirectInput(node, constant));
         }
     }
 
@@ -62,7 +64,8 @@ public class ConnectionsTracker
     {
         name = name == null ? workBundleName : name;
 
-        var existing = this.bundles.Single(x=>x.Name == name)?.ParaMethConnections.SingleOrDefault(x => x.Parameter == node);
+        var existing = this.bundles.Single(x => x.Name == name)?.ParaMethConnections
+            .SingleOrDefault(x => x.Parameter == node);
 
         if (existing != null)
         {
@@ -88,11 +91,11 @@ public class ConnectionsTracker
 
     public object PrintResult(string bundleName, Variable[] variables = null)
     {
-        bundleName = bundleName == null ? workBundleName : bundleName; 
+        bundleName = bundleName == null ? workBundleName : bundleName;
 
         CubeBundle bundle = this.bundles.SingleOrDefault(x => x.Name == bundleName);
-        
-        if(bundle == null)
+
+        if (bundle == null)
         {
             this.bundles.Add(new CubeBundle(bundleName));
             this.LoadPersistedData(bundleName, false);
@@ -133,7 +136,8 @@ public class ConnectionsTracker
 
         foreach (var paramater in node.MyParamaters)
         {
-            var constant = bundle.ParaDirectInputConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID).ToArray();
+            var constant = bundle.ParaDirectInputConnections.Where(x => x.Parameter.ParameterInfo.ID == paramater.ID)
+                .ToArray();
             if (constant.Length > 1)
             {
                 Debug.Log("MORE THANT ONE CONSTANT!!!!");
@@ -144,7 +148,7 @@ public class ConnectionsTracker
             {
                 if (constant[0].DirectInput.IsVariable())
                 {
-                    /// Finding the variable with the right name and getting it's value. The values are passed by the resultUI.
+                    // Finding the variable with the right name and getting it's value. The values are passed by the resultUI.
                     values.Add(variables.SingleOrDefault(x => x.Name == constant[0].DirectInput.VariableName)?.Value);
                 }
                 else
@@ -152,8 +156,15 @@ public class ConnectionsTracker
                     values.Add(constant[0].DirectInput.GetVal());
                 }
 
-                ///TODO: FIX
-                values[values.Count - 1] = Convert.ChangeType(values[values.Count - 1], paramater.Info.ParameterType);
+                try
+                {
+                    values[values.Count - 1] =
+                        Convert.ChangeType(values[values.Count - 1], paramater.Info.ParameterType);
+                }
+                catch (Exception e)
+                {
+                    // Debug.Log("Error converting");
+                }
 
                 continue;
             }
@@ -190,7 +201,7 @@ public class ConnectionsTracker
         {
             var param = node.MyParamaters[i];
 
-            Debug.Log($"{param.Info.ParameterType.Name} {par[i].ToString()}");
+            Debug.Log($"{param.Info.ParameterType.Name} {par[i]?.ToString()}");
         }
         //...
 
@@ -212,7 +223,7 @@ public class ConnectionsTracker
 
     public void Persist(string name = "some_name")
     {
-        MethodIDParamaterID[] methodParams = this.bundles.Single(x=>x.Name == workBundleName).ParaMethConnections
+        MethodIDParamaterID[] methodParams = this.bundles.Single(x => x.Name == workBundleName).ParaMethConnections
             .Select(x => new MethodIDParamaterID
             {
                 MethodID = x.Method.ID,
@@ -220,7 +231,8 @@ public class ConnectionsTracker
             })
             .ToArray();
 
-        DirectInputIDParamaterID[] directInputs = this.bundles.Single(x => x.Name == workBundleName).ParaDirectInputConnections
+        DirectInputIDParamaterID[] directInputs = this.bundles.Single(x => x.Name == workBundleName)
+            .ParaDirectInputConnections
             .Select(x => new DirectInputIDParamaterID
             {
                 DirectInputID = x.DirectInput.ID,

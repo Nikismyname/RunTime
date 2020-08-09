@@ -4,11 +4,17 @@ using UnityEngine;
 
 public class LineDestroyer
 {
-    public void CreateDestroyerLine(Vector3 begin, Vector3 end)
+    public void CreateDestroyerLine(Vector3? begin, Vector3? end)
     {
+        if (begin == null || end == null)
+        {
+            Debug.Log("LineDestroyer missing vector!");
+            return;
+        }
+
         LineDrawer drawer = new LineDrawer(null);
-        GameObject lineParent = drawer.DrawInGameLine(begin, end, Color.blue, 0.5f, new GameObject("Parent").transform);
-        GameObject line = lineParent.transform.Find("line").gameObject; 
+        GameObject lineParent = drawer.DrawInGameLine(begin.Value, end.Value, Color.blue, 0.5f, new GameObject("Parent").transform);
+        GameObject line = lineParent.transform.Find("line").gameObject;
         line.GetComponent<CapsuleCollider>().isTrigger = true;
         line.AddComponent<LineDestroyerBehaviour>();
     }
@@ -43,7 +49,7 @@ public class LineDestroyerBehaviour : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("HI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        
+
         if (other.gameObject.CompareTag("destroy"))
         {
             Destroy(other.gameObject);

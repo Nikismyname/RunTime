@@ -69,6 +69,17 @@ public class ShowPresetsBehaviour : MonoBehaviour
             {
                 new Variable
                 {
+                    Name = ResultCanvas.PlayerForwardVarName, 
+                    Value = ReferenceBuffer.Instance.PlayerObject.transform.forward,
+                },
+                new Variable
+                {
+                    Name = ResultCanvas.PlayerPositionVarName,
+                    Value = ReferenceBuffer.Instance.PlayerObject.transform.position,
+                },
+                
+                new Variable
+                {
                     Name = ResultCanvas.PlayerMarker, 
                     Value = ReferenceBuffer.Instance.PlayerIntersection.GetIntersectionPosition,
                 },

@@ -135,8 +135,8 @@ public class Setups
         var spellClass = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<LineDestroyer>(), new Vector3(0, 0, 0), out Node one);
         this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking {Name = typeof(LineDestroyer).FullName, node = one}, null);
 
-        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.DroneMarker);
-        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerMarker);
+        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.DroneMarker);
+        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.PlayerMarker);
 
         this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
         {
