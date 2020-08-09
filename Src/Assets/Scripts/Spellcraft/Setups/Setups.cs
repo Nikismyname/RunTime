@@ -1,4 +1,4 @@
-﻿#region 
+﻿#region
 
 using Boo.Lang;
 using UnityEngine;
@@ -11,10 +11,13 @@ public class Setups
     private WorldSpaceUI UI;
     private ResultNode resultNode;
     private ClassVisualisation classVisualisation;
-    private List<ClassVisualisation.MethodAndParameterNodes[]> customNodes = new List<ClassVisualisation.MethodAndParameterNodes[]>();
+
+    private List<ClassVisualisation.MethodAndParameterNodes[]> customNodes =
+        new List<ClassVisualisation.MethodAndParameterNodes[]>();
 
 
-    public Setups(ResultCanvas resultCanvas, InputCanvas inputCanvas, ConnectionsRegisterer connRegisterer, WorldSpaceUI UI, ResultNode resultNode, ClassVisualisation classVisualisation)
+    public Setups(ResultCanvas resultCanvas, InputCanvas inputCanvas, ConnectionsRegisterer connRegisterer,
+        WorldSpaceUI UI, ResultNode resultNode, ClassVisualisation classVisualisation)
     {
         this.resultCanvas = resultCanvas;
         this.inputCanvas = inputCanvas;
@@ -33,9 +36,11 @@ public class Setups
     public async void JustTwoAddMethod(bool solved = false)
     {
         ///CLASS NODES
-        var nodes1 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, +5, 0), out _);
+        var nodes1 = this.classVisualisation.GenerateClassVisualisation(
+            this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, +5, 0), out _);
         //this.UI.connTracker.RegisterClassName(nameof(TestClasses.Test));
-        var nodes2 = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, -5, 0), out _);
+        var nodes2 = this.classVisualisation.GenerateClassVisualisation(
+            this.classVisualisation.GenerateNodeData<TestClasses.Test>(), new Vector3(0, -5, 0), out _);
         //this.UI.connTracker.RegisterClassName(nameof(TestClasses.Test));
 
         //TODO: The names are truncated for the frontend and names need to be 4 sumbols for things to match. FIX IT!
@@ -78,15 +83,23 @@ public class Setups
         this.UI.connTracker.RegisterBundle(null);
 
         ///CLASS NODES
-        var spellClass = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<SpellcraftClasses.Projectile>(), new Vector3(0, 0, 0), out Node one);
-        this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking { Name = typeof(SpellcraftClasses.Projectile).FullName, node = one }, null);
+        var spellClass = this.classVisualisation.GenerateClassVisualisation(
+            this.classVisualisation.GenerateNodeData<SpellcraftClasses.Projectile>(), new Vector3(0, 0, 0),
+            out Node one);
+        this.UI.connTracker.RegisterClassNameForPersistance(
+            new ClassTracking {Name = typeof(SpellcraftClasses.Projectile).FullName, node = one}, null);
 
-        var vecUtil = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<Vector3Classes.Vector3Util>(), new Vector3(0, +5, 0), out Node two);
-        this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking { Name = typeof(Vector3Classes.Vector3Util).FullName, node = two }, null);
+        var vecUtil = this.classVisualisation.GenerateClassVisualisation(
+            this.classVisualisation.GenerateNodeData<Vector3Classes.Vector3Util>(), new Vector3(0, +5, 0),
+            out Node two);
+        this.UI.connTracker.RegisterClassNameForPersistance(
+            new ClassTracking {Name = typeof(Vector3Classes.Vector3Util).FullName, node = two}, null);
 
         //TODO: The names are truncated for the frontend and names need to be 6 sumbols for things to match. FIX IT!
-        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerPositionVarName);
-        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerForwardVarName);
+        ResultCanvas.VariableInput var1 =
+            new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerPositionVarName);
+        ResultCanvas.VariableInput var2 =
+            new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerForwardVarName);
 
         this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
         {
@@ -106,10 +119,37 @@ public class Setups
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 15), null);
         var contant5 = this.inputCanvas.CreateInputCanvas(16, ++id, this.UI, false);
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, 16), null);
-        var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerPositionVarName);
+        var variable1 =
+            this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerPositionVarName);
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerPositionVarName, null), null);
-        var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerForwardVarName);
+        var variable2 =
+            this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerForwardVarName);
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerForwardVarName, null), null);
+    }
+
+    public void LineDestroyer(bool solved = false)
+    {
+        this.UI.connTracker.RegisterBundle(null);
+
+        //CLASS NODES
+        var spellClass = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<LineDestroyer>(), new Vector3(0, 0, 0), out Node one);
+        this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking {Name = typeof(LineDestroyer).FullName, node = one}, null);
+
+        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.DroneMarker);
+        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3), ResultCanvas.PlayerMarker);
+
+        this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
+        {
+            var1,
+            var2,
+        });
+
+        int id = 0;
+
+        var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.DroneMarker);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.DroneMarker, null), null);
+        var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerMarker);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerMarker, null), null);
     }
 
     #endregion
@@ -125,7 +165,6 @@ public class Setups
 
     public void CustomSpellcraft()
     {
-
     }
 
     #endregion

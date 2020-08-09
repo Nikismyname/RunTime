@@ -13,7 +13,9 @@ public class ResultCanvas
     private ConnectionsTracker connTracker;
     public const string PlayerPositionVarName = "plyPos";
     public const string PlayerForwardVarName = "plyFor";
-
+    public const string DroneMarker = "marDro";
+    public const string PlayerMarker = "marPla";
+    
     public void Reset()
     {
         /// TODO:

@@ -287,6 +287,9 @@ public class GenerateLevel
             player = GameObject.Instantiate(ReferenceBuffer.Instance.EditorInput.playerPrefab);
         }
 
+        /// the ignore raycast layer
+        player.layer = 2;
+
         player.name = "Player";
         player.AddComponent<PlayerFailure>();
 

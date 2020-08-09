@@ -1,11 +1,11 @@
-﻿#region INIT
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LineDrawer
 {
+    #region INIT
+    
     private List<Line> lines = new List<Line>();
     private WorldSpaceUI UI;
 
@@ -128,10 +128,11 @@ public class LineDrawer
         this.DrawInGameLine(center + new Vector3(-halfSize, halfSize, -halfSize), center + new Vector3(halfSize, halfSize, -halfSize), Color.black, thickness, parent);
     }
 
-    private GameObject DrawInGameLine(Vector3 from, Vector3 to, Color color, float thickness, Transform parent)
+    public GameObject DrawInGameLine(Vector3 from, Vector3 to, Color color, float thickness, Transform parent)
     {
         GameObject localParent = new GameObject("LineParent");
         GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        line.name = "line";
         localParent.transform.position = new Vector3(0, -1, 0);
         line.transform.parent = localParent.transform;
 

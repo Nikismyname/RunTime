@@ -182,21 +182,21 @@ public class ConnectionsTracker
         object obj = node.Object;
         object[] par = values.ToArray();
 
-        ///DEBUGGING
-        Debug.Log("###########################################################################################");
-        Debug.Log($"<<<<{node.Object.GetType().Name}>>>");
-        Debug.Log($">>>{node.MyMethodInfo.Info.Name}<<<");
+        //DEBUGGING
+        // Debug.Log("###########################################################################################");
+        // Debug.Log($"<<<<{node.Object.GetType().Name}>>>");
+        // Debug.Log($">>>{node.MyMethodInfo.Info.Name}<<<");
         for (int i = 0; i < node.MyParamaters.Length; i++)
         {
             var param = node.MyParamaters[i];
 
             Debug.Log($"{param.Info.ParameterType.Name} {par[i].ToString()}");
         }
-        ///...
+        //...
 
         object result = node.MyMethodInfo.Info.Invoke(obj, par);
 
-        Debug.Log("PASSED");
+        //Debug.Log("PASSED");
 
         return result;
     }

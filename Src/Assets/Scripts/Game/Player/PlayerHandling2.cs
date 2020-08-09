@@ -41,10 +41,10 @@ public class PlayerHandling2 : MonoBehaviour
     private bool holdingWall = false;
     private KeyCode rechargeWhileHangingKeyCode = KeyCode.V;
 
+    private CamCenterIntersection camCenterInt;
+
     private void Start()
     {
-        //Debug.Log("Player Handling2");
-
         this.active = true;
         this.ms = GameObject.Find("Main").GetComponent<TargetManagerBehaviour>();
         this.speed = ReferenceBuffer.Instance.EditorInput.playerSpeed;
@@ -61,7 +61,8 @@ public class PlayerHandling2 : MonoBehaviour
 
         this.imageOriginalColor = image.color;
 
-        //this.GroundPlayer();
+        this.camCenterInt = new CamCenterIntersection(this.gameObject, this.mainCamera, new Vector3(0.5f, 0.6f, 0.5f));
+        ReferenceBuffer.Instance.RegisterPlayerIntersection(this.camCenterInt);
     }
 
     #endregion
@@ -232,6 +233,14 @@ public class PlayerHandling2 : MonoBehaviour
     {
         if (this.active == false) { return; }
 
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Debug.Log("HERE2");
+            this.camCenterInt.ToggleActive();
+        }
+
+        this.camCenterInt.Update();
+
         this.DoubleClickWCheck();
 
         this.SimulateGravity();
@@ -279,8 +288,8 @@ public class PlayerHandling2 : MonoBehaviour
         Vector3 forward2D = new Vector2(cameraForward.x, cameraForward.z).normalized;
         Vector3 forward3D = new Vector3(forward2D.x, 0, forward2D.y);
         Vector3 sideways3D = Quaternion.AngleAxis(-90, Vector3.up) * forward3D;
-        Vector3 moveVector = ( - moveHorizontal * sideways3D + moveVertical * forward3D);
-        float moveMultiplyer = speed * Time.deltaTime * speedDown; 
+        Vector3 moveVector = (-moveHorizontal * sideways3D + moveVertical * forward3D);
+        float moveMultiplyer = speed * Time.deltaTime * speedDown;
         Vector3 offset = moveVector.normalized * moveMultiplyer;
         this.rb.MovePosition(rb.position + offset);
         this.rb.MoveRotation(Quaternion.LookRotation(-offset));

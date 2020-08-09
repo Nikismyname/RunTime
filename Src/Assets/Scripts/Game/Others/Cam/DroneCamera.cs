@@ -47,33 +47,24 @@ public class DroneCamera : MonoBehaviour
             this.transform.position += this.transform.right * this.sideSpeed * Time.deltaTime;
         }
 
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) && !Input.GetKey(KeyCode.LeftShift))
         {
             this.transform.position += this.transform.up * this.upSpeed * Time.deltaTime;
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.Space))
         {
             this.transform.position -= this.transform.up * this.downSpeed * Time.deltaTime;
         }
 
-        float multy = 30f;
-
-        xDeg += Input.GetAxis("Mouse X") * Time.deltaTime * multy;
-        yDeg -= Input.GetAxis("Mouse Y") * Time.deltaTime * multy;
-
-        Quaternion desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
-
-        transform.rotation = desiredRotation;
-    }
-
-    private float ClampAngle(float angle, float min, float max)
-    {
-        if (angle < -360)
-            angle += 360;
-        if (angle > 360)
-            angle -= 360;
-        return Mathf.Clamp(angle, min, max);
+        if (Input.GetMouseButton(1))
+        {
+            float multy = 50f;
+            xDeg += Input.GetAxis("Mouse X") * Time.deltaTime * multy;
+            yDeg -= Input.GetAxis("Mouse Y") * Time.deltaTime * multy;
+            Quaternion desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
+            transform.rotation = desiredRotation;
+        }
     }
 }
 

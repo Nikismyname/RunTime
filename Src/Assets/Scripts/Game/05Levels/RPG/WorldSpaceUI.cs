@@ -101,7 +101,7 @@ public class WorldSpaceUI : MonoBehaviour
         //this.levels.JustTwoAddMethod(true);
         if (LoadLevel)
         {
-            this.levels.SpellCraft_TEST(false);
+            this.levels.LineDestroyer(false);
         }
 
         this.levelSpecificParent.transform.position = this.position;

@@ -25,6 +25,10 @@ public class ReferenceBuffer : MonoBehaviour
     public GenerateUpdateAndDisplayTargetSpeceficUI ManageProcUI { get; set; }
     public GameObject UI { get; set; }
     public WorldSpaceUI worldSpaceUI { get; set; }
+    
+    public CamCenterIntersection PlayerIntersection { get; set; }
+
+    public CamCenterIntersection DroneIntersection { get; set; }
 
     private void Awake()
     {
@@ -66,5 +70,15 @@ public class ReferenceBuffer : MonoBehaviour
     public void RegisterPlayerHandling(PlayerHandling2 playerHandling)
     {
         this.PlayerHandling = playerHandling;
+    }
+
+    public void RegisterPlayerIntersection(CamCenterIntersection intersection)
+    {
+        this.PlayerIntersection = intersection;
+    }
+    
+    public void RegisterDroneIntersection(CamCenterIntersection intersection)
+    {
+        this.DroneIntersection = intersection;
     }
 }

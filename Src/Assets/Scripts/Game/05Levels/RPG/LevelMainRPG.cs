@@ -12,17 +12,17 @@ public class LevelMainRPG : LevelBase
 
     private void Start()
     {
-        /// Floor!
+        // Floor!
         GameObject baseCylindcer = ReferenceBuffer.Instance.gl.CylinderBasePrefab(new Vector3(40, 1, 40), true);
 
-        /// Player and cam!
+        // Player and cam!
         this.player = ReferenceBuffer.Instance.gl.Player(new Vector3(0, 0, 10), true, true, true);
         this.mainCamera = GameObject.Find("MainCamera");
         this.mainSpellCamera = GameObject.Find("Camera"); /// second cam is Camera2
         this.secondSpellCamera = GameObject.Find("Camera2");
         CamHandling camHandling = this.mainCamera.GetComponent<CamHandling>();
         camHandling.target = this.player.transform;
-        ///...
+        //...
 
         var procUI = gameObject.AddComponent<SpellcraftProcUI>();
         this.worldSpaceUI = gameObject.AddComponent<WorldSpaceUI>();
@@ -34,15 +34,28 @@ public class LevelMainRPG : LevelBase
         this.droneCamGO.GetComponent<Camera>().enabled = false;
         this.droneCamGO.transform.position = new Vector3(5, 5, 5);
         this.droneCamGO.AddComponent<Drone>();
+
+        GameObject toDestroy = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        toDestroy.tag = "destroy";
+        toDestroy.transform.position = new Vector3(0, 0, 0);
+        var rb = toDestroy.AddComponent<Rigidbody>();
+        rb.useGravity = false;
+        rb.isKinematic = true;
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
-            /// RPG Mode active
-            this.SwithchToSpellCraft();
-            this.SwithchToRPG();
+            // RPG Mode active
+            if (this.mainCamera.GetComponent<Camera>().enabled == true)
+            {
+                this.SwithchToSpellCraft();
+            }
+            else
+            {
+                this.SwithchToRPG();
+            }
         }
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.D))
@@ -59,25 +72,19 @@ public class LevelMainRPG : LevelBase
 
     public void SwithchToSpellCraft()
     {
-        if (this.mainCamera.GetComponent<Camera>().enabled == true)
-        {
-            this.mainCamera.GetComponent<Camera>().enabled = false;
-            this.mainSpellCamera.GetComponent<Camera>().enabled = true;
-            ReferenceBuffer.Instance.UI.SetActive(false);
-            //Debug.Log("RPG OFF");
-        }
+        this.mainCamera.GetComponent<Camera>().enabled = false;
+        this.mainSpellCamera.GetComponent<Camera>().enabled = true;
+        ReferenceBuffer.Instance.UI.SetActive(false);
+        //Debug.Log("RPG OFF");
     }
 
     public void SwithchToRPG()
     {
-        if (this.mainCamera.GetComponent<Camera>().enabled == false)
-        {
-            this.mainCamera.GetComponent<Camera>().enabled = true;
-            this.mainSpellCamera.GetComponent<Camera>().enabled = false;
-            this.secondSpellCamera.GetComponent<Camera>().enabled = false;
-            ReferenceBuffer.Instance.UI.SetActive(true);
-            //Debug.Log("RPG ON");
-        }
+        this.mainCamera.GetComponent<Camera>().enabled = true;
+        this.mainSpellCamera.GetComponent<Camera>().enabled = false;
+        this.secondSpellCamera.GetComponent<Camera>().enabled = false;
+        ReferenceBuffer.Instance.UI.SetActive(true);
+        //Debug.Log("RPG ON");
     }
 
     public void SwitchToDrone()
@@ -107,4 +114,3 @@ public class LevelMainRPG : LevelBase
         this.player.transform.position = new Vector3(0, 0, 10);
     }
 }
-
