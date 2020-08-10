@@ -34,7 +34,9 @@ public class SpellcraftProcUI : MonoBehaviour
     private List<GameObject> loadButtons = new List<GameObject>();
     private List<GameObject> saveButtons = new List<GameObject>();
     private List<GameObject> actionMapButtons = new List<GameObject>();
-
+    private List<GameObject> variableMapping = new List<GameObject>();
+    private List<GameObject> typesSelection  = new List<GameObject>();
+    
     private List<ActionButtonMap> actionButtonData = new List<ActionButtonMap>();
 
     public GameObject GetGameObject()
@@ -72,8 +74,10 @@ public class SpellcraftProcUI : MonoBehaviour
         this.DrawLoadRow(new Vector2(0, 0), out float x1, out float y1);
         this.DrawSaveCubeMenu(new Vector2(x1, 0), out float x2);
         this.DrawActionButtonMapping(new Vector2(x1 + x2, 0), out float x3);
+        this.DrawVariableManagement(new Vector2(x1 + x2 + x3, 0), out float x4);
+        this.DrawTypesSelection(new Vector2(x1 + x2 + x3 + x4, 0), out float x5);
 
-        var UIElements = this.loadButtons.Concat(this.saveButtons).Concat(this.actionMapButtons);
+        var UIElements = this.loadButtons.Concat(this.saveButtons).Concat(this.actionMapButtons).Concat(this.variableMapping).Concat(typesSelection);
 
         /// assuming  00 is TopRight so far, moving all elements to align
         foreach (var elem in UIElements)
@@ -124,7 +128,7 @@ public class SpellcraftProcUI : MonoBehaviour
             }
         }
 
-        x = 12;
+        x = (this.XOffset + this.buttonPixelsX) * 3;
     }
 
     private void DrawLoadRow(Vector2 TR, out float x, out float y)
@@ -174,6 +178,80 @@ public class SpellcraftProcUI : MonoBehaviour
         this.saveButtons.Add(saveButton);
 
         x = this.buttonPixelsX + this.YOffset;
+    }
+
+    private void DrawVariableManagement(Vector2 TR, out float x)
+    {
+        for (int i = 0; i < this.variableMapping.Count; i++)
+        {
+            GameObject.Destroy(this.variableMapping[i]);
+        }
+        
+        this.variableMapping = new List<GameObject>();
+
+        var variableNames = new string[] { ResultCanvas.PlayerMarkerVarName, ResultCanvas.PlayerForwardVarName, ResultCanvas.DroneMarkerVarName, ResultCanvas.PlayerPositionVarName};
+        
+        for (int yy = 0; yy < 3; yy++)
+        {
+            for (int xx = 0; xx < 3; xx++)
+            {
+                int index = yy * 3 + xx;
+
+                if (index >= variableNames.Length)
+                {
+                    goto label;
+                }
+                
+                GameObject variableButton = DrawButton(variableNames[index], new Vector2(TR.x + this.XOffset + xx * (this.XOffset + this.buttonPixelsX), TR.y - (yy * (this.YOffset + this.buttonPixelsY))));
+                this.variableMapping.Add(variableButton);
+                
+                variableButton.GetComponent<Button>().onClick.AddListener(() =>
+                {
+                    ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.AddVariable(variableNames[index]);
+                });
+            }
+        }
+        
+        label:
+        
+        x = (this.XOffset + this.buttonPixelsX) * 3;
+    }
+    
+    private void DrawTypesSelection(Vector2 TR, out float x)
+    {
+        for (int i = 0; i < this.typesSelection.Count; i++)
+        {
+            GameObject.Destroy(this.typesSelection[i]);
+        }
+        
+        this.typesSelection = new List<GameObject>();
+
+        string[] typeNames = DynamicSetup.Types.Select(z => z.Name).ToArray();
+        
+        for (int yy = 0; yy < 3; yy++)
+        {
+            for (int xx = 0; xx < 3; xx++)
+            {
+                int index = yy * 3 + xx;
+
+                if (index >= typeNames.Length)
+                {
+                    goto label;
+                }
+                
+                GameObject variableButton = DrawButton(typeNames[index], new Vector2(TR.x + this.XOffset + xx * (this.XOffset + this.buttonPixelsX), TR.y - (yy * (this.YOffset + this.buttonPixelsY))));
+                this.typesSelection.Add(variableButton);
+                
+                variableButton.GetComponent<Button>().onClick.AddListener(() =>
+                {
+                    ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.RegisterNode<int>(DynamicSetup.Types[index]);
+                });
+            }
+        }
+        
+        label:
+        
+        x = (this.XOffset + this.buttonPixelsX) * 3;
     }
 
     #endregion

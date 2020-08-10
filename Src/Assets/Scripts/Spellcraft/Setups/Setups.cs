@@ -14,8 +14,7 @@ public class Setups
 
     private List<ClassVisualisation.MethodAndParameterNodes[]> customNodes =
         new List<ClassVisualisation.MethodAndParameterNodes[]>();
-
-
+    
     public Setups(ResultCanvas resultCanvas, InputCanvas inputCanvas, ConnectionsRegisterer connRegisterer,
         WorldSpaceUI UI, ResultNode resultNode, ClassVisualisation classVisualisation)
     {
@@ -127,16 +126,20 @@ public class Setups
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerForwardVarName, null), null);
     }
 
+    #endregion
+
     public void LineDestroyer(bool solved = false)
     {
         this.UI.connTracker.RegisterBundle(null);
 
         //CLASS NODES
-        var spellClass = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<LineDestroyer>(), new Vector3(0, 0, 0), out Node one);
-        this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking {Name = typeof(LineDestroyer).FullName, node = one}, null);
+        var spellClass = this.classVisualisation.GenerateClassVisualisation(
+            this.classVisualisation.GenerateNodeData<LineDestroyer>(), new Vector3(0, 0, 0), out Node one);
+        this.UI.connTracker.RegisterClassNameForPersistance(
+            new ClassTracking {Name = typeof(LineDestroyer).FullName, node = one}, null);
 
-        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.DroneMarker);
-        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.PlayerMarker);
+        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.DroneMarkerVarName);
+        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.PlayerMarkerVarName);
 
         this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
         {
@@ -146,26 +149,36 @@ public class Setups
 
         int id = 0;
 
-        var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.DroneMarker);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.DroneMarker, null), null);
-        var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerMarker);
-        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerMarker, null), null);
+        var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.DroneMarkerVarName);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.DroneMarkerVarName, null), null);
+        var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerMarkerVarName);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerMarkerVarName, null), null);
     }
-
-    #endregion
-
-    #region CUSTOM_NOT_DONE
-
-    //public ClassVisualisation.MethodAndParameterNodes[] AddToCustomSpellcraft<T>() where T : class, new()
-    //{
-    //    var nodes = this.classVisualisation.GenerateClassVisualisation(this.classVisualisation.GenerateNodeData<T>(), new Vector3(0, 0, 0));
-    //    this.customNodes.Add(nodes);
-    //    return nodes;
-    //}
-
-    public void CustomSpellcraft()
+    
+    public void Teleportation(bool solved = false)
     {
-    }
+        this.UI.connTracker.RegisterBundle(null);
 
-    #endregion
+        //CLASS NODES
+        ClassVisualisation.MethodAndParameterNodes[] spellClass = this.classVisualisation.GenerateClassVisualisation(
+            this.classVisualisation.GenerateNodeData<Teleporter>(), new Vector3(0, 0, 0), out Node one);
+        this.UI.connTracker.RegisterClassNameForPersistance(
+            new ClassTracking {Name = typeof(Teleporter).FullName, node = one}, null);
+
+        ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.DroneMarkerVarName);
+        ResultCanvas.VariableInput var2 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.PlayerMarkerVarName);
+
+        this.resultCanvas.SetVariables(new ResultCanvas.VariableInput[]
+        {
+            var1,
+            var2,
+        });
+
+        int id = 0;
+
+        var variable1 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.DroneMarkerVarName);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.DroneMarkerVarName, null), null);
+        var variable2 = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, ResultCanvas.PlayerMarkerVarName);
+        this.UI.connTracker.RegisterDirectInput(new DirectInput(id, ResultCanvas.PlayerMarkerVarName, null), null);
+    }
 }

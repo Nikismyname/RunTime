@@ -33,6 +33,7 @@ public class WorldSpaceUI : MonoBehaviour
     public InfoCanvas infoCanvas;
     public SpellcraftProcUI procUI;
     public GameObject procUIAnchor;
+    public DynamicSetup dynamicSetup;
 
     public ResultNode resultNode;
     private Vector3 position;
@@ -97,11 +98,13 @@ public class WorldSpaceUI : MonoBehaviour
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
         this.resultCanvasVantigePoint.transform.SetParent(this.levelSpecificParent.transform);
+        
+        this.dynamicSetup = new DynamicSetup(this.classVisualisation, this, this.resultCanvas, this.inputCanvas); 
 
         //this.levels.JustTwoAddMethod(true);
         if (LoadLevel)
         {
-            this.levels.LineDestroyer(false);
+            //this.levels.LineDestroyer(false);
         }
 
         this.levelSpecificParent.transform.position = this.position;

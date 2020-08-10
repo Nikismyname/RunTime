@@ -13,8 +13,8 @@ public class ResultCanvas
     private ConnectionsTracker connTracker;
     public const string PlayerPositionVarName = "plyPos";
     public const string PlayerForwardVarName = "plyFor";
-    public const string DroneMarker = "marDro";
-    public const string PlayerMarker = "marPla";
+    public const string DroneMarkerVarName = "marDro";
+    public const string PlayerMarkerVarName = "marPla";
     
     public void Reset()
     {
@@ -37,6 +37,9 @@ public class ResultCanvas
         this.connTracker = connTracker;
     }
 
+    /// <summary>
+    /// This is for visualisation UI control and not used in the integration! 
+    /// </summary>
     public void SetVariables(VariableInput[] vars)
     {
         for (int i = 0; i < 3; i++)

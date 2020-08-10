@@ -1,12 +1,12 @@
-﻿#region INIT
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class ConnectionsTracker
 {
+    #region INIT
+    
     private const string workBundleName = "WorkingOn";
 
     private List<CubeBundle> bundles = new List<CubeBundle>();
@@ -201,7 +201,7 @@ public class ConnectionsTracker
         {
             var param = node.MyParamaters[i];
 
-            Debug.Log($"{param.Info.ParameterType.Name} {par[i]?.ToString()}");
+            // Debug.Log($"{param.Info.ParameterType.Name} {par[i]?.ToString()}");
         }
         //...
 
@@ -264,6 +264,7 @@ public class ConnectionsTracker
         this.persistance.LoadPersistedData(name, visualise);
     }
 
+    /// <param name="name">null means workingBundle/default</param>
     public void RegisterDirectInput(DirectInput DI, string name)
     {
         name = name == null ? workBundleName : name;

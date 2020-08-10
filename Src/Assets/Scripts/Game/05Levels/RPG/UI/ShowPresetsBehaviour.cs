@@ -80,12 +80,12 @@ public class ShowPresetsBehaviour : MonoBehaviour
                 
                 new Variable
                 {
-                    Name = ResultCanvas.PlayerMarker, 
+                    Name = ResultCanvas.PlayerMarkerVarName, 
                     Value = ReferenceBuffer.Instance.PlayerIntersection.GetIntersectionPosition,
                 },
                 new Variable
                 {
-                    Name = ResultCanvas.DroneMarker,
+                    Name = ResultCanvas.DroneMarkerVarName,
                     Value = ReferenceBuffer.Instance.DroneIntersection.GetIntersectionPosition,
                 },
             });
