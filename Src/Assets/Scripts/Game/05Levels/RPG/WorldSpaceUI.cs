@@ -53,12 +53,12 @@ public class WorldSpaceUI : MonoBehaviour
 
         this.connTracker = new ConnectionsTracker(this);
 
-        ///Rotation of class nodes implementation that wull be replaced
+        //Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
         this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
-        ///...
+        //...
 
-        ///Parented
+        //Parented
         this.drawer = new LineDrawer(this);
         this.drawer.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
         this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
@@ -69,10 +69,12 @@ public class WorldSpaceUI : MonoBehaviour
 
         this.procUI = this.GetComponent<SpellcraftProcUI>();
         this.procUI.Setup(this.myCamera2, this.connTracker, 0.035f);
-        float YY = 40;
-        this.procUI.SetCanvasPosition(new Vector3(20, YY, 20));
+        
+        // Procedural SpellCraftUI
+        float YY = -1000;
+        this.procUI.SetCanvasPosition(new Vector3(0, YY, 1000));
         this.procUIAnchor = new GameObject("ProcUIAnchor");
-        this.procUIAnchor.transform.position = new Vector3(20, YY, 0);
+        this.procUIAnchor.transform.position = new Vector3(0, YY, 0);
 
         GameObject center = new GameObject("Center");
         center.transform.SetParent(this.levelSpecificParent.transform);
@@ -84,13 +86,13 @@ public class WorldSpaceUI : MonoBehaviour
         this.resultCanvas.Hide();
         this.inputCanvas = new InputCanvas(this.myCamera, this.inputPanelPrefab, this.persistantParent.transform);
 
-        ///Extract that somewhere
+        //Extract that somewhere
         this.resultGO = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         this.resultGO.name = "Result GO";
         this.resultGO.transform.SetParent(this.persistantParent.transform);
         this.resultGO.transform.position = new Vector3(0, -15, 0);
         this.resultNode = this.resultGO.AddComponent<ResultNode>();
-        ///... 
+        //... 
 
         this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, this.resultNode);
         this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.levelSpecificParent.transform);
@@ -208,14 +210,14 @@ public class WorldSpaceUI : MonoBehaviour
 
     public void SwitchToMenu()
     {
-        /// SECOND CAM IS ON
+        // SECOND CAM IS ON
         if (this.myCamera.enabled == false)
         {
             this.camHandling.SetEnabled(true);
             this.camHandling2.UnsetTarget(this.myCamera.gameObject);
             //Debug.Log("SPELL MOVE TO MAILN");
         }
-        /// FIRST CAM IS ON
+        // FIRST CAM IS ON
         else
         {
             this.camHandling.SetEnabled(false);

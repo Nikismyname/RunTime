@@ -8,6 +8,7 @@ TagManager:
   - Wall
   - red
   - blue
+  - destroy
   layers:
   - Default
   - TransparentFX

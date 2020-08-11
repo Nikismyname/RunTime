@@ -101,7 +101,7 @@ public class SpellMenuDragCam : MonoBehaviour
 
         if (this.dragging)
         {
-            float multy = 7;
+            float multy = 400;
             var x  = -Input.GetAxis("Mouse X") * multy * 0.02f;
             var y = -Input.GetAxis("Mouse Y") * multy * 0.02f;
 
