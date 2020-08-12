@@ -5,25 +5,28 @@ using UnityEngine.UI;
 
 public class DrawSavingCube : SpellcraftProcUIElement
 {
-    public DrawSavingCube(Vector2 tl, Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(
-        tl, baseColor, generator, procUI)
+    public DrawSavingCube(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(baseColor, generator, procUI)
     {
     }
 
-    public override GameObject[] GenerateUI(out Vector2 offsets)
+    public override GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets)
     {
-        GameObject text = this.Generator.DrawText(new Vector2(Tl.x, Tl.y), "Name The Save", 20);
+        this.tl = tl;
+        
+        GameObject text = this.generator.DrawText(new Vector2(tl.x, tl.y), "Name The Save", 20);
         GameObject input =
-            this.Generator.DrawInputMenu(new Vector2(Tl.x, Tl.y - this.ProcUI.yOffset - this.ProcUI.buttonPixelsY));
-        GameObject saveButton = this.Generator.DrawButton("Save",
-            new Vector2(Tl.x, Tl.y - (this.ProcUI.yOffset + this.ProcUI.buttonPixelsY) * 2));
+            this.generator.DrawInputMenu(new Vector2(tl.x, tl.y - this.procUI.yOffset - this.procUI.buttonPixelsY));
+        GameObject saveButton = this.generator.DrawButton("Save",
+            new Vector2(tl.x, tl.y - (this.procUI.yOffset + this.procUI.buttonPixelsY) * 2));
         saveButton.GetComponent<Button>().onClick
             .AddListener(() => this.OnClickSave(input.GetComponent<TMP_InputField>()));
         this.Elements.Add(text);
         this.Elements.Add(input);
         this.Elements.Add(saveButton);
 
-        offsets = new Vector2(this.ProcUI.buttonPixelsX + this.ProcUI.yOffset, 0);
+        offsets = new Vector2(this.procUI.buttonPixelsX + this.procUI.yOffset, 0);
+
+        return this.Elements.ToArray();
     }
 
     public override void Refresh()
@@ -45,7 +48,7 @@ public class DrawSavingCube : SpellcraftProcUIElement
 
         Debug.Log("VALID Name!");
 
-        this.ProcUI.tracker.Persist(nameText);
+        this.procUI.tracker.Persist(nameText);
 
         this.Refresh();
     }

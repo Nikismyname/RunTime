@@ -5,12 +5,17 @@ using UnityEngine.UI;
 
 public class DrawSavedCubesRow : SpellcraftProcUIElement
 {
-    public DrawSavedCubesRow(Vector2 tl, Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(tl, baseColor, generator, procUI)
+    private DrawActionButtonMapping actionButtonMapping; 
+    
+    public DrawSavedCubesRow(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI, DrawActionButtonMapping actionButtonMapping) : base(baseColor, generator, procUI)
     {
+        this.actionButtonMapping = actionButtonMapping;
     }
 
-    public override GameObject[] GenerateUI(out Vector2 offsets)
+    public override GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets)
     {
+        this.tl = tl; 
+        
         string[] textNames = CubePersistance.GetAllSavedCubes().Select(z => z.Name).ToArray();
 
         for (int i = 0; i < textNames.Length; i++)
@@ -18,9 +23,9 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
             string nameText = textNames[i];
 
             GameObject main =
-                this.Generator.DrawButton(nameText, new Vector2(Tl.x, Tl.y - i * (this.ProcUI.buttonPixelsY + this.ProcUI.yOffset)));
-            GameObject delete = this.Generator.DrawButton("X",
-                new Vector2(Tl.x + this.ProcUI.buttonPixelsX + this.ProcUI.xOffset, Tl.y - i * (this.ProcUI.buttonPixelsY + this.ProcUI.yOffset)),
+                this.generator.DrawButton(nameText, new Vector2(tl.x, tl.y - i * (this.procUI.buttonPixelsY + this.procUI.yOffset)));
+            GameObject delete = this.generator.DrawButton("X",
+                new Vector2(tl.x + this.procUI.buttonPixelsX + this.procUI.xOffset, tl.y - i * (this.procUI.buttonPixelsY + this.procUI.yOffset)),
                 new Vector2(30, 30), Color.red);
 
             main.GetComponent<Button>().onClick.AddListener(() => this.OnClickLoadCube(nameText));
@@ -30,7 +35,7 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
             this.Elements.Add(delete);
         }
 
-        offsets = new Vector2(this.ProcUI.buttonPixelsX + this.ProcUI.xOffset * 2 + 30, 0);
+        offsets = new Vector2(this.procUI.buttonPixelsX + this.procUI.xOffset * 2 + 30, 0);
 
         return this.Elements.ToArray();
     }
@@ -56,7 +61,7 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
             return;
         }
 
-        SpellcraftProcUI.ActionButtonMap selected = this.ProcUI.actionButtonData.SingleOrDefault(x => x.Selected);
+        DrawActionButtonMapping.ActionButtonMap selected = this.actionButtonMapping.actionButtonData.SingleOrDefault(x => x.Selected);
 
         if (selected == null) return;
 

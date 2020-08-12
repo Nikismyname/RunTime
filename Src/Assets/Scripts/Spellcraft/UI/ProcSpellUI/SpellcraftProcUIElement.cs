@@ -3,24 +3,21 @@ using UnityEngine;
 
 public abstract class SpellcraftProcUIElement
 {
-    public Vector2 Tl { get; set; }
-    public Color BaseColor { get; set; }
-
-    public List<GameObject> Elements { get; set; }
-
-    public GenerateBasicElements Generator { get; set; }
-
-    public SpellcraftProcUI ProcUI { get; set; }
+    protected Vector2 tl;
+    protected Color baseColor;
+    protected GenerateBasicElements generator;
+    protected SpellcraftProcUI procUI;
     
-    public SpellcraftProcUIElement(Vector2 tl, Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI)
+    public List<GameObject> Elements { get; set; } = new List<GameObject>();
+    
+    public SpellcraftProcUIElement(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI)
     {
-        this.BaseColor = baseColor;
-        this.Tl = tl;
-        this.Generator = generator;
-        this.ProcUI = procUI;
+        this.baseColor = baseColor;
+        this.generator = generator;
+        this.procUI = procUI;
     }
     
-    public abstract GameObject[] GenerateUI(out Vector2 offsets);
+    public abstract GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets);
 
     public abstract void Refresh();
 }
