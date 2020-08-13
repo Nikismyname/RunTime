@@ -35,6 +35,7 @@ public class LevelMainRPG : LevelBase
         this.droneCamGO.GetComponent<Camera>().enabled = false;
         this.droneCamGO.transform.position = new Vector3(5, 5, 5);
         this.droneCamGO.AddComponent<Drone>();
+        this.droneCamGO.SetActive(false);
 
         GameObject toDestroy = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         toDestroy.tag = "destroy";
@@ -90,20 +91,22 @@ public class LevelMainRPG : LevelBase
 
     public void SwitchToDrone()
     {
-        /// Only switch to drone from rpg mode!
+        // Only switch to drone from rpg mode!
         if (this.mainCamera.GetComponent<Camera>().enabled == true)
         {
-            /// Switch To Drone
-            if (this.droneCamGO.GetComponent<Camera>().enabled == false)
+            // Switch To Drone
+            if (this.droneCamGO.activeSelf == false)
             {
+                this.droneCamGO.SetActive(true);
                 this.droneCamGO.GetComponent<Camera>().enabled = true;
                 this.mainSpellCamera.GetComponent<Camera>().enabled = false;
                 this.player.SetActive(false);
             }
-            /// Swith off drone
+            // Swith off drone
             else
             {
                 this.droneCamGO.GetComponent<Camera>().enabled = false;
+                this.droneCamGO.SetActive(false);
                 this.mainCamera.GetComponent<Camera>().enabled = true;
                 this.player.SetActive(true);
             }

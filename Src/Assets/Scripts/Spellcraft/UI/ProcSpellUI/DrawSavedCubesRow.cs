@@ -43,6 +43,8 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
     private void OnClickDeleteCube(string nameText)
     {
         CubePersistance.DeleteCube(nameText);
+        ActionKeyPersistance.Delete(nameText);
+        this.procUI.drawActionButtonMapping.Refresh();
         this.Refresh();
     }
     

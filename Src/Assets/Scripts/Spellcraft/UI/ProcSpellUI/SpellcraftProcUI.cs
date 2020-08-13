@@ -32,6 +32,7 @@ public class SpellcraftProcUI : MonoBehaviour
     public DrawSavingCube drawSavingCube;
     public DrawVariableSelection drawVariableSelection;
     public DrawTypesSelection drawTypesSelection;
+
     public GameObject GetGameObject()
     {
         return this.canvasGO;
@@ -60,30 +61,32 @@ public class SpellcraftProcUI : MonoBehaviour
         this.canvasGO.AddComponent<CanvasScaler>();
         this.canvasGO.AddComponent<GraphicRaycaster>();
         rectT.sizeDelta = new Vector2(this.canvasHalfX * 2, this.canvasHalfY * 2);
-        
+
         GenerateBasicElements generator = new GenerateBasicElements(this);
         drawActionButtonMapping = new DrawActionButtonMapping(Color.white, generator, this);
-        drawSavedCubesRow = new DrawSavedCubesRow( Color.white, generator, this);
-        drawSavingCube = new DrawSavingCube( Color.white, generator, this);
-        drawVariableSelection = new DrawVariableSelection( Color.white, generator, this);
-        drawTypesSelection = new DrawTypesSelection( Color.white, generator, this);
-        
+        drawSavedCubesRow = new DrawSavedCubesRow(Color.white, generator, this);
+        drawSavingCube = new DrawSavingCube(Color.white, generator, this);
+        drawVariableSelection = new DrawVariableSelection(Color.white, generator, this);
+        drawTypesSelection = new DrawTypesSelection(Color.white, generator, this);
+
         Vector2 tl = new Vector2(-this.canvasHalfX, this.canvasHalfY);
+
+        float interBlockOffset = this.xOffset * 4;
         
         drawSavedCubesRow.GenerateUI(tl, out Vector2 offset1);
-        tl.x += offset1.x;
-        
-        drawSavingCube.GenerateUI(tl, out Vector2 offset2); 
-        tl.x += offset2.x;
-        
+        tl.x += offset1.x + interBlockOffset;
+
+        drawSavingCube.GenerateUI(tl, out Vector2 offset2);
+        tl.x += offset2.x + interBlockOffset;
+
         drawActionButtonMapping.GenerateUI(tl, out Vector2 offset3);
-        tl.x += offset3.x;
-        
+        tl.x += offset3.x + interBlockOffset;
+
         drawVariableSelection.GenerateUI(tl, out Vector2 offset4);
-        tl.x += offset4.x;
+        tl.x += offset4.x + interBlockOffset;
 
         drawTypesSelection.GenerateUI(tl, out Vector2 offset5);
-        tl.x += offset5.x;
+        tl.x += offset5.x + interBlockOffset;
     }
 
     #endregion

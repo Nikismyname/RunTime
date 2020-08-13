@@ -27,14 +27,17 @@ public class GenerateLevel
         var baseCilinder = GameObject.Instantiate(prefab);
 
         baseCilinder.name = "BaseCilinder";
+
+        baseCilinder.GetComponent<Renderer>().material.color = Colors.BaseColor;
+        baseCilinder.transform.localScale = scale;
+        baseCilinder.transform.position = new Vector3(0, -scale.y, 0);
+        
         if (collider == true)
         {
             var currentCollider = baseCilinder.AddComponent<MeshCollider>();
             currentCollider.convex = true;
         }
-        baseCilinder.GetComponent<Renderer>().material.color = Colors.BaseColor;
-        baseCilinder.transform.localScale = scale;
-        baseCilinder.transform.position = new Vector3(0, -scale.y, 0);
+        
         return baseCilinder;
     }
 

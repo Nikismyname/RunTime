@@ -71,10 +71,10 @@ public class WorldSpaceUI : MonoBehaviour
         this.procUI.Setup(this.myCamera2, this.connTracker, 0.035f);
         
         // Procedural SpellCraftUI
-        float YY = -1000;
-        this.procUI.SetCanvasPosition(new Vector3(0, YY, 1000));
+        float YY = 1000;
+        this.procUI.SetCanvasPosition(new Vector3(0, YY, -1000));
         this.procUIAnchor = new GameObject("ProcUIAnchor");
-        this.procUIAnchor.transform.position = new Vector3(0, YY, 0);
+        this.procUIAnchor.transform.position = new Vector3(0, YY, -2000);
 
         GameObject center = new GameObject("Center");
         center.transform.SetParent(this.levelSpecificParent.transform);

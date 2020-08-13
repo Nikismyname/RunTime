@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 public class ActionKeyPersistance
 {
@@ -35,9 +36,26 @@ public class ActionKeyPersistance
         File.WriteAllText(fileName, Serialize(datas));
     }
 
+    public static void Delete(string name)
+    {
+        ActionKeyPersistanceData[] datas = GetKeyCubeMapping();
+
+        ActionKeyPersistanceData existingMapping = datas.SingleOrDefault(x => x.CubeName == name);
+
+        if (existingMapping == null)
+        {
+            Debug.LogError("The persisted action key mapping for deletion was not found!");
+            return;
+        }
+
+        datas = datas.Where(x=> x.CubeName != name).ToArray();
+
+        File.WriteAllText(fileName, Serialize(datas));
+    }
+
     public static ActionKeyPersistanceData[] GetKeyCubeMapping()
     {
-        if(File.Exists(fileName) == false)
+        if (File.Exists(fileName) == false)
         {
             var some = File.Create(fileName);
             some.Dispose();
@@ -64,4 +82,3 @@ public class ActionKeyPersistance
         return JsonConvert.SerializeObject(obj, Formatting.None, settings);
     }
 }
-
