@@ -12,7 +12,7 @@ public class DrawActionButtonMapping : SpellcraftProcUIElement
     {
     }
 
-    public override GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets)
+    protected override GameObject[] GenerateUI(out Vector2 offsets)
     {
         this.tl = tl; 
         
@@ -44,11 +44,6 @@ public class DrawActionButtonMapping : SpellcraftProcUIElement
         return this.Elements.ToArray(); 
     }
 
-    public override void Refresh()
-    {
-        throw new System.NotImplementedException();
-    }
-    
     public class ActionButtonMap
     {
         public ActionButtonMap(int id, GameObject gameObject, List<ActionButtonMap> all)

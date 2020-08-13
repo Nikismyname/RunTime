@@ -27,7 +27,8 @@ public class LevelMainRPG : LevelBase
         var procUI = gameObject.AddComponent<SpellcraftProcUI>();
         this.worldSpaceUI = gameObject.AddComponent<WorldSpaceUI>();
         this.worldSpaceUI.Setup(new Vector3(0, -40, 0));
-        this.worldSpaceUI.LoadLevel = true;
+        // LOADLEVEL_DECLARED_HERE 
+        this.worldSpaceUI.LoadLevel = false;
         ReferenceBuffer.Instance.RegisterWorldSapceUI(this.worldSpaceUI);
 
         this.droneCamGO = GameObject.Find("DroneCamera");

@@ -1,32 +1,32 @@
-﻿using System.CodeDom;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DrawSavedCubesRow : SpellcraftProcUIElement
 {
-    private DrawActionButtonMapping actionButtonMapping; 
-    
-    public DrawSavedCubesRow(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI, DrawActionButtonMapping actionButtonMapping) : base(baseColor, generator, procUI)
+    public DrawSavedCubesRow(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(baseColor, generator, procUI)
     {
-        this.actionButtonMapping = actionButtonMapping;
     }
 
-    public override GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets)
+    protected override GameObject[] GenerateUI(out Vector2 offsets)
     {
-        this.tl = tl; 
-        
         string[] textNames = CubePersistance.GetAllSavedCubes().Select(z => z.Name).ToArray();
 
         for (int i = 0; i < textNames.Length; i++)
         {
             string nameText = textNames[i];
 
-            GameObject main =
-                this.generator.DrawButton(nameText, new Vector2(tl.x, tl.y - i * (this.procUI.buttonPixelsY + this.procUI.yOffset)));
-            GameObject delete = this.generator.DrawButton("X",
-                new Vector2(tl.x + this.procUI.buttonPixelsX + this.procUI.xOffset, tl.y - i * (this.procUI.buttonPixelsY + this.procUI.yOffset)),
-                new Vector2(30, 30), Color.red);
+            float mainX = tl.x;
+            float mainY = tl.y - i * (this.procUI.buttonPixelsY + this.procUI.yOffset);
+
+            if(i == 0)
+                Debug.Log($"{mainX} {mainY}");
+
+            float delX = tl.x + this.procUI.buttonPixelsX + this.procUI.xOffset;
+            float delY = tl.y - i * (this.procUI.buttonPixelsY + this.procUI.yOffset); 
+            
+            GameObject main = this.generator.DrawButton(nameText, new Vector2(mainX, mainY));
+            GameObject delete = this.generator.DrawButton("X", new Vector2(delX, delY), new Vector2(30, 30), Color.red);
 
             main.GetComponent<Button>().onClick.AddListener(() => this.OnClickLoadCube(nameText));
             delete.GetComponent<Button>().onClick.AddListener(() => this.OnClickDeleteCube(nameText));
@@ -40,11 +40,6 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
         return this.Elements.ToArray();
     }
 
-    public override void Refresh()
-    {
-        throw new System.NotImplementedException();
-    }
-    
     private void OnClickDeleteCube(string nameText)
     {
         CubePersistance.DeleteCube(nameText);
@@ -61,7 +56,7 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
             return;
         }
 
-        DrawActionButtonMapping.ActionButtonMap selected = this.actionButtonMapping.actionButtonData.SingleOrDefault(x => x.Selected);
+        DrawActionButtonMapping.ActionButtonMap selected = this.procUI.drawActionButtonMapping.actionButtonData.SingleOrDefault(x => x.Selected);
 
         if (selected == null) return;
 

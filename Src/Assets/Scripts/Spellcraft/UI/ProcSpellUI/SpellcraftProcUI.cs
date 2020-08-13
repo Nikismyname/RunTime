@@ -27,14 +27,11 @@ public class SpellcraftProcUI : MonoBehaviour
     public GameObject canvasGO;
     private Canvas canvas;
 
-    //private List<GameObject> UIElements = new List<GameObject>();
-
-    private List<GameObject> loadButtons = new List<GameObject>();
-    private List<GameObject> saveButtons = new List<GameObject>();
-    private List<GameObject> actionMapButtons = new List<GameObject>();
-    private List<GameObject> variableMapping = new List<GameObject>();
-    private List<GameObject> typesSelection = new List<GameObject>();
-
+    public DrawActionButtonMapping drawActionButtonMapping;
+    public DrawSavedCubesRow drawSavedCubesRow;
+    public DrawSavingCube drawSavingCube;
+    public DrawVariableSelection drawVariableSelection;
+    public DrawTypesSelection drawTypesSelection;
     public GameObject GetGameObject()
     {
         return this.canvasGO;
@@ -65,27 +62,27 @@ public class SpellcraftProcUI : MonoBehaviour
         rectT.sizeDelta = new Vector2(this.canvasHalfX * 2, this.canvasHalfY * 2);
         
         GenerateBasicElements generator = new GenerateBasicElements(this);
-        DrawActionButtonMapping actionMaping = new DrawActionButtonMapping(Color.white, generator, this);
-        DrawSavedCubesRow savedRow = new DrawSavedCubesRow( Color.white, generator, this, actionMaping);
-        DrawSavingCube savingCube = new DrawSavingCube( Color.white, generator, this);
-        DrawVariableSelection variableSelector = new DrawVariableSelection( Color.white, generator, this);
-        DrawTypesSelection typeSelection = new DrawTypesSelection( Color.white, generator, this);
+        drawActionButtonMapping = new DrawActionButtonMapping(Color.white, generator, this);
+        drawSavedCubesRow = new DrawSavedCubesRow( Color.white, generator, this);
+        drawSavingCube = new DrawSavingCube( Color.white, generator, this);
+        drawVariableSelection = new DrawVariableSelection( Color.white, generator, this);
+        drawTypesSelection = new DrawTypesSelection( Color.white, generator, this);
         
         Vector2 tl = new Vector2(-this.canvasHalfX, this.canvasHalfY);
         
-        savedRow.GenerateUI(tl, out Vector2 offset1);
+        drawSavedCubesRow.GenerateUI(tl, out Vector2 offset1);
         tl.x += offset1.x;
         
-        savingCube.GenerateUI(tl, out Vector2 offset2); 
+        drawSavingCube.GenerateUI(tl, out Vector2 offset2); 
         tl.x += offset2.x;
         
-        actionMaping.GenerateUI(tl, out Vector2 offset3);
+        drawActionButtonMapping.GenerateUI(tl, out Vector2 offset3);
         tl.x += offset3.x;
         
-        variableSelector.GenerateUI(tl, out Vector2 offset4);
+        drawVariableSelection.GenerateUI(tl, out Vector2 offset4);
         tl.x += offset4.x;
 
-        typeSelection.GenerateUI(tl, out Vector2 offset5);
+        drawTypesSelection.GenerateUI(tl, out Vector2 offset5);
         tl.x += offset5.x;
     }
 

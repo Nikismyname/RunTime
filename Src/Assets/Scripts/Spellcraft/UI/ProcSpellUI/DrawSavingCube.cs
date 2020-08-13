@@ -9,7 +9,7 @@ public class DrawSavingCube : SpellcraftProcUIElement
     {
     }
 
-    public override GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets)
+    protected override GameObject[] GenerateUI(out Vector2 offsets)
     {
         this.tl = tl;
         
@@ -29,11 +29,6 @@ public class DrawSavingCube : SpellcraftProcUIElement
         return this.Elements.ToArray();
     }
 
-    public override void Refresh()
-    {
-        throw new System.NotImplementedException();
-    }
-
     private void OnClickSave(TMP_InputField nameInput)
     {
         string nameText = nameInput.text;
@@ -50,6 +45,6 @@ public class DrawSavingCube : SpellcraftProcUIElement
 
         this.procUI.tracker.Persist(nameText);
 
-        this.Refresh();
+        this.procUI.drawSavedCubesRow.Refresh();
     }
 }

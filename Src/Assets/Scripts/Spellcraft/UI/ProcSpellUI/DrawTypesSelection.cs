@@ -8,7 +8,7 @@ public class DrawTypesSelection: SpellcraftProcUIElement
     {
     }
 
-    public override GameObject[] GenerateUI(Vector2 tl, out Vector2 offsets)
+    protected override GameObject[] GenerateUI(out Vector2 offsets)
     {
         this.tl = tl; 
         
