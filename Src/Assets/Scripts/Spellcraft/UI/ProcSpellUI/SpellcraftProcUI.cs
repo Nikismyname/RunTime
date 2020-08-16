@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class SpellcraftProcUI : MonoBehaviour
+public class SpellcraftProcUI
+    :MonoBehaviour, ISpellcraftProcUI
 {
     #region INIT
 
@@ -32,7 +30,7 @@ public class SpellcraftProcUI : MonoBehaviour
     public DrawSavingCube drawSavingCube;
     public DrawVariableSelection drawVariableSelection;
     public DrawTypesSelection drawTypesSelection;
-
+    public DrawConstantSelection drawConstantSelection;
     public GameObject GetGameObject()
     {
         return this.canvasGO;
@@ -68,7 +66,8 @@ public class SpellcraftProcUI : MonoBehaviour
         drawSavingCube = new DrawSavingCube(Color.white, generator, this);
         drawVariableSelection = new DrawVariableSelection(Color.white, generator, this);
         drawTypesSelection = new DrawTypesSelection(Color.white, generator, this);
-
+        drawConstantSelection = new DrawConstantSelection(Color.white, generator, this);
+        
         Vector2 tl = new Vector2(-this.canvasHalfX, this.canvasHalfY);
 
         float interBlockOffset = this.xOffset * 4;
@@ -80,13 +79,16 @@ public class SpellcraftProcUI : MonoBehaviour
         tl.x += offset2.x + interBlockOffset;
 
         drawActionButtonMapping.GenerateUI(tl, out Vector2 offset3);
-        tl.x += offset3.x + interBlockOffset;
+        tl.y += - offset3.y - interBlockOffset;
 
         drawVariableSelection.GenerateUI(tl, out Vector2 offset4);
-        tl.x += offset4.x + interBlockOffset;
+        tl.y += - offset4.y - interBlockOffset;
 
         drawTypesSelection.GenerateUI(tl, out Vector2 offset5);
-        tl.x += offset5.x + interBlockOffset;
+        tl.y += - offset5.y - interBlockOffset;
+
+        drawConstantSelection.GenerateUI(tl, out Vector2 offset6);
+        tl.y += - offset6.y - interBlockOffset;
     }
 
     #endregion

@@ -131,7 +131,9 @@ public class CubePersistance
         {
             DirectInputIDParamaterID DP = info.DirectInputParamater[i];
 
-            ParameterNode pNode = methodInfoWithParamInfo.SelectMany(x => x.SelectMany(y => y.Parameters)).Single(x => x.ID == DP.ParameterID);
+            ParameterNode[] parameters = methodInfoWithParamInfo.SelectMany(x => x.SelectMany(y => y.Parameters)).ToArray();
+            ParameterNode pNode = parameters.Single(x => x.ID == DP.ParameterID);
+            
             DirectInputNode DINode = inputs.Select(x => x.Node).Single(x => x.ID == DP.DirectInputID);
 
             if (visualise)

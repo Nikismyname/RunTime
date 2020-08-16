@@ -1,6 +1,7 @@
 ﻿#region INIT
 
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class WorldSpaceUI : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class WorldSpaceUI : MonoBehaviour
     public bool LoadLevel;
 
     public ZoomMode zoomMode { get; set; } = ZoomMode.OuterZoom;
-    public GameObject levelSpecificParent;
+    public GameObject spellcraftParent;
     public GameObject persistantParent;
     private Camera myCamera;
     private Camera myCamera2;
@@ -48,14 +49,14 @@ public class WorldSpaceUI : MonoBehaviour
             this.worldSpaceTextPrefab = Resources.Load("Prefabs/WorldSpaceCanvases/WorldSpaceTextPrefab", typeof(GameObject)) as GameObject;
         }
 
-        this.levelSpecificParent = new GameObject("Spellcraft Parent");
+        this.spellcraftParent = new GameObject("Spellcraft Parent");
         this.persistantParent = new GameObject("Persistant Parent");
 
         this.connTracker = new ConnectionsTracker(this);
 
         //Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
-        this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
+        this.rotatorGO.transform.SetParent(this.spellcraftParent.transform);
         //...
 
         //Parented
@@ -77,7 +78,7 @@ public class WorldSpaceUI : MonoBehaviour
         this.procUIAnchor.transform.position = new Vector3(0, YY, -2000);
 
         GameObject center = new GameObject("Center");
-        center.transform.SetParent(this.levelSpecificParent.transform);
+        center.transform.SetParent(this.spellcraftParent.transform);
         this.camHandling.Setup(center);
         this.classVisualisation = new ClassVisualisation(this);
         this.resultCanvas = new ResultCanvas(this.resultAndVariablesPanelPrefab, this.myCamera, this.connTracker, this.persistantParent.transform);
@@ -95,11 +96,11 @@ public class WorldSpaceUI : MonoBehaviour
         //... 
 
         this.connRegisterer = new ConnectionsRegisterer(this.connTracker, this.inputCanvas, this.drawer, this.resultNode);
-        this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.levelSpecificParent.transform);
+        this.infoCanvas = new InfoCanvas(this.worldSpaceTextPrefab, this.myCamera, this.spellcraftParent.transform);
         this.levels = new Setups(this.resultCanvas, this.inputCanvas, this.connRegisterer, this, this.resultNode, this.classVisualisation);
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
-        this.resultCanvasVantigePoint.transform.SetParent(this.levelSpecificParent.transform);
+        this.resultCanvasVantigePoint.transform.SetParent(this.spellcraftParent.transform);
         
         this.dynamicSetup = new DynamicSetup(this.classVisualisation, this, this.resultCanvas, this.inputCanvas); 
 
@@ -113,28 +114,28 @@ public class WorldSpaceUI : MonoBehaviour
             this.connTracker.RegisterBundle(null);
         }
 
-        this.levelSpecificParent.transform.position = this.position;
+        this.spellcraftParent.transform.position = this.position;
         this.persistantParent.transform.position = this.position;
     }
 
     private void Reinit()
     {
-        this.levelSpecificParent = new GameObject("Spellcraft Parent");
+        this.spellcraftParent = new GameObject("Spellcraft Parent");
 
         ///Rotation of class nodes implementation that wull be replaced
         this.rotatorGO = new GameObject("Rotator");
-        this.rotatorGO.transform.SetParent(this.levelSpecificParent.transform);
+        this.rotatorGO.transform.SetParent(this.spellcraftParent.transform);
         ///...
 
         this.drawer.DrawBox(SpellcraftConstants.HalfSize, SpellcraftConstants.Thickness, SpellcraftConstants.BoxCenter);
 
         GameObject center = new GameObject("Center");
-        center.transform.SetParent(this.levelSpecificParent.transform);
+        center.transform.SetParent(this.spellcraftParent.transform);
         this.camHandling.Setup(center);
 
         this.resultCanvasVantigePoint = new GameObject("VantigePoint");
         this.resultCanvasVantigePoint.transform.position = new Vector3(0, 0, -30);
-        this.resultCanvasVantigePoint.transform.SetParent(this.levelSpecificParent.transform);
+        this.resultCanvasVantigePoint.transform.SetParent(this.spellcraftParent.transform);
     }
 
     public void Setup(Vector3 position)
@@ -148,27 +149,27 @@ public class WorldSpaceUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.P) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.connTracker.Persist();
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ResetData();
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.inputCanvas.InputsHide();
         }
 
-        if (Input.GetKeyDown(KeyCode.G))
+        if (Input.GetKeyDown(KeyCode.G) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.connRegisterer.ResetToNull();
         }
 
-        if (Input.GetKeyDown(KeyCode.G))
+        if (Input.GetKeyDown(KeyCode.G) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.resultCanvas.Show();
             this.camHandling.SetRotateToView(this.resultCanvasVantigePoint);
@@ -249,7 +250,7 @@ public class WorldSpaceUI : MonoBehaviour
         //this.resultCanvas.Reset(); ///Not implemented right now!
         //this.inputCanvas.Reset();
 
-        Destroy(this.levelSpecificParent);
+        Destroy(this.spellcraftParent);
         ///
         this.Reinit();
         /// Resets the ids for generated nodes to 0 so it matches with the persisted values!

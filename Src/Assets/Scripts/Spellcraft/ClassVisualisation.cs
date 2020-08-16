@@ -35,8 +35,8 @@ public class ClassVisualisation
         MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(x => !x.Name.StartsWith("set_") && !x.Name.StartsWith("get_")).ToArray();
         return new ClassNode(type, props, methods, new T());
     }
-
-    public ClassNode GenerateNodeData(Type type)
+    
+    public ClassNode GenerateNodeData(Type type) 
     {
         PropertyInfo[] props = type.GetProperties();
         MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(x => !x.Name.StartsWith("set_") && !x.Name.StartsWith("get_")).ToArray();
@@ -51,7 +51,7 @@ public class ClassVisualisation
     {
         GameObject basy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-        basy.transform.SetParent(this.UI.levelSpecificParent.transform);
+        basy.transform.SetParent(this.UI.spellcraftParent.transform);
 
         basy.SetColor(Color.red);
         basy.SetShader();

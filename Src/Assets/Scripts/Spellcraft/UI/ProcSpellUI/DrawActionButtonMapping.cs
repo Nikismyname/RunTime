@@ -40,7 +40,8 @@ public class DrawActionButtonMapping : SpellcraftProcUIElement
             }
         }
 
-        offsets = new Vector2((this.procUI.xOffset + this.procUI.buttonPixelsX) * 3, 0);
+        offsets = new Vector2((this.procUI.xOffset + this.procUI.buttonPixelsX) * 3, (this.procUI.yOffset + this.procUI.buttonPixelsY) * 3 );
+        
         return this.Elements.ToArray(); 
     }
 

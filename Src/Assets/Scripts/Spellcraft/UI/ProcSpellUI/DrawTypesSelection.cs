@@ -1,11 +1,18 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class DrawTypesSelection: SpellcraftProcUIElement
 {
-    public DrawTypesSelection(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(baseColor, generator, procUI)
+    private SelectableButtons selectableButtons = new SelectableButtons();
+    
+    //DiContainer container = new DiContainer();
+
+    public DrawTypesSelection(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(
+        baseColor, generator, procUI)
     {
+        //this.selectableButtons = this.container.Instantiate<SelectableButtons>();
     }
 
     protected override GameObject[] GenerateUI(out Vector2 offsets)
@@ -25,22 +32,33 @@ public class DrawTypesSelection: SpellcraftProcUIElement
                     goto label;
                 }
 
-                GameObject variableButton = this.generator.DrawButton(typeNames[index],
+                GameObject typeButton = this.generator.DrawButton(typeNames[index],
                     new Vector2(tl.x + this.procUI.xOffset + xx * (this.procUI.xOffset + this.procUI.buttonPixelsX),
                         tl.y - (yy * (this.procUI.yOffset + this.procUI.buttonPixelsY))));
-                this.Elements.Add(variableButton);
+                this.Elements.Add(typeButton);
 
-                variableButton.GetComponent<Button>().onClick.AddListener(() =>
+                this.selectableButtons.RegisterButton(typeButton.GetComponent<Button>(), isSelected =>
                 {
-                    ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.RegisterNode<int>(DynamicSetup.Types[index]);
+                    if (isSelected)
+                    {
+                        Debug.Log("No Deselect Yet!");
+                        return false;
+                    }
+                    else
+                    {
+                        Debug.Log("TypeSelection" + index);
+                        ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.RegisterNode(DynamicSetup.Types[index]);
+                        return true;
+                    }
                 });
             }
         }
 
         label:
 
-        offsets = new Vector2((this.procUI.xOffset + this.procUI.buttonPixelsX) * 3, 0);
-        return this.Elements.ToArray(); 
+        offsets = new Vector2((this.procUI.xOffset + this.procUI.buttonPixelsX) * 3, (this.procUI.yOffset + this.procUI.buttonPixelsY) * 3 );
+
+        return this.Elements.ToArray();
     }
 
     public override void Refresh()

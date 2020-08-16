@@ -16,6 +16,7 @@ public class DrawSavingCube : SpellcraftProcUIElement
         GameObject text = this.generator.DrawText(new Vector2(tl.x, tl.y), "Name The Save", 20);
         GameObject input =
             this.generator.DrawInputMenu(new Vector2(tl.x, tl.y - this.procUI.yOffset - this.procUI.buttonPixelsY));
+        ReferenceBuffer.Instance.focusManager.Register(input.GetComponent<TMP_InputField>());
         GameObject saveButton = this.generator.DrawButton("Save",
             new Vector2(tl.x, tl.y - (this.procUI.yOffset + this.procUI.buttonPixelsY) * 2));
         saveButton.GetComponent<Button>().onClick

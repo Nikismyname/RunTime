@@ -1,22 +1,28 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class DrawVariableSelection : SpellcraftProcUIElement
+public class DrawConstantSelection : SpellcraftProcUIElement
 {
     private SelectableButtons selectableButtons = new SelectableButtons();
 
-    public DrawVariableSelection(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(baseColor, generator, procUI)
+    public DrawConstantSelection(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI) : base(
+        baseColor, generator, procUI)
     {
     }
 
     protected override GameObject[] GenerateUI(out Vector2 offsets)
     {
         this.tl = tl;
-        
-        string[] variableNames =
+
+        object[] constants =
         {
-            ResultCanvas.PlayerMarkerVarName, ResultCanvas.PlayerForwardVarName, ResultCanvas.DroneMarkerVarName,
-            ResultCanvas.PlayerPositionVarName
+            0.5, 
+            Vector3.up, 
+            2, 
+            10,
+            1000,
+            Vector3.left,
+            -1,
         };
 
         for (int yy = 0; yy < 3; yy++)
@@ -25,20 +31,18 @@ public class DrawVariableSelection : SpellcraftProcUIElement
             {
                 int index = yy * 3 + xx;
 
-                if (index >= variableNames.Length)
+                if (index >= constants.Length)
                 {
                     goto label;
                 }
 
-                GameObject variableButton = this.generator.DrawButton(variableNames[index],
+                GameObject variableButton = this.generator.DrawButton(constants[index].ToString(),
                     new Vector2(tl.x + this.procUI.xOffset + xx * (this.procUI.xOffset + this.procUI.buttonPixelsX),
                         tl.y - (yy * (this.procUI.yOffset + this.procUI.buttonPixelsY))));
                 this.Elements.Add(variableButton);
 
-                variableButton.GetComponent<Button>().onClick.AddListener(() =>
-                {
-                });
-                
+                variableButton.GetComponent<Button>().onClick.AddListener(() => { });
+
                 this.selectableButtons.RegisterButton(variableButton.GetComponent<Button>(), isSelected =>
                 {
                     if (isSelected)
@@ -47,7 +51,7 @@ public class DrawVariableSelection : SpellcraftProcUIElement
                     }
                     else
                     {
-                        ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.AddVariable(variableNames[index]);
+                        ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.AddConstant(constants[index]);
                         return true;
                     }
                 });
@@ -56,8 +60,9 @@ public class DrawVariableSelection : SpellcraftProcUIElement
 
         label:
 
-        offsets = new Vector2((this.procUI.xOffset + this.procUI.buttonPixelsX) * 3, (this.procUI.yOffset + this.procUI.buttonPixelsY) * 3 );
-        
+        offsets = new Vector2((this.procUI.xOffset + this.procUI.buttonPixelsX) * 3,
+            (this.procUI.yOffset + this.procUI.buttonPixelsY) * 3);
+
         return this.Elements.ToArray();
     }
 

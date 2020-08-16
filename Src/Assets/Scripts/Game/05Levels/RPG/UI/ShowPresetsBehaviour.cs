@@ -63,8 +63,14 @@ public class ShowPresetsBehaviour : MonoBehaviour
         {
             Debug.Log($"WORKS=> {btnInfo.CubeName}");
 
-            GameObject player = ReferenceBuffer.Instance.PlayerObject; 
+            GameObject player = ReferenceBuffer.Instance.PlayerObject;
 
+            Vector3? droneMarker = null;
+            if (ReferenceBuffer.Instance.DroneIntersection != null)
+            {
+                droneMarker = ReferenceBuffer.Instance.DroneIntersection.GetIntersectionPosition;
+            }
+            
             ReferenceBuffer.Instance.worldSpaceUI.connTracker.PrintResult(btnInfo.CubeName, new Variable[] 
             {
                 new Variable
@@ -86,7 +92,7 @@ public class ShowPresetsBehaviour : MonoBehaviour
                 new Variable
                 {
                     Name = ResultCanvas.DroneMarkerVarName,
-                    Value = ReferenceBuffer.Instance.DroneIntersection.GetIntersectionPosition,
+                    Value = droneMarker,
                 },
             });
 

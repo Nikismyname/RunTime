@@ -7,7 +7,6 @@ public abstract class SpellcraftProcUIElement
     protected Color baseColor;
     protected GenerateBasicElements generator;
     protected SpellcraftProcUI procUI;
-
     public List<GameObject> Elements { get; set; } = new List<GameObject>();
 
     public SpellcraftProcUIElement(Color baseColor, GenerateBasicElements generator, SpellcraftProcUI procUI)
@@ -49,7 +48,7 @@ public abstract class SpellcraftProcUIElement
     {
         foreach (var item in this.Elements)
         {
-            item.transform.position += this.procUI.canvasGO.transform.position; 
+            item.transform.position += this.procUI.canvasGO.transform.position;
         }
     }
 }
