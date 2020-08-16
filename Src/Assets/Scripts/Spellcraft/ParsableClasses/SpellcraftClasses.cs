@@ -9,12 +9,12 @@ public class SpellcraftClasses
             GameObject boolet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             boolet.SetScale(new Vector3(0.3f,0.3f,0.3f));
             boolet.transform.position = position;
-            BooletBehaviour beh = boolet.AddComponent<BooletBehaviour>();
+            BulletBehaviour beh = boolet.AddComponent<BulletBehaviour>();
             beh.Setup(velocity);
         }
     }
 
-    public class BooletBehaviour: MonoBehaviour
+    public class BulletBehaviour: MonoBehaviour
     {
         private Vector3 velocity;
         private readonly float speed = 8f;

@@ -7,6 +7,7 @@ public class ReferenceBuffer : MonoBehaviour
     public ShowCodeBehaviour ShowCode { get; set; }
     public ShowActionsBehaviour ShowActions { get; set; }
     public ShowAvailableCSFiles ShowAvailableCSFiles { get; set; }
+    public ShowPresetsBehaviour ShowPresetBehaviour { get; set; }
     public GameObject ColorPicker { get; set; }
     public PlayerHandling2 PlayerHandling { get; set; }
     public GameObject PlayerObject { get; set; }
@@ -39,6 +40,7 @@ public class ReferenceBuffer : MonoBehaviour
         this.ColorPicker.SetActive(false);
         this.ShowActions = GameObject.Find("ShowActionsButton").GetComponent<ShowActionsBehaviour>();
         this.ShowAvailableCSFiles = GameObject.Find("ShowAvailableFilesButton").GetComponent<ShowAvailableCSFiles>();
+        this.ShowPresetBehaviour = GameObject.Find("ShwoPresetsButton").GetComponent<ShowPresetsBehaviour>();
         this.InfoTextObject = GameObject.Find("InfoText");
         this.InfoTextCanvasGroup = GameObject.Find("ScrollableInfoText");
         this.ms = main.GetComponent<TargetManagerBehaviour>();
@@ -55,12 +57,6 @@ public class ReferenceBuffer : MonoBehaviour
         this.ManageProcUI = actionsContent.GetComponent<GenerateUpdateAndDisplayTargetSpeceficUI>();
         this.UI = GameObject.Find("UI");
     }
-
-    //private void Start()
-    //{
-    //    GameObject main = GameObject.Find("Main");
-    //    this.worldSpaceUI = main.GetComponent<WorldSpaceUI>();
-    //}
 
     public void RegisterWorldSapceUI(WorldSpaceUI worldSpaceUI)
     {

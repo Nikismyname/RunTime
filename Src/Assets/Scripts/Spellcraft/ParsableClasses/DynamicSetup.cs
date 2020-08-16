@@ -11,7 +11,7 @@ public class DynamicSetup
     private InputCanvas inputCanvas;
     private Vector3 posOffset;
 
-    public static Type[] Types = new Type[] {typeof(LineDestroyer), typeof(Projectile), typeof(Teleporter), typeof(Vector3Classes.Vector3Util)};
+    public static Type[] Types = new Type[] {typeof(LineDestroyer), typeof(SpellcraftClasses.Projectile), typeof(Teleporter), typeof(Vector3Classes.Vector3Util)};
 
     public DynamicSetup(ClassVisualisation classVisualisation, WorldSpaceUI UI, ResultCanvas resultCanvas, InputCanvas inputCanvas)
     {

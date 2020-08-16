@@ -69,5 +69,7 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
             CubeName = cubeName,
             KeyId = selected.Id,
         });
+
+        ReferenceBuffer.Instance.ShowPresetBehaviour.RedoMappingConnections();
     }
 }

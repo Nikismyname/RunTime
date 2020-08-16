@@ -6,18 +6,26 @@ using UnityEngine.UI;
 public class ShowPresetsBehaviour : MonoBehaviour
 {
     private bool show;
-    List<ActionButton> buttons = new List<ActionButton>();
+    private List<ActionButton> buttons;
 
     void Start()
     {
         this.show = true;
+        Button btn = gameObject.GetComponent<Button>();
+        btn.onClick.AddListener(MainOnClick);
 
-        var existingMappings = ActionKeyPersistance.GetKeyCubeMapping(); 
+        this.MapConnections();
+    }
 
+    public void MapConnections()
+    {
+        var existingMappings = ActionKeyPersistance.GetKeyCubeMapping();
+        this.buttons = new List<ActionButton>();
+            
         for (int i = 1; i <= 9; i++)
         {
             ActionButton btnInfo = new ActionButton();
-            buttons.Add(btnInfo);
+            this.buttons.Add(btnInfo);
             btnInfo.Button = GameObject.Find("ActionButton" + i);
             int index = i;
             btnInfo.Button.GetComponent<Button>().onClick.AddListener(() => ActionButtonOnClick(index));
@@ -28,11 +36,30 @@ public class ShowPresetsBehaviour : MonoBehaviour
                 btnInfo.CubeName = mappings[0].CubeName;
                 btnInfo.Button.transform.Find("Text").GetComponent<Text>().text = mappings[0].CubeName;
             }
+
             btnInfo.ID = i;
         }
-
-        Button btn = gameObject.GetComponent<Button>();
-        btn.onClick.AddListener(MainOnClick);
+    }
+    
+    public void RedoMappingConnections()
+    {
+        var existingMappings = ActionKeyPersistance.GetKeyCubeMapping();
+            
+        for (int i = 0; i < 9; i++)
+        {
+            var btnInfo = buttons[i];
+            int index = i;
+            Button button = btnInfo.Button.GetComponent<Button>(); 
+            button.onClick.RemoveAllListeners();
+            btnInfo.Button.GetComponent<Button>().onClick.AddListener(() => ActionButtonOnClick(index+1));
+            btnInfo.Button.SetActive(false);
+            var mappings = existingMappings.Where(x => x.KeyId == i+1).ToArray();
+            if (mappings.Length == 1)
+            {
+                btnInfo.CubeName = mappings[0].CubeName;
+                btnInfo.Button.transform.Find("Text").GetComponent<Text>().text = mappings[0].CubeName;
+            }
+        }
     }
 
     private void MainOnClick()
@@ -57,7 +84,7 @@ public class ShowPresetsBehaviour : MonoBehaviour
 
     private void ActionButtonOnClick(int id)
     {
-        ActionButton btnInfo = this.buttons.Single(x => x.ID == id); 
+        ActionButton btnInfo = this.buttons.Single(x => x.ID == id);
 
         if (btnInfo.CubeName != null)
         {
@@ -70,12 +97,12 @@ public class ShowPresetsBehaviour : MonoBehaviour
             {
                 droneMarker = ReferenceBuffer.Instance.DroneIntersection.GetIntersectionPosition;
             }
-            
-            ReferenceBuffer.Instance.worldSpaceUI.connTracker.PrintResult(btnInfo.CubeName, new Variable[] 
+
+            ReferenceBuffer.Instance.worldSpaceUI.connTracker.PrintResult(btnInfo.CubeName, new Variable[]
             {
                 new Variable
                 {
-                    Name = ResultCanvas.PlayerForwardVarName, 
+                    Name = ResultCanvas.PlayerForwardVarName,
                     Value = ReferenceBuffer.Instance.PlayerObject.transform.forward,
                 },
                 new Variable
@@ -83,10 +110,10 @@ public class ShowPresetsBehaviour : MonoBehaviour
                     Name = ResultCanvas.PlayerPositionVarName,
                     Value = ReferenceBuffer.Instance.PlayerObject.transform.position,
                 },
-                
+
                 new Variable
                 {
-                    Name = ResultCanvas.PlayerMarkerVarName, 
+                    Name = ResultCanvas.PlayerMarkerVarName,
                     Value = ReferenceBuffer.Instance.PlayerIntersection.GetIntersectionPosition,
                 },
                 new Variable
@@ -114,7 +141,7 @@ public class ShowPresetsBehaviour : MonoBehaviour
         if (persistedKeys.Select(x => x.CubeName).Contains(lastName))
         {
             Debug.Log("That spell name already keyd!");
-            return; 
+            return;
         }
 
         ActionKeyPersistance.Persist(new ActionKeyPersistance.ActionKeyPersistanceData
@@ -137,47 +164,47 @@ public class ShowPresetsBehaviour : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(1);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha2) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(2);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.Alpha3) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(3);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha4))
+        if (Input.GetKeyDown(KeyCode.Alpha4) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(4);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha5))
+        if (Input.GetKeyDown(KeyCode.Alpha5) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(5);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha6))
+        if (Input.GetKeyDown(KeyCode.Alpha6) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(6);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha7))
+        if (Input.GetKeyDown(KeyCode.Alpha7) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(7);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha8))
+        if (Input.GetKeyDown(KeyCode.Alpha8) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(8);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha9))
+        if (Input.GetKeyDown(KeyCode.Alpha9) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.ActionButtonOnClick(9);
         }

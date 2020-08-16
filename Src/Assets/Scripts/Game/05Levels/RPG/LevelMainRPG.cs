@@ -47,7 +47,7 @@ public class LevelMainRPG : LevelBase
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.F)  && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             // RPG Mode active
             if (this.mainCamera.GetComponent<Camera>().enabled == true)
@@ -60,12 +60,12 @@ public class LevelMainRPG : LevelBase
             }
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.D)  && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.SwitchToDrone();
         }
 
-        if (Input.GetKeyDown(KeyCode.C) && this.mainCamera.GetComponent<Camera>().enabled == false)
+        if (Input.GetKeyDown(KeyCode.C) && this.mainCamera.GetComponent<Camera>().enabled == false && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             this.worldSpaceUI.SwitchToMenu();
             //Debug.Log("SPELL SWITCH");

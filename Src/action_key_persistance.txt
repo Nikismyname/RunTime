@@ -1,1 +1,1 @@
-[{"KeyId":1,"CubeName":"teleporter"},{"KeyId":2,"CubeName":"teleportDrone"},{"KeyId":3,"CubeName":"destroy"}]
+[{"KeyId":1,"CubeName":"teleporter"}]
