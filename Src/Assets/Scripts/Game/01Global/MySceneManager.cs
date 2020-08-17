@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class MySceneManager : MonoBehaviour
 {
-    public Type[] levels = new Type[] {typeof(LevelMainRPG) ,typeof(LevelPCTMain), typeof (Tutiral3GOManip2), typeof(Tutiral3GOManip1), typeof(TurretLevel), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
+    public Type[] levels = new Type[] {typeof(RPGLevel1) ,typeof(LevelPCTMain), typeof (Tutiral3GOManip2), typeof(Tutiral3GOManip1), typeof(TurretLevel), typeof(Tutiral1StartMethod2), typeof(Tutiral1StartMethod1), typeof(Level1Main), typeof(Level3Main), typeof(WallJumpMain) };
     private int level = 0;
 
     private readonly string levelScene = "UniLevel";
