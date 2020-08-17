@@ -75,7 +75,7 @@ public class CubePersistance
 
             var spellClass = this.UI.classVisualisation.GenerateClassVisualisation(this.UI.classVisualisation.GenerateNodeData(type), position, out Node one);
 
-            this.UI.connTracker.RegisterClassNameForPersistance(new ClassTracking { Name = type.FullName, node = one }, info.Name);
+            this.UI.connTracker.RegisterClassNameForPersistence(new ClassTracking { Name = type.FullName, node = one }, info.Name);
 
             methodInfoWithParamInfo.Add(spellClass);
         }

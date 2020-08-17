@@ -50,7 +50,7 @@ public class PRGLevelBase : LevelBase
         if (Input.GetKeyDown(KeyCode.F)  && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {
             // RPG Mode active
-            if (this.mainCamera.GetComponent<Camera>().enabled == true)
+            if (this.mainCamera.activeSelf == true)
             {
                 this.SwithchToSpellCraft();
             }
@@ -74,25 +74,37 @@ public class PRGLevelBase : LevelBase
     
     public void SwithchToSpellCraft()
     {
+        // this.mainCamera.GetComponent<Camera>().enabled = false;
+        // this.mainSpellCamera.GetComponent<Camera>().enabled = true;
+        // ReferenceBuffer.Instance.UI.SetActive(false);
+        
         this.mainCamera.GetComponent<Camera>().enabled = false;
         this.mainSpellCamera.GetComponent<Camera>().enabled = true;
+        this.mainCamera.SetActive(false);
+        this.mainSpellCamera.SetActive(true);
         ReferenceBuffer.Instance.UI.SetActive(false);
-        //Debug.Log("RPG OFF");
     }
 
     public void SwithchToRPG()
     {
+        // this.mainCamera.GetComponent<Camera>().enabled = true;
+        // this.mainSpellCamera.GetComponent<Camera>().enabled = false;
+        // this.secondSpellCamera.GetComponent<Camera>().enabled = false;
+        // ReferenceBuffer.Instance.UI.SetActive(true);
+        
         this.mainCamera.GetComponent<Camera>().enabled = true;
         this.mainSpellCamera.GetComponent<Camera>().enabled = false;
         this.secondSpellCamera.GetComponent<Camera>().enabled = false;
+        this.mainCamera.SetActive(true);
+        this.mainSpellCamera.SetActive(false);
+        this.secondSpellCamera.SetActive(false);
         ReferenceBuffer.Instance.UI.SetActive(true);
-        //Debug.Log("RPG ON");
     }
 
     public void SwitchToDrone()
     {
         // Only switch to drone from rpg mode!
-        if (this.mainCamera.GetComponent<Camera>().enabled == true)
+        if (this.mainCamera.activeSelf== true)
         {
             // Switch To Drone
             if (this.droneCamGO.activeSelf == false)

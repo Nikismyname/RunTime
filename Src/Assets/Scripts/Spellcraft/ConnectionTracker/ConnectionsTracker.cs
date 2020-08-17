@@ -6,7 +6,7 @@ using UnityEngine;
 public class ConnectionsTracker
 {
     #region INIT
-    
+
     private const string workBundleName = "WorkingOn";
 
     private List<CubeBundle> bundles = new List<CubeBundle>();
@@ -214,11 +214,32 @@ public class ConnectionsTracker
 
     #endregion
 
-    public void RegisterClassNameForPersistance(ClassTracking classInfo, string name)
+    #region PERSISTANCE
+
+    public void RegisterClassNameForPersistence(ClassTracking classInfo, string name)
     {
         name = name == null ? workBundleName : name;
 
         this.bundles.Single(x => x.Name == name).ClassTypeNamesForPersistance.Add(classInfo);
+    }
+
+    public GameObject UnregisterClassName(string className, string name)
+    {
+        name = name == null ? workBundleName : name;
+        CubeBundle bundle = this.bundles.Single(x => x.Name == name);
+        ClassTracking ct = bundle.ClassTypeNamesForPersistance.SingleOrDefault(x => x.Name == className);
+        if (ct != null)
+            bundle.ClassTypeNamesForPersistance.Remove(ct);
+
+        // removing the connections itself, not the visualisation or anything else
+        bundle.ParaMethConnections = bundle.ParaMethConnections
+            .Where(x => x.Method.ClassNode != ct.node || x.Parameter.ClassNode != ct.node)
+            .ToList();
+        bundle.ParaDirectInputConnections = bundle.ParaDirectInputConnections
+            .Where(x => x.Parameter.ClassNode != ct.node)
+            .ToList();
+
+        return ct.node.gameObject;
     }
 
     public void Persist(string name = "some_name")
@@ -264,13 +285,32 @@ public class ConnectionsTracker
         this.persistance.LoadPersistedData(name, visualise);
     }
 
+
     /// <param name="name">null means workingBundle/default</param>
+    /// seems to be for persistence - if we had a constant - not checked!
     public void RegisterDirectInput(DirectInput DI, string name)
     {
         name = name == null ? workBundleName : name;
 
         this.bundles.Single(x => x.Name == name).DirectInputs.Add(DI);
     }
+
+    public void UnregisterDirectInput(int id, string name)
+    {
+        name = name == null ? workBundleName : name;
+        CubeBundle bundle = this.bundles.Single(x => x.Name == name);
+        var directInput = bundle.DirectInputs.SingleOrDefault(x => x.ID == id);
+        // removing from persistance
+        bundle.DirectInputs.Remove(directInput);
+        // removing from existing connections
+        bundle.ParaDirectInputConnections = bundle.ParaDirectInputConnections
+            .Where(x => x.DirectInput.ID != id)
+            .ToList();
+    }
+
+    #endregion
+
+    #region INTERNAL DATA CLASSES
 
     public class CubeBundle
     {
@@ -286,6 +326,8 @@ public class ConnectionsTracker
         public List<ClassTracking> ClassTypeNamesForPersistance { get; set; } = new List<ClassTracking>();
         public List<DirectInput> DirectInputs { get; set; } = new List<DirectInput>();
     }
+
+    #endregion
 }
 
 #region DATA_CLASSES

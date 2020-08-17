@@ -7,7 +7,6 @@ public class DynamicSetup
     private List<Type> nodeTypes = new List<Type>();
     private ClassVisualisation classVisualisation;
     private WorldSpaceUI UI;
-    //private ResultCanvas resultCanvas;
     private InputCanvas inputCanvas;
     private Vector3 posOffset;
 
@@ -34,8 +33,14 @@ public class DynamicSetup
             this.classVisualisation.GenerateNodeData(type), position, out Node node);
         
         // registering them for persistence 
-        this.UI.connTracker.RegisterClassNameForPersistance(
+        this.UI.connTracker.RegisterClassNameForPersistence(
             new ClassTracking {Name = type.FullName, node = node}, null);
+    }
+
+    public void UnregisterNode(Type type)
+    {
+        var go = this.UI.connTracker.UnregisterClassName(type.FullName, null);
+        GameObject.Destroy(go);
     }
 
     private int id = 0;

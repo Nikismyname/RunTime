@@ -41,7 +41,8 @@ public class DrawTypesSelection: SpellcraftProcUIElement
                 {
                     if (isSelected)
                     {
-                        Debug.Log("No Deselect Yet!");
+                        ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.UnregisterNode(DynamicSetup.Types[index]);
+                        Debug.Log("No REMOVED!");
                         return false;
                     }
                     else

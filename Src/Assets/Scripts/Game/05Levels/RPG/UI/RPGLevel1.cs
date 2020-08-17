@@ -15,7 +15,6 @@ public class RPGLevel1 : PRGLevelBase
         rb.isKinematic = true;
 
         Debug.Log("all systems go");
-        
     }
     
     public override void ResetLevel()

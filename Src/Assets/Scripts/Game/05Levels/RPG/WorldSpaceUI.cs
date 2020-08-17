@@ -215,21 +215,38 @@ public class WorldSpaceUI : MonoBehaviour
 
     public void SwitchToMenu()
     {
+        // smooth transitions
+        // // SECOND CAM IS ON
+        // if (this.myCamera.enabled == false)
+        // {
+        //     this.camHandling.SetEnabled(true);
+        //     this.camHandling2.UnsetTarget(this.myCamera.gameObject);
+        // }
+        // // FIRST CAM IS ON
+        // else
+        // {
+        //     this.camHandling.SetEnabled(false);
+        //     this.myCamera2.enabled = true;
+        //     this.myCamera.enabled = false;
+        //     this.camHandling2.SetTarget(this.procUIAnchor.transform.position, this.myCamera.gameObject.transform.rotation, this.myCamera.gameObject.transform.position);
+        // }
+        
         // SECOND CAM IS ON
-        if (this.myCamera.enabled == false)
+        if (this.myCamera.gameObject.activeSelf == false)
         {
-            this.camHandling.SetEnabled(true);
+            this.myCamera.gameObject.SetActive(true);
+            //this.camHandling.SetEnabled(true);
             this.camHandling2.UnsetTarget(this.myCamera.gameObject);
-            //Debug.Log("SPELL MOVE TO MAILN");
+            this.myCamera2.gameObject.SetActive(false);
         }
         // FIRST CAM IS ON
         else
         {
-            this.camHandling.SetEnabled(false);
+            //this.camHandling.SetEnabled(false);
+            this.camHandling.gameObject.SetActive(false);
+            this.camHandling2.gameObject.SetActive(true);
             this.myCamera2.enabled = true;
-            this.myCamera.enabled = false;
             this.camHandling2.SetTarget(this.procUIAnchor.transform.position, this.myCamera.gameObject.transform.rotation, this.myCamera.gameObject.transform.position);
-            //Debug.Log("SPELL MOVE TO second");
         }
     }
 

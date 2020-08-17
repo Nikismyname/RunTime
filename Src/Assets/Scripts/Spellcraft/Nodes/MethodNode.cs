@@ -9,16 +9,17 @@ public class MethodNode : MonoBehaviour
     public MyMethodInfo MyMethodInfo { get; set; }
     public MyParameterInfo[] MyParamaters { get; set; }
     public int ID { get; set; }
-
-    public void Setup(MyMethodInfo methodInfo, MyParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI)
+    public Node ClassNode { get; set; }
+    
+    public void Setup(MyMethodInfo methodInfo, MyParameterInfo[] myParamaters, object classObject, WorldSpaceUI UI, Node classNode)
     {
         this.MyMethodInfo = methodInfo;
         this.MyParamaters = myParamaters;
         this.Object = classObject;
         this.UI = UI;
         this.ID = methodInfo.ID;
-
         this.type = methodInfo.Info.ReturnType;
+        this.ClassNode = classNode;
     }
 
     private void OnMouseDown()

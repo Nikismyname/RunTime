@@ -26,10 +26,9 @@ public class ReferenceBuffer : MonoBehaviour
     public GenerateUpdateAndDisplayTargetSpeceficUI ManageProcUI { get; set; }
     public GameObject UI { get; set; }
     public WorldSpaceUI worldSpaceUI { get; set; }
-    
     public CamCenterIntersection PlayerIntersection { get; set; }
-
     public CamCenterIntersection DroneIntersection { get; set; }
+    public Camera Camera { get; set; }
 
     private void Awake()
     {
@@ -56,6 +55,7 @@ public class ReferenceBuffer : MonoBehaviour
         GameObject actionsContent = GameObject.Find("ActionsContent"); 
         this.ManageProcUI = actionsContent.GetComponent<GenerateUpdateAndDisplayTargetSpeceficUI>();
         this.UI = GameObject.Find("UI");
+        this.Camera = GameObject.Find("Camera").GetComponent<Camera>();
     }
 
     public void RegisterWorldSapceUI(WorldSpaceUI worldSpaceUI)

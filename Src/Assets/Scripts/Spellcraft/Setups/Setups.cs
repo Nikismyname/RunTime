@@ -85,13 +85,13 @@ public class Setups
         var spellClass = this.classVisualisation.GenerateClassVisualisation(
             this.classVisualisation.GenerateNodeData<SpellcraftClasses.Projectile>(), new Vector3(0, 0, 0),
             out Node one);
-        this.UI.connTracker.RegisterClassNameForPersistance(
+        this.UI.connTracker.RegisterClassNameForPersistence(
             new ClassTracking {Name = typeof(SpellcraftClasses.Projectile).FullName, node = one}, null);
 
         var vecUtil = this.classVisualisation.GenerateClassVisualisation(
             this.classVisualisation.GenerateNodeData<Vector3Classes.Vector3Util>(), new Vector3(0, +5, 0),
             out Node two);
-        this.UI.connTracker.RegisterClassNameForPersistance(
+        this.UI.connTracker.RegisterClassNameForPersistence(
             new ClassTracking {Name = typeof(Vector3Classes.Vector3Util).FullName, node = two}, null);
 
         //TODO: The names are truncated for the frontend and names need to be 6 sumbols for things to match. FIX IT!
@@ -135,7 +135,7 @@ public class Setups
         //CLASS NODES
         var spellClass = this.classVisualisation.GenerateClassVisualisation(
             this.classVisualisation.GenerateNodeData<LineDestroyer>(), new Vector3(0, 0, 0), out Node one);
-        this.UI.connTracker.RegisterClassNameForPersistance(
+        this.UI.connTracker.RegisterClassNameForPersistence(
             new ClassTracking {Name = typeof(LineDestroyer).FullName, node = one}, null);
 
         ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.DroneMarkerVarName);
@@ -162,7 +162,7 @@ public class Setups
         //CLASS NODES
         ClassVisualisation.MethodAndParameterNodes[] spellClass = this.classVisualisation.GenerateClassVisualisation(
             this.classVisualisation.GenerateNodeData<Teleporter>(), new Vector3(0, 0, 0), out Node one);
-        this.UI.connTracker.RegisterClassNameForPersistance(
+        this.UI.connTracker.RegisterClassNameForPersistence(
             new ClassTracking {Name = typeof(Teleporter).FullName, node = one}, null);
 
         ResultCanvas.VariableInput var1 = new ResultCanvas.VariableInput(typeof(Vector3?), ResultCanvas.DroneMarkerVarName);

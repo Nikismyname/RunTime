@@ -27,7 +27,7 @@ public class Node : MonoBehaviour
 
         this.interactionPlane = new Plane(normals[0].normal, this.gameObject.transform.position);
 
-        this.myCamera = GameObject.Find("Camera").GetComponent<Camera>();
+        this.myCamera = ReferenceBuffer.Instance.Camera;
         this.camBehaviour = this.myCamera.gameObject.GetComponent<SpellcraftCam>();
 
         GameObject bottom = GameObject.CreatePrimitive(PrimitiveType.Cube);

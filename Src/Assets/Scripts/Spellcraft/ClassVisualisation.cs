@@ -62,7 +62,7 @@ public class ClassVisualisation
 
         this.GeneratePropertyPips(node, basy);
 
-        MethodAndParameterNodes[] nodes = this.GenerateMethodPips(node, basy);
+        MethodAndParameterNodes[] nodes = this.GenerateMethodPips(node, basy, nodeBeh);
 
         basy.transform.position = position;
 
@@ -91,7 +91,7 @@ public class ClassVisualisation
         }
     }
 
-    public MethodAndParameterNodes[] GenerateMethodPips(ClassNode node, GameObject baseSphere)
+    public MethodAndParameterNodes[] GenerateMethodPips(ClassNode node, GameObject baseSphere, Node classNode)
     {
         List<MethodAndParameterNodes> methodNodes = new List<MethodAndParameterNodes>();
 
@@ -116,7 +116,7 @@ public class ClassVisualisation
                 myParamaterInfos.Add(param);
                 GameObject paramaterPip = CreatePip(baseSphere, Color.black);
                 ParameterNode paramScript = paramaterPip.AddComponent<ParameterNode>();
-                paramScript.Setup(param, method, node.Object, this.UI);
+                paramScript.Setup(param, method, node.Object, this.UI, classNode);
                 methodNode.Parameters.Add(paramScript);
                 float wantedAngleDown = initialOffset + (i + 1) * 20f;
                 paramaterPip.RotateAroundUnitSphere(new Vector3(1, 0, 0), wantedAngleDown);
@@ -124,7 +124,7 @@ public class ClassVisualisation
             }
 
             var methodScript = methodPip.AddComponent<MethodNode>();
-            methodScript.Setup(new MyMethodInfo(this.currMethodId++, method), myParamaterInfos.ToArray(), node.Object, this.UI);
+            methodScript.Setup(new MyMethodInfo(this.currMethodId++, method), myParamaterInfos.ToArray(), node.Object, this.UI, classNode);
             methodNode.Method = methodScript;
 
             methodNodes.Add(methodNode);
