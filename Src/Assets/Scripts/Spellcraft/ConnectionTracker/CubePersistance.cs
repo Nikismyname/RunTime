@@ -138,7 +138,7 @@ public class CubePersistance
 
             if (visualise)
             {
-                this.UI.connRegisterer.RegisterConstantClick(DINode, pNode);
+                this.UI.connRegisterer.RegisterDirectInputClick(DINode, pNode);
             }
             else
             {

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Tracks the main nodes and connections for persistence and execution purposes
+/// </summary>
 public class ConnectionsTracker
 {
     #region INIT
@@ -223,7 +226,7 @@ public class ConnectionsTracker
         this.bundles.Single(x => x.Name == name).ClassTypeNamesForPersistance.Add(classInfo);
     }
 
-    public GameObject UnregisterClassName(string className, string name)
+    public Node UnregisterClassName(string className, string name)
     {
         name = name == null ? workBundleName : name;
         CubeBundle bundle = this.bundles.Single(x => x.Name == name);
@@ -238,8 +241,8 @@ public class ConnectionsTracker
         bundle.ParaDirectInputConnections = bundle.ParaDirectInputConnections
             .Where(x => x.Parameter.ClassNode != ct.node)
             .ToList();
-
-        return ct.node.gameObject;
+        
+        return ct.node;
     }
 
     public void Persist(string name = "some_name")
@@ -298,6 +301,7 @@ public class ConnectionsTracker
     public void UnregisterDirectInput(int id, string name)
     {
         name = name == null ? workBundleName : name;
+        
         CubeBundle bundle = this.bundles.Single(x => x.Name == name);
         var directInput = bundle.DirectInputs.SingleOrDefault(x => x.ID == id);
         // removing from persistance

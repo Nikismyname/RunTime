@@ -37,18 +37,14 @@ public class DynamicSetup
             new ClassTracking {Name = type.FullName, node = node}, null);
     }
 
-    public void UnregisterNode(Type type)
-    {
-        var go = this.UI.connTracker.UnregisterClassName(type.FullName, null);
-        GameObject.Destroy(go);
-    }
-
     private int id = 0;
     
-    public void AddVariable(string varName)
+    public int AddVariable(string varName)
     {
-        var variable = this.inputCanvas.CreateInputCanvas(default, ++id, this.UI, true, varName);
+        id++;
+        InputCanvas.InputElements variable = this.inputCanvas.CreateInputCanvas(default, id, this.UI, true, varName);
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, varName, null), null);
+        return id;
     }
 
     public void AddConstant(object value)
@@ -56,4 +52,22 @@ public class DynamicSetup
         var contant = this.inputCanvas.CreateInputCanvas(value, ++id, this.UI, false);
         this.UI.connTracker.RegisterDirectInput(new DirectInput(id, null, value), null);
     }
+
+    #region REMOVE ELEMENTS
+    
+    public void UnregisterNode(Type type)
+    {
+        Node node = this.UI.connTracker.UnregisterClassName(type.FullName, null);
+        this.UI.drawer.RemoveInterClassLine(node);
+        GameObject.Destroy(node.gameObject);
+    }
+    
+    public void UnregisterDirectInput(int id)
+    {
+        this.UI.connTracker.UnregisterDirectInput(id, null);
+        ReferenceBuffer.Instance.worldSpaceUI.inputCanvas.RemoveInputCanvas(id);
+    }
+
+    #endregion
+
 }

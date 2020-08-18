@@ -33,7 +33,7 @@ public class InputCanvas
         this.inputs = new List<InputElements>();
     }
 
-    public InputElements CreateInputCanvas(object value, int ID, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
+    public InputElements CreateInputCanvas(object value, int id, WorldSpaceUI worldSpaceUI, bool isVariable, string name = "constant")
     {
         GameObject obj = GameObject.Instantiate(this.constantAndVariablePanelPrefab);
         Canvas can = obj.GetComponent<Canvas>();
@@ -53,14 +53,21 @@ public class InputCanvas
 
         DirectInputNode nodeBe = buttonGo.AddComponent<DirectInputNode>();
         RectTransform rt = obj.GetComponent<RectTransform>();
-        InputElements result = new InputElements(obj, text, nodeBe, rt, button);
+        InputElements result = new InputElements(obj, text, nodeBe, rt, button, id);
         obj.transform.SetParent(this.localParent);
         ///element scaling!
         rt.localScale *= this.constantsScale;
-        nodeBe.Setup(value, ID, worldSpaceUI, result, isVariable, name);
+        nodeBe.Setup(value, id, worldSpaceUI, result, isVariable, name);
         this.inputs.Add(result);
         return result;
     }
+
+    public void RemoveInputCanvas(int id)
+    {
+        InputElements element = this.inputs.Single(x => x.Id == id); 
+        GameObject.Destroy(element.Object);
+        this.inputs = this.inputs.Where(x => x.Id != id).ToList();
+    } 
 
     public async Task InputsDisplay(Vector3 pos, ParameterNode node)
     {
@@ -158,13 +165,16 @@ public class InputCanvas
 
         public bool Used { get; set; } = false;
 
-        public InputElements(GameObject canvas, TMP_Text text, DirectInputNode node, RectTransform rectTransform, Button button)
+        public int Id { get; set; }
+
+        public InputElements(GameObject canvas, TMP_Text text, DirectInputNode node, RectTransform rectTransform, Button button, int id)
         {
             this.RectTransform = rectTransform;
             this.Object = canvas;
             this.text = text;
             this.Node = node;
             this.Button = button;
+            this.Id = id;
         }
     }
 

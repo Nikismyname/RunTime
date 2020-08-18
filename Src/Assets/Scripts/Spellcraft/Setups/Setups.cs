@@ -64,9 +64,9 @@ public class Setups
         if (solved)
         {
             await this.connRegisterer.RegisterParameterClick(nodes1[0].Parameters[0], nodes2[0].Method);
-            this.connRegisterer.RegisterConstantClick(variable1.Node, nodes1[0].Parameters[1]);
-            this.connRegisterer.RegisterConstantClick(variable2.Node, nodes2[0].Parameters[0]);
-            this.connRegisterer.RegisterConstantClick(contant4.Node, nodes2[0].Parameters[1]);
+            this.connRegisterer.RegisterDirectInputClick(variable1.Node, nodes1[0].Parameters[1]);
+            this.connRegisterer.RegisterDirectInputClick(variable2.Node, nodes2[0].Parameters[0]);
+            this.connRegisterer.RegisterDirectInputClick(contant4.Node, nodes2[0].Parameters[1]);
             this.connRegisterer.RegisterResultClick(this.resultNode, nodes1[0].Method);
 
             this.inputCanvas.InputsHide();

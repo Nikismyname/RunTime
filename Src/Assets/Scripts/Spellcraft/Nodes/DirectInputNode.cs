@@ -42,7 +42,7 @@ public class DirectInputNode : MonoBehaviour
     private void OnClick()
     {
         //Debug.Log("HERE " + this.value.ToString());
-        this.UI.connRegisterer.RegisterConstantClick(this);
+        this.UI.connRegisterer.RegisterDirectInputClick(this);
     }
 
     public object GetVal()

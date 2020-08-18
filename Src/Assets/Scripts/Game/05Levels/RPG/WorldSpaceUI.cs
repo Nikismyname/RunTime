@@ -24,16 +24,16 @@ public class WorldSpaceUI : MonoBehaviour
     private GameObject resultCanvasVantigePoint;
 
     public ClassVisualisation classVisualisation;
-    public LineDrawer drawer;
     public Setups levels;
-    public ConnectionsRegisterer connRegisterer;
+    public GameObject procUIAnchor;
 
+    public LineDrawer drawer;
+    public ConnectionsRegisterer connRegisterer;
     public ConnectionsTracker connTracker;
     public ResultCanvas resultCanvas;
     public InputCanvas inputCanvas;
     public InfoCanvas infoCanvas;
     public SpellcraftProcUI procUI;
-    public GameObject procUIAnchor;
     public DynamicSetup dynamicSetup;
 
     public ResultNode resultNode;

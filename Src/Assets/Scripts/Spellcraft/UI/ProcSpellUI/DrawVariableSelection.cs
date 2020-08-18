@@ -13,10 +13,12 @@ public class DrawVariableSelection : SpellcraftProcUIElement
     {
         this.tl = tl;
         
-        string[] variableNames =
+        VariableInfo[] variables =
         {
-            ResultCanvas.PlayerMarkerVarName, ResultCanvas.PlayerForwardVarName, ResultCanvas.DroneMarkerVarName,
-            ResultCanvas.PlayerPositionVarName
+            new VariableInfo(ResultCanvas.PlayerMarkerVarName),
+            new VariableInfo(ResultCanvas.PlayerForwardVarName),
+            new VariableInfo(ResultCanvas.DroneMarkerVarName),
+            new VariableInfo(ResultCanvas.PlayerPositionVarName)
         };
 
         for (int yy = 0; yy < 3; yy++)
@@ -25,12 +27,12 @@ public class DrawVariableSelection : SpellcraftProcUIElement
             {
                 int index = yy * 3 + xx;
 
-                if (index >= variableNames.Length)
+                if (index >= variables.Length)
                 {
                     goto label;
                 }
 
-                GameObject variableButton = this.generator.DrawButton(variableNames[index],
+                GameObject variableButton = this.generator.DrawButton(variables[index].Name,
                     new Vector2(tl.x + this.procUI.xOffset + xx * (this.procUI.xOffset + this.procUI.buttonPixelsX),
                         tl.y - (yy * (this.procUI.yOffset + this.procUI.buttonPixelsY))));
                 this.Elements.Add(variableButton);
@@ -40,14 +42,23 @@ public class DrawVariableSelection : SpellcraftProcUIElement
                 });
                 
                 this.selectableButtons.RegisterButton(variableButton.GetComponent<Button>(), isSelected =>
-                {
+                { 
+                    VariableInfo variable = variables[index];
+                        
                     if (isSelected)
                     {
+                        if (variable.Id == -1)
+                        {
+                            Debug.LogError("ID NOT ASSIGNED!!!");
+                        }
+                        
+                        ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.UnregisterDirectInput(variable.Id);
                         return false;
                     }
                     else
                     {
-                        ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.AddVariable(variableNames[index]);
+                        int id = ReferenceBuffer.Instance.worldSpaceUI.dynamicSetup.AddVariable(variable.Name);
+                        variable.Id = id;
                         return true;
                     }
                 });
@@ -64,5 +75,17 @@ public class DrawVariableSelection : SpellcraftProcUIElement
     public override void Refresh()
     {
         throw new System.NotImplementedException();
+    }
+
+    public class VariableInfo
+    {
+        public VariableInfo(string name)
+        {
+            this.Name = name;
+            this.Id = -1;
+        }
+
+        public string Name { get; set; }
+        public int Id { get; set; }
     }
 }

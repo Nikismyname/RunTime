@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
+/// <summary>
+/// Registers the making of a connection. Draws a line when appropriate and notifies connectionTracker.
+/// </summary>
 public class ConnectionsRegisterer
 {
     private ConnectionsTracker connTracker;
@@ -14,8 +17,7 @@ public class ConnectionsRegisterer
     private MethodNode lastClickedMethod = null;
     private PropertyNode lastClickedProperty = null;
     private ParameterNode lastClickedParameter = null;
-
-
+    
     public ConnectionsRegisterer(ConnectionsTracker connTracker, InputCanvas inputCanvas, LineDrawer drawer, ResultNode resultNode)
     {
         this.connTracker = connTracker;
@@ -26,7 +28,9 @@ public class ConnectionsRegisterer
 
     #endregion
 
-    public void RegisterConstantClick(DirectInputNode node, ParameterNode paraNodeIn = null)
+    #region DirectInput 
+    
+    public void RegisterDirectInputClick(DirectInputNode node, ParameterNode paraNodeIn = null)
     {
         var paraNode = this.lastClickedParameter;
         if (paraNodeIn != null)
@@ -58,10 +62,12 @@ public class ConnectionsRegisterer
 
         if (this.lastClickedProperty != null)
         {
-            ///TODO:
+            // TODO:
         }
     }
 
+    #endregion
+    
     public void RegisterResultClick(ResultNode resultNode, MethodNode methodNodeIn = null)
     {
         var methodNode = this.lastClickedMethod;
@@ -77,12 +83,11 @@ public class ConnectionsRegisterer
 
         this.connTracker.TrackResultAssignMethodCall(methodNode);
 
-        this.DrawConnection(this.resultNode.gameObject, methodNode.gameObject);
+        this.DrawConnection(this.resultNode.gameObject, methodNode.gameObject, null, methodNode);
 
         this.lastClickedMethod = null;
     }
-
-
+    
     public void RegisterPropertyClick(PropertyNode node)
     {
         this.lastClickedProperty = node;
@@ -92,24 +97,23 @@ public class ConnectionsRegisterer
 
     public async Task RegisterParameterClick(ParameterNode node, MethodNode methodNodeIn = null)
     {
-        /// Cashing the last clicked parameter
+        // Cashing the last clicked parameter
         this.lastClickedParameter = node;
 
-        /// Makes it gray!
+        // Makes it gray!
         this.lastClickedParameter.RegisterSelection();
 
-        /// This allows us to pass external methodNode!
+        // This allows us to pass external methodNode!
         var methodNode = this.lastClickedMethod;
         if (methodNodeIn != null)
         {
             methodNode = methodNodeIn;
         }
-        ///...
 
-        /// if not method to connect the property with - end the method and only then show the inputCanvas
+        // if not method to connect the property with - end the method and only then show the inputCanvas
         if (methodNode == null)
         {
-            Debug.Log($"RegisterParameterClick methodNode NULL");
+            //Debug.Log($"RegisterParameterClick methodNode NULL");
             /// If Natural click show Inputs!
             if (methodNodeIn == null)
             {
@@ -118,7 +122,7 @@ public class ConnectionsRegisterer
             return;
         }
 
-        /// Trying to short circuit pram to its method return
+        // Trying to short circuit pram to its method return
         if (node.Object == methodNode.Object && node.myMethod == methodNode.MyMethodInfo.Info)
         {
             Debug.Log($"RegisterParameterClick SHORT CIRCUIT");
@@ -127,8 +131,8 @@ public class ConnectionsRegisterer
 
         Debug.Log($"RegisterParameterClick CONNECTION MADE");
         this.connTracker.TrackParameterAssignMethod(node, methodNode);
-        this.DrawConnection(node.gameObject, methodNode.gameObject);
-        ///Reset the srelevent selection after connection
+        this.DrawConnection(node.gameObject, methodNode.gameObject,node, methodNode);
+        // Reset the relevent selection after connection
         this.lastClickedParameter = null;
         this.lastClickedMethod = null;
     }
@@ -158,14 +162,14 @@ public class ConnectionsRegisterer
         }
 
         Debug.Log($"RegisterMethodClick CONNECTION MADE");
-        this.DrawConnection(node.gameObject, paramNode.gameObject);
+        this.DrawConnection(node.gameObject, paramNode.gameObject, paramNode, node);
         this.connTracker.TrackParameterAssignMethod(paramNode, node);
         ///Reset the srelevent selection after 
         this.lastClickedParameter = null;
         this.lastClickedMethod = null;
     }
 
-    private void DrawConnection(GameObject one, GameObject two)
+    private void DrawConnection(GameObject one, GameObject two, ParameterNode paraNode, MethodNode methodNode)
     {
         if (one.transform.parent == two.transform.parent)
         {
@@ -173,7 +177,7 @@ public class ConnectionsRegisterer
         }
         else
         {
-            this.drawer.DrawDynamicLine(one.transform, two.transform, 0.1f, Color.green);
+            this.drawer.DrawDynamicLine(one.transform, two.transform, 0.1f, Color.green, paraNode, methodNode);
         }
     }
 
