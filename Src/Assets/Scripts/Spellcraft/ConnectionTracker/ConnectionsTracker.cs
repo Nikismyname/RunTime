@@ -90,41 +90,49 @@ public class ConnectionsTracker
 
     #endregion
 
-    #region PRINT_RESULTS
+    #region RunCube
 
-    public object PrintResult(string bundleName, Variable[] variables = null)
+    public void AddBundle(string name)
+    {
+        if(this.bundles.Any(x=>x.Name == name) == false)
+            this.bundles.Add(new CubeBundle(name));
+    }
+    
+    public object RunCube(string bundleName, Variable[] variables = null)
     {
         bundleName = bundleName == null ? workBundleName : bundleName;
-
+        
+        // looking for existing bundle with the given name
         CubeBundle bundle = this.bundles.SingleOrDefault(x => x.Name == bundleName);
-
+        // if not found try load persisted bundle with given name
         if (bundle == null)
         {
-            this.bundles.Add(new CubeBundle(bundleName));
+            this.AddBundle(bundleName);
             this.LoadPersistedData(bundleName, false);
             Debug.Log($"Bundle not Found, Loading Bundle: {bundleName}");
         }
 
+        // if the bundle is still null, well nothing we can do, abort!
         bundle = this.bundles.SingleOrDefault(x => x.Name == bundleName);
-
         if (bundle == null)
         {
-            this.LoadPersistedData(bundleName, false);
             Debug.LogError($"Bundle not Found After Loading it, ABORT");
             return null;
         }
 
         if (variables == null)
             variables = new Variable[0];
-
+        
         if (bundle.ResultMethodCall == null)
         {
             Debug.Log("Result Not Connected!");
             return null;
         }
 
-        object result = this.PrintResultRec(bundle.ResultMethodCall, bundle, variables);
+        // run the recursion
+        object result = this.RunCubeRecursion(bundle.ResultMethodCall, bundle, variables);
 
+        // most times the result is null so we have nothing to display
         if (result != null)
         {
             Debug.Log("SUCCESS " + result.ToString());
@@ -133,7 +141,7 @@ public class ConnectionsTracker
         return result;
     }
 
-    private object PrintResultRec(MethodNode node, CubeBundle bundle, Variable[] variables)
+    private object RunCubeRecursion(MethodNode node, CubeBundle bundle, Variable[] variables)
     {
         List<object> values = new List<object>();
 
@@ -187,7 +195,7 @@ public class ConnectionsTracker
             }
             else
             {
-                values.Add(PrintResultRec(method[0].Method, bundle, variables));
+                values.Add(RunCubeRecursion(method[0].Method, bundle, variables));
             }
 
             values[values.Count - 1] = Convert.ChangeType(values[values.Count - 1], paramater.Info.ParameterType);

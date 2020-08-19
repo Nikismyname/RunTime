@@ -154,10 +154,10 @@ public class WorldSpaceUI : MonoBehaviour
             this.connTracker.Persist();
         }
 
-        if (Input.GetKeyDown(KeyCode.R) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
-        {
-            this.ResetData();
-        }
+        // if (Input.GetKeyDown(KeyCode.R) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
+        // {
+        //     this.ResetData();
+        // }
 
         if (Input.GetKeyDown(KeyCode.T) && ReferenceBuffer.Instance.focusManager.SafeToTrigger())
         {

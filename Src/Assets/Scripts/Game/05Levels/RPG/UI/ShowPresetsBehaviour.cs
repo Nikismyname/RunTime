@@ -98,7 +98,7 @@ public class ShowPresetsBehaviour : MonoBehaviour
                 droneMarker = ReferenceBuffer.Instance.DroneIntersection.GetIntersectionPosition;
             }
 
-            ReferenceBuffer.Instance.worldSpaceUI.connTracker.PrintResult(btnInfo.CubeName, new Variable[]
+            ReferenceBuffer.Instance.worldSpaceUI.connTracker.RunCube(btnInfo.CubeName, new Variable[]
             {
                 new Variable
                 {

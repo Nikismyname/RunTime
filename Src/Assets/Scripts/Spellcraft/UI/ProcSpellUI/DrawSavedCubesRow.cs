@@ -50,26 +50,36 @@ public class DrawSavedCubesRow : SpellcraftProcUIElement
     
     private void OnClickLoadCube(string cubeName)
     {
-        ActionKeyPersistance.ActionKeyPersistanceData[] mappings = ActionKeyPersistance.GetKeyCubeMapping();
-
-        if (mappings.Any(x => x.CubeName == cubeName))
-        {
-            Debug.Log("There is already key with that cube name!!!");
-            return;
-        }
-
         DrawActionButtonMapping.ActionButtonMap selected = this.procUI.drawActionButtonMapping.actionButtonData.SingleOrDefault(x => x.Selected);
 
-        if (selected == null) return;
-
-        selected.SetName(cubeName);
-        selected.Deselect();
-        ActionKeyPersistance.Persist(new ActionKeyPersistance.ActionKeyPersistanceData
+        // if we are loading a Cube to work on...
+        if (selected == null)
         {
-            CubeName = cubeName,
-            KeyId = selected.Id,
-        });
+            ReferenceBuffer.Instance.worldSpaceUI.connTracker.AddBundle(cubeName);
+            ReferenceBuffer.Instance.worldSpaceUI.connTracker.LoadPersistedData(cubeName, true);
+        }
+        // if we are mapping key to a Cube...
+        else
+        {
+            ActionKeyPersistance.ActionKeyPersistanceData[] mappings = ActionKeyPersistance.GetKeyCubeMapping();
 
-        ReferenceBuffer.Instance.ShowPresetBehaviour.RedoMappingConnections();
+            if (mappings.Any(x => x.CubeName == cubeName))
+            {
+                Debug.Log("There is already key with that cube name!!!");
+                return;
+            }
+            
+            if (selected == null) return;
+
+            selected.SetName(cubeName);
+            selected.Deselect();
+            ActionKeyPersistance.Persist(new ActionKeyPersistance.ActionKeyPersistanceData
+            {
+                CubeName = cubeName,
+                KeyId = selected.Id,
+            });
+
+            ReferenceBuffer.Instance.ShowPresetBehaviour.RedoMappingConnections();
+        }
     }
 }

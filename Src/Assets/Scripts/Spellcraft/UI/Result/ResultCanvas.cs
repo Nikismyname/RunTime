@@ -107,7 +107,7 @@ public class ResultCanvas
             });
         }
 
-        object result = this.connTracker.PrintResult(null, vars.ToArray());
+        object result = this.connTracker.RunCube(null, vars.ToArray());
         if (result == null)
         {
             this.resultText.text = "VOID";
